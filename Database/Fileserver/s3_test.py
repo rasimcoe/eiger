@@ -2,12 +2,6 @@ import sys
 import boto3
 import os
 
-ENDPOINT="gto1243.clvvehluzo54.us-east-2.rds.amazonaws.com"
-PORT="5432"
-USR="simcoe"
-REGION="us-east-2"
-DBNAME="postgres"
-
 # Get the appropriate local credentials
 s3_resource = boto3.client('s3')
 
