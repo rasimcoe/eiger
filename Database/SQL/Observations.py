@@ -138,7 +138,7 @@ class Observation:
         if (len(obscheck) == 0):
             print("ERROR: Observatory is not yet listed in the database, or is formatted inconsistently")
             print("Legal choices are:")
-            print(edb.columnNames('observatories'))
+            print(edb.query('select observatory from observatories'))
             edb.close()
             return False
 
@@ -147,7 +147,7 @@ class Observation:
         if (len(obscheck) == 0):
             print("ERROR: Instrument is not yet listed in the database, or is formatted inconsistently")
             print("Legal choices are:")
-            print(edb.columnNames('instruments'))
+            print(edb.query('select name from instruments'))
             edb.close()
             return False
         
