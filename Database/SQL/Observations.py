@@ -6,7 +6,8 @@ import eigerdb
 
 class Observation:
 
-    def __init__(self, instrument=None, observatory=None, utdate=None, datafile=None, errfile=None, quasarID=None):
+    def __init__(self, instrument=None, observatory=None, utdate=None, \
+                 datafile=None, errfile=None, quasarID=None,exptime=None,filtername=None):
         self.id            = None
         self.quasarid      = quasarID
         self.instrument    = instrument
@@ -175,15 +176,63 @@ class Observation:
         except:
             print("Error: file upload aborted")
 
+        ########## Build the query string according to how many attributes are known ########
+
+        obsfields = {}
+        if (self.observatory != None):
+            obsfields['observatory'] = self.observatory
+        if (self.instrument != None):
+            obsfields['instrument'] = self.instrument
+        if (self.filtername != None):
+            obsfields['filter'] = self.filtername
+        if (self.disperser != None):
+            obsfields['disperser'] = self.disperser
+        if (self.exptime != None):
+            obsfields['exptime'] = self.exptime
+        if (self.awsbucket != None):
+            obsfields['awsbucket'] = self.awsbucket
+        if (self.awspath != None):
+            obsfields['awspath'] = self.awspath
+        if (self.awsurl != None):
+            obsfields['awsurl'] = self.awsurl
+        if (self.ut_date != None):
+            obsfields['ut_date'] = self.ut_date
+        if (self.awspath_err != None):
+            obsfields['awspath_err'] = self.awspath_err
+        if (self.awsurl_err != None):
+            obsfields['awsurl_err'] = self.awsurl_err
+        if (self.quasarid != None):
+            obsfields['quasarid'] = self.quasarid
+
+        query_string = "INSERT INTO observations ("
+        nfields = len(obsfields)
+        i = 0
+        for keyname in list(obsfields):
+            query_string += keyname
+            if (i < nfields-1):
+                query_string += ','
+                i+=1
+            else:
+                query_string += ') VALUES ('
+
+        i=0
+        for keyval in list(obsfields.values()):
+
+            # Strings need quotes in the query, floats and ints do not.
+            if (isinstance(keyval,str)):
+                query_string += '\''+keyval+'\''
+            else:
+                query_string += '{}'.format(keyval)
+                
+            if (i < nfields-1):
+                query_string += ','
+                i+=1
+            else:
+                query_string += ')'
+                            
         ##########  Add this to the SQL table of observations ###########
 
-        query_string = \
-        """INSERT INTO observations
-        (instrument,observatory,filter,exptime,awsbucket,awspath)
-        VALUES (\'{}\',\'{}\',\'{}\',{},\'{}\',\'{}\')
-        """.format(self.instrument,self.observatory,self.filter,self.exptime,self.awsbucket,self.awspath)
         edb.command(query_string,getreply=False)
-
 
         print("addToDatabase: All done!")
         edb.close()
