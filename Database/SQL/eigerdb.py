@@ -42,11 +42,24 @@ class Eigerdb:
 
 
             
-    def query(self, querystring):
+    def query(self, querystring, getreply=True):
         self.cursor.execute(querystring)
-        result = self.cursor.fetchall()
+        if (getreply == True):
+            result = self.cursor.fetchall()
+        else:
+            result = None
         return(result)
 
+    
+    def command(self, querystring, getreply=True):
+        self.cursor.execute(querystring)
+        if (getreply == True):
+            result = self.cursor.fetchall()
+        else:
+            result = None
+        self.connection.commit()
+        return(result)
+    
 
     def columnNames(self, tablename):
         querystring = \
@@ -56,7 +69,16 @@ class Eigerdb:
         names = [r[3] for r in result]
         return(names)
 
-    
+
+    def tableNames(self):
+        querystring = \
+            "SELECT TABLE_NAME from INFORMATION_SCHEMA.TABLES where TABLE_SCHEMA=\'public\' order by table_name"
+        self.cursor.execute(querystring)
+        result = self.cursor.fetchall()
+        names = [r[0] for r in result]
+        return(names)
+
+
     def close(self):
         self.connection.close()
         
