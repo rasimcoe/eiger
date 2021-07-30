@@ -89,12 +89,12 @@ if len(yaml_WFSS_files)==0:
 lambda_qso,flux_qso=eiger_mirage.get_qso_spectrum(qso_spec,zqso,average_flamb_QSO)
 
 #CREATE POINTSOURCE CATALOG
-eiger_mirage.create_pointsource_catalog(target_RA,target_DEC,AB_MAGNITUDES,filename='ptsrc_test_grism.cat')
+eiger_mirage.create_pointsource_catalog(target_RA,target_DEC,AB_MAGNITUDES,filename='ptsrc_test_im.cat')
 
 #CREATE GALAXY CATALOG
-sel_spectral_cats=eiger_mirage.create_galaxy_catalog_grism('../catalog_data/JADES_SF_mock_r1_v1.2.fits',target_RA,target_DEC,MAGLIM,redshift_lim_low,redshift_lim_high,filename='gal_test_grism.cat')
+sel_spectral_cats=eiger_mirage.create_galaxy_catalog_grism('../catalog_data/JADES_SF_mock_r1_v1.2.fits',target_RA,target_DEC,MAGLIM,redshift_lim_low,redshift_lim_high,filename='gal_test_im.cat')
 
-cat_dict = {'J0100+2802': {'point_source':'ptsrc_test_grism.cat','galaxy':'gal_test_grism.cat'}}
+cat_dict = {'J0100+2802': {'point_source':'ptsrc_test_im.cat','galaxy':'gal_test_im.cat'}}
 sed_file=yaml_dir+'/test_sed_file.hdf5'
 
 #CREATE HDF5 FILE WITH THE SPECTRA OF QSO AND GALAXIES
