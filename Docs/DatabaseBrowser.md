@@ -1,6 +1,6 @@
 
 
-# 
+# Introduction, Purpose and Scope
 
 The *eiger* SQL database should primarily accessed in your code
 through a python API that incorporates the psycopg2 library, as documented [here](https://github.com/rasimcoe/eiger/blob/main/Docs/EIGERDataHandling_r02.pdf), but it is extremely handy
@@ -10,5 +10,13 @@ the results returned as browsable lists.
 This can be done using the free software
 [pgadmin4](https://www.pgadmin.org/download/). This is the industry
 standard tool used to access postgresql databases, and is well
-suported in the community.
+suported in the community. Installation instructions are included with
+the install package, this document explains how to configure pgadmin4
+for use with the eiger AWS database server, and common ways to run
+queries.
+
+# Configuring **pgadmin4** for use with eiger's AWS database
+
+
+
 
