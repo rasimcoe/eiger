@@ -3,7 +3,6 @@ from eiger.Database.Fileserver import s3_etag
 import boto3
 from astropy.io import fits
 import os
-from numpy import sqrt
 
 #############################################################################
 #
@@ -60,25 +59,25 @@ def parseSpec(fitsfile, instrument):
         tmp = fits.open(fitsfile)[1].data[0]
         outspec['wave'] = tmp['wave']
         outspec['flux'] = tmp['flux']
-        outspec['sig'] = tmp['sig']
+        outspec['ivar'] = 1.0/tmp['sig']**2
 
     elif (instrument == 'HIRES'):
         tmp = fits.open(fitsfile)[1].data[0]
         outspec['wave'] = tmp['wave']
         outspec['flux'] = tmp['flux']
-        outspec['sig'] = tmp['sig']
+        outspec['ivar'] = 1.0/tmp['sig']**2
         
     elif (instrument == 'XShooter'):
         tmp = fits.open(fitsfile)[1].data
         outspec['wave'] = tmp['wave']
         outspec['flux'] = tmp['flux']
-        outspec['sig'] = sqrt(1.0/tmp['ivar'])
+        outspec['ivar'] = tmp['ivar']
 
     elif (instrument == 'MOSFIRE'):
         tmp = fits.open(fitsfile)[1].data
         outspec['wave'] = tmp['wave']
         outspec['flux'] = tmp['flux']
-        outspec['sig'] = sqrt(1.0/tmp['ivar'])
+        outspec['ivar'] = tmp['ivar']
 
     return(outspec)
         
