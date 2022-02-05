@@ -3,6 +3,7 @@ from eiger.Database.Fileserver import s3_etag
 import boto3
 from astropy.io import fits
 import os
+import numpy as np
 
 #############################################################################
 #
@@ -60,12 +61,14 @@ def parseSpec(fitsfile, instrument):
         outspec['wave'] = tmp['wave']
         outspec['flux'] = tmp['flux']
         outspec['ivar'] = 1.0/tmp['sig']**2
-
+        outspec['ivar'][np.isinf(outspec['ivar'])] = 0.0
+        
     elif (instrument == 'HIRES'):
         tmp = fits.open(fitsfile)[1].data[0]
         outspec['wave'] = tmp['wave']
         outspec['flux'] = tmp['flux']
         outspec['ivar'] = 1.0/tmp['sig']**2
+        outspec['ivar'][np.isinf(outspec['ivar'])] = 0.0
         
     elif (instrument == 'XShooter'):
         tmp = fits.open(fitsfile)[1].data
@@ -79,6 +82,14 @@ def parseSpec(fitsfile, instrument):
         outspec['flux'] = tmp['flux']
         outspec['ivar'] = tmp['ivar']
 
+    contname = fitsfile[:-5]+'_contin.fits'
+    if(os.path.exists(contname)):
+       tmp = fits.open(contname)[1].data
+       outspec['cont'] = tmp['cont']
+       outspec['inlier_mask'] = tmp['mask']
+    else:
+        print(f"{contname} doesn't exist")
+        
     return(outspec)
         
 #############################################################################
@@ -86,7 +97,9 @@ def parseSpec(fitsfile, instrument):
 #############################################################################
 #############################################################################
 
-def loadQsoSpec(obj_id, spectrographs=['XShooter', 'FIRE', 'MOSFIRE', 'HIRES']):
+
+
+def loadQsoSpec(obj_id, spectrographs=['XShooter', 'FIRE', 'MOSFIRE', 'HIRES'], files=False):
 
     if (obj_id < 1 or obj_id > 6):
         print("ERROR: Quasar ID must be between 1 and 6")
@@ -95,12 +108,16 @@ def loadQsoSpec(obj_id, spectrographs=['XShooter', 'FIRE', 'MOSFIRE', 'HIRES']):
     db = eigerdb.Eigerdb()
     db.getcursor()
 
-    reply = db.query(f"select name from Quasars where id={obj_id}")
+    reply = db.query(f"select name,zem from Quasars where id={obj_id}")
     print(f"Object: {reply[0][0]}, quasarid={obj_id}")
     
     ##### Find the spectra that exist in the observations database
 
     spectra = {}
+
+    spectra['objid']   = obj_id
+    spectra['objname'] = reply[0][0]
+    spectra['z_em'] = reply[0][1]
     
     for spectrograph in spectrographs:
 
@@ -113,15 +130,55 @@ def loadQsoSpec(obj_id, spectrographs=['XShooter', 'FIRE', 'MOSFIRE', 'HIRES']):
         obs = db.query(querystring)
 
         if (len(obs) > 0):
+
             print(f"{spectrograph}:")
-            local_file = getSpec(obs[0])
-            spectrum = parseSpec(local_file,spectrograph)
-            spectra[spectrograph] = spectrum
-            if (spectrograph == 'XShooter' and False):
+
+            if (spectrograph == 'XShooter'):
                 # Grab both the VIS and NIR arms
-                spectrum = getSpec(obs[1])
+                for oo in obs:
+                    local_file = getSpec(oo)
+                    if ('VIS' in local_file):
+                        arm = 'XSH_VIS'
+                    else:
+                        arm = 'XSH_NIR'
+
+                    if (files==True):
+                        spectrum = local_file
+                    else:
+                        spectrum = parseSpec(local_file,spectrograph)
+
+                    spectra[arm] = spectrum
+
+            elif (spectrograph == 'MOSFIRE'):
+                # Separate files for Y, J, H, K
+                for oo in obs:
+                    local_file = getSpec(oo)
+                    if ('_Y_' in local_file):
+                        arm='MOSFIRE_Y'
+                    elif ('_J_' in local_file):
+                        arm='MOSFIRE_J'
+                    elif ('_H_' in local_file):
+                        arm='MOSFIRE_H'
+                    elif ('_K_' in local_file):
+                        arm='MOSFIRE_K'
+                    if (files==True):
+                        spectrum = local_file
+                    else:
+                        spectrum = parseSpec(local_file,spectrograph)
+                    spectra[arm] = spectrum
+
             else:
-                continue
+                local_file = getSpec(obs[0])
+
+                if (files==True):
+                    spectrum = local_file
+                else:
+                    spectrum = parseSpec(local_file,spectrograph)
+
+                spectra[spectrograph] = spectrum
+
+        else:
+            continue
             
     db.close()
     
