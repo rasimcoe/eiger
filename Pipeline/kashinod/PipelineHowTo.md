@@ -6,18 +6,20 @@ Last update: Daichi Kashino, 2022-02-17
   - Input: simulated_data/uncal.fits
   - Output: calibrated_det1/rate.fits
 
-1. Image2
+2. Image2
   - scripts: qsub_exe_pipe_img2.sh > exe_pipe_img2.sh > pipeline_Image2.py
   - Input: calibrated_det1/rate.fits
   - Output: calibrated_img2/cal.fits
 
-1. Image3 
+3. Image3 
   - scripts: exe_pipe_img3.sh > pipeline_Image3.py
   - Input: calibrated_img2/cal.fits; asn.json
   - Output: calibrated_img3/cat.ecsv, i2d.fits 
-* Create lists for creating global sky images
-    * create_lists_for_global_sky.ipynb
-        * e.g., list_nrca1_f200w.txt, list_nrcb5_f356w_imaging.txt
+
+### with global sky subtraction
+4. Create lists for creating global sky images
+  - create_lists_for_global_sky.ipynb
+    - e.g., list_nrca1_f200w.txt, list_nrcb5_f356w_imaging.txt
 * Get global sky images
     * exe_get_global_sky_image.sh
         * python ../scripts/get_global_sky_image.py [list file] [outname]
