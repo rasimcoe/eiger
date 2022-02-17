@@ -1,6 +1,7 @@
 Last update: Daichi Kashino, 2022-02-17
 
 ## Imaging
+### Standard
 1. Detector1
   - scripts: exe_pipe_det1.py > pipeline_Detector1.py
   - Input: simulated_data/uncal.fits
@@ -18,16 +19,18 @@ Last update: Daichi Kashino, 2022-02-17
 
 ### with global sky subtraction
 4. Create lists for creating global sky images
-  - create_lists_for_global_sky.ipynb
-    - e.g., list_nrca1_f200w.txt, list_nrcb5_f356w_imaging.txt
-* Get global sky images
-    * exe_get_global_sky_image.sh
-        * python ../scripts/get_global_sky_image.py [list file] [outname]
-    * Input: calibrated_img2/cal.fits
-    * Output: globalsky_nrca1_f115w.fits etc.
-* Subtract Global sky (and then) median values (in horizontal and vertical directions)
-    * exe_median_filter_img2cal.sh
-        * python ../scripts/median_filter_img2cal_fits_v20211029.py
+  - scripts: create_lists_for_global_sky.ipynb
+  - Output: e.g., list_nrca1_f200w.txt, list_nrcb5_f356w_imaging.txt
+
+5. Get global sky images
+  - scripts: exe_get_global_sky_image.sh
+    >> python ../scripts/get_global_sky_image.py [list file] [outname]
+  - Input: calibrated_img2/cal.fits
+  - Output: globalsky_nrca1_f115w.fits etc.
+
+6. Subtract Global sky (and then) median values (in horizontal and vertical directions)
+  - scripts: exe_median_filter_img2cal.sh
+    - [Usage] python ../scripts/median_filter_img2cal_fits_v20211029.py
     * Input: calibrated_img2/cal.fits
     * Output: calibrated_img2_medSubt_v2/cal.fits
 * Image3 from processed images (no masking)
