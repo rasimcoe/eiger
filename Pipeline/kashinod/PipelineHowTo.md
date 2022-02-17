@@ -71,42 +71,50 @@ Last update: Daichi Kashino, 2022-02-17
 ## WFSS:
 ### Standard
 - Detector1
-    * pipeline_Detector1.py
-    * Input: simulated_data/uncal.fits
-    * Output: calibrated_det1/rate.fits
+  - pipeline_Detector1.py
+  - Input: simulated_data/uncal.fits
+  - Output: calibrated_det1/rate.fits
 
-### in imaging-mode
+### imaging-mode reduction
 - Modify WFSS fits header
     - modify_wfss_fits_header.py 
     - Input dir: calibrated_det1
     - Output dir: calibrated_det1_wfss_hdr_corr
+
 - WFSS Image2:
     - qsub_exe_pipe_img2_wfss.sh
     - Output: calibrated_img2_wfss/jw01243001003_01101_00068_nrca5_cal.fits
+
 - Median-filtering (iteration 1)
     - qsub_exe_median_filter_wfss_img2cal.sh > exe_median_filter_wfss_img2cal.sh > python ../scripts/median_filter_wfss_img2cal_fits_v20211105.py $fil $output_dir $kx $ky $kx_gap
         * kernel (x, y, x_gap): 51 1 9
     - Input: calibrated_img2_wfss/cal.fits
     - Output: calibrated_img2_wfss_medSubt/cal.fits
+
 - Create lists for global sky images
     - create_lists_for_global_sky.ipynb
         - list_nrca5_f356w_wfss.txt
             - calibrated_img2_wfss_medSubt/jw01243001001_01101_00001_nrca5_cal.fits
             - calibrated_img2_wfss_medSubt/jw01243001001_01101_00002_nrca5_cal.fits
+
 - Get global sky from median-filtered (iter1) images
     - python ../scripts/get_globalsky.py list_nrca5_f356w_wfss.txt nrca5_f356w_wfss
     - python ../scripts/get_globalsky.py list_nrcb5_f356w_wfss.txt nrcb5_f356w_wfss
     - Output: globalsky_nrcb5_f356w_wfss.fits
+
 - Subtract global sky from median-filtered (iter1) images
     - scripts: ./qsub_exe_subtract_globalsky.sh > exe_subtract_globalsky.sh > python ../scripts/subtract_globalsky.py $fil $output_dir $global_sky
     - Input: calibrated_img2_wfss.fits
     - Output: calibrated_img2_wfss_medSubt2/cal.fits
+
 - WFSS Image3
     - create_asn_img3_wfss.ipynb
         - asn_files
     - scripts: exe_pipe_img3_wfss.sh > pipeline_Image3_wfss.py
     - Input: calibrated_img2_wfss_medSubt2/cal.fits
     - Output dir: calibrated_img3_wfss_medSubt2
+
+### imaging-mode reduction with masking
 - Prepare masks
     - Sextractor
     - ./sextractor/results/sex_jw01243_nrc_img3_wfss_visit3a_i2d_selected.reg
