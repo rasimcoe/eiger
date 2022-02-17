@@ -37,7 +37,6 @@ Last update: Daichi Kashino, 2022-02-17
 - Create asn file for Image3
  
 - Image3 from the processed images
-  - 
   - Input: 
   - Output: calibrated_img3_medSubt/cat.ecsv, i2d.fits etc.
 
@@ -61,15 +60,16 @@ Last update: Daichi Kashino, 2022-02-17
   - execute python ../scripts/median_filter_img2cal_fits_v20211104.py $fil $output_dir
   - Input: 
   - Output: calibrated_img2_medSubt
-
-- Image3 from processed image (fully processed)
+ 
+ - Image3 from processed image (fully processed)
   - create_asn_img3.ipynb
   - Input: 
     - asn file: jw01243_nrc_img3_f356w_medSubt_v3_asn.json
   - Output: calibrated_img3_medSubt_v3
 
-WFSS:
-* Detector1
+## WFSS:
+# Standard
+- Detector1
     * pipeline_Detector1.py
     * Input: simulated_data/uncal.fits
     * Output: calibrated_det1/rate.fits
