@@ -12,31 +12,34 @@ Last update: Daichi Kashino, 2022-02-17
   - Input: calibrated_det1/rate.fits
   - Output: calibrated_img2/cal.fits
 
-3. Image3 
-  - scripts: exe_pipe_img3.sh > pipeline_Image3.py
-  - Input: calibrated_img2/cal.fits; asn.json
-  - Output: calibrated_img3/cat.ecsv, i2d.fits 
+3. Create asn file for Image3
 
-### with global sky subtraction
-4. Create lists for creating global sky images
+4. Image3 
+  - scripts: exe_pipe_img3.sh > pipeline_Image3.py
+  - Input: calibrated_img2/cal.fits and asn.json
+  - Output: calibrated_img3/cat.ecsv, i2d.fits etc.
+
+### with global sky + median subtraction
+5. Create lists for creating global sky images
   - scripts: create_lists_for_global_sky.ipynb
   - Output: e.g., list_nrca1_f200w.txt, list_nrcb5_f356w_imaging.txt
 
-5. Get global sky images
-  - scripts: exe_get_global_sky_image.sh
-    >> python ../scripts/get_global_sky_image.py [list file] [outname]
+6. Get global sky images
+  - scripts: exe_get_global_sky_image.sh; python ../scripts/get_global_sky_image.py [list file] [outname]
   - Input: calibrated_img2/cal.fits
   - Output: globalsky_nrca1_f115w.fits etc.
 
-6. Subtract Global sky (and then) median values (in horizontal and vertical directions)
-  - scripts: exe_median_filter_img2cal.sh
-    - [Usage] python ../scripts/median_filter_img2cal_fits_v20211029.py
-    * Input: calibrated_img2/cal.fits
-    * Output: calibrated_img2_medSubt_v2/cal.fits
-* Image3 from processed images (no masking)
-    * Asn file: jw01243_nrc_img3_f356w_medSubt_v2_asn.json
-    * Input: 
-    * Output: calibrated_img3_medSubt_v2
+7. Subtract Global sky (and then) median values (in horizontal and vertical directions)
+  - scripts: exe_median_filter_img2cal.sh; python ../scripts/median_filter_img2cal_fits_v20211029.py
+  - Input: calibrated_img2/cal.fits
+  - Output: calibrated_img2_medSubt/cal.fits
+
+8. Create asn file for Image3
+9. 
+10. Image3 from the processed images
+  - 
+  - Input: 
+  - Output: calibrated_img3_medSubt/cat.ecsv, i2d.fits etc.
 * Create masks (.reg files) from input images
     * create_mask_for_median_filtering.ipynb
         * mask_f115w_m280.reg  
