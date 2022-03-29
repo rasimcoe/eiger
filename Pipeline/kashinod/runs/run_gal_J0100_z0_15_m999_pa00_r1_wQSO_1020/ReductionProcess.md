@@ -58,10 +58,10 @@
  - Input dir: calibrated_det1
  - Output dir: calibrated_det1_wfss_hdr_corr
 ## WFSS Image2:
- - qsub_exe_pipe_img2_wfss.sh --> exe_pipe_img2_wfss.sh --> pipeline_Image2_wfss.sh
+ - qsub_exe_pipe_img2_wfss.sh --> exe_pipe_img2.sh --> pipeline_Image2.sh
  - Output dir: calibrated_img2_wfss
 ## Subtract global medians (at each x) and sources' continua
- - qsub_exe_median_filter_wfss_img2cal.sh --> exe_median_filter_wfss_img2cal.sh --> median_filter_wfss_img2cal_fits_v*.py
+ - qsub_exe_median_filter_wfss_img2cal.sh --> exe_median_filter_wfss_img2cal.sh --> median_filter_wfss_img2cal_fits(_v20220328).py
  - Kernel: kx=51, ky=1, kx_gap=9
  - Input: calibrated_img2_wfss/cal.fits
  - Output: calibrated_img2_wfss_medFiltered/cal.fits
