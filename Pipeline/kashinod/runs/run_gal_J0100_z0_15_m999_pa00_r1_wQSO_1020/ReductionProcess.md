@@ -30,7 +30,7 @@
  - Output: calibrated_img3_medSubt/i2d.fits, cat.ecsv
 ## Masking
  - Prepare a ds9-format region file from Image3/cat.ecsv, your own Sextractor result, or input catalog.
- - qsub_exe_mask_objects_img2cal.sh --> exe_mask_objects_img2cal.sh --> ../scripts/exe_mask_objects_img2cal.sh
+ - qsub_exe_mask_objects_img2cal.sh --> exe_mask_objects_img2cal.sh --> ../scripts/mask_objects_img2cal.sh
  - Input: calibrated_img2/cal.fits
  - Output: calibrated_img2_mask_f115w_m280/mask.fits etc.
 ## Re-create global sky images with mask
