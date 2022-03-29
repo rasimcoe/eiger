@@ -28,7 +28,6 @@ kx_gap=_KERNEL_XGAP_
 echo 'input file: '$fil
 echo 'output dir: '$outdir 
 echo 'kernel: '$kx $ky
-#python ../scripts/median_filter_wfss_img2cal_fits_v20211105.py $fil $output_dir $kx $ky $kx_gpa
 python ../scripts/median_filter_wfss_img2cal_v20220328.py $fil $output_dir $kx $ky $kx_gap
 
 
