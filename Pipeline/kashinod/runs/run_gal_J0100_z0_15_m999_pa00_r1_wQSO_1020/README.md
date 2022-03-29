@@ -4,35 +4,35 @@
  - Input: simulated_data/uncal.fits
  - Output: calibrated_det1/rate.fits
 ## Image2
-  * qsub_exe_pipe_img2.sh --> exe_pipe_img2.sh --> pipeline_Image2.py
-  * Input: calibrated_det1/rate.fits
-  * Output: calibrated_img2/cal.fits
+ - qsub_exe_pipe_img2.sh --> exe_pipe_img2.sh --> pipeline_Image2.py
+ - Input: calibrated_det1/rate.fits
+ - Output: calibrated_img2/cal.fits
 ## Image3 (standard; no manual processing)
-  * qsub_exe_pipe_img3.sh --> exe_pipe_img3.sh --> pipeline_Image3.py
-  * Input: calibrated_img2/cal.fits; asn.json
-  * Output: calibrated_img3/cat.ecsv, i2d.fits 
+ - qsub_exe_pipe_img3.sh --> exe_pipe_img3.sh --> pipeline_Image3.py
+ - Input: calibrated_img2/cal.fits; asn.json
+ - Output: calibrated_img3/cat.ecsv, i2d.fits 
 ## Create cal.fits lists for globalsky
-  * create_list_for_globalsky.py
+ - create_list_for_globalsky.py
 ## Get global-sky images
-  * exe_get_globalsky.sh --> get_globalsky.py
-  * Input: list created above, calibrated_img2/cal.fits
-  * Output: globalsky_nrca1_f115w.fits etc.
+ - exe_get_globalsky.sh --> get_globalsky.py
+ - Input: list created above, calibrated_img2/cal.fits
+ - Output: globalsky_nrca1_f115w.fits etc.
 ## Subtract global-sky & global-xy-medians from Image2/cal.fits
-* qsub_exe_median_filter_img2cal.sh --> exe_median_filter_img2cal.sh --> median_filter_img2cal_fits_v20211029.py
-* Input: calibrated_img2/cal.fits
-* Output: calibrated_img2_medSubt/cal.fits
+ - qsub_exe_median_filter_img2cal.sh --> exe_median_filter_img2cal.sh --> median_filter_img2cal_fits_v20211029.py
+ - Input: calibrated_img2/cal.fits
+ - Output: calibrated_img2_medSubt/cal.fits
 ## Create asn files for Image3
-* create_asn_img3.ipynb
-* Output: list_nrcb5_f115w.txt, list_nrcb5_f356w_imaging.txt etc.
+ - create_asn_img3.ipynb
+ - Output: list_nrcb5_f115w.txt, list_nrcb5_f356w_imaging.txt etc.
 ## Image 3 from the processed images
-* qsub_exe_pipe_img3.sh --> exe_pipe_img3.sh --> pipeline_Image3.sh
-* Input: asn file e.g., jw01243_nrc_img3_f115w_visit1_medSubt_asn.json
-* Output: calibrated_img3_medSubt/i2d.fits, cat.ecsv
+ - qsub_exe_pipe_img3.sh --> exe_pipe_img3.sh --> pipeline_Image3.sh
+ - Input: asn file e.g., jw01243_nrc_img3_f115w_visit1_medSubt_asn.json
+ - Output: calibrated_img3_medSubt/i2d.fits, cat.ecsv
 ## Masking
-* Prepare a ds9-format region file from Image3/cat.ecsv, your own Sextractor result, or input catalog.
-* qsub_exe_mask_objects_img2cal.sh --> exe_mask_objects_img2cal.sh --> exe_mask_objects_img2cal.sh
-* Input: calibrated_img2/cal.fits
-* Output: calibrated_img2_mask/mask.fits
+ - Prepare a ds9-format region file from Image3/cat.ecsv, your own Sextractor result, or input catalog.
+ - qsub_exe_mask_objects_img2cal.sh --> exe_mask_objects_img2cal.sh --> exe_mask_objects_img2cal.sh
+ - Input: calibrated_img2/cal.fits
+ - Output: calibrated_img2_mask/mask.fits
 ## Re-create globalsky with mask
 * exe_get_globalsky.sh --> get_globalsky.py
 * Input: list created above, mask file list, calibrated_img2/cal.fits
