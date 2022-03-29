@@ -29,7 +29,6 @@ try:
 except Exception as e:
     print(e)
     
-
 inp_fil = args.inp_fil
 out_dir = args.out_dir
 
@@ -131,9 +130,12 @@ sci_img_bg = np.copy(sci_img)
 
 # Read mask image
 if masking:
+    print('Read mask_fil: ', mask_fil)
     mask = fits.getdata(mask_fil,0)
     idx_maskedout = np.where(mask==1)  ## Pixels of bright emission lines
     idx_unmasked = np.where(mask==0)   
+    print('# idx_maskedout: ', idx_maskedout[0].size)
+    print('# idx_unmasked : ', idx_unmasked[0].size)
     sci_img_bg[idx_maskedout]=np.nan
 else:
     idx_unmasked = np.where(np.finite(sci_img_bg))
@@ -143,7 +145,7 @@ else:
 #sci_img_bg[:,-1]=np.nan
 
 idx_negative_err = np.where(err_img <= 0)
-print('Pixels negative ERR=0: ', idx_negative_err[0].size, '(', fits_name, ')', flush=True)
+print('Pixels negative error: ', idx_negative_err[0].size, '(', fits_name, ')', flush=True)
 sci_img_bg[idx_negative_err]=np.nan
 
 err_ptiles = np.nanpercentile(err_img[idx_unmasked], [0.15, 1., 2.5, 16., 50., 84., 97.5, 99., 99.85, 99.99])
@@ -172,8 +174,8 @@ for i_x in range(n_x):
 
 print(datetime.now(), ': End global x,y median', flush=True)
 
-sci_img_cleaned = sci_img_original - sci_img_medians_at_x# - sci_img_medians_at_y
-medians_img =  sci_img_medians_at_x# + sci_img_medians_at_y
+sci_img_cleaned = sci_img_original - sci_img_medians_at_x # - sci_img_medians_at_y
+medians_img =  sci_img_medians_at_x # + sci_img_medians_at_y
 
 
 hdu_tmp = fits.ImageHDU(data = sci_img_cleaned, header = imheader)
@@ -193,6 +195,9 @@ print(datetime.now(), ': Saved: ', globalMed_fil)
 print(datetime.now(), ': Start secondary continuum subtraction')
 sci_img_new_bg = np.copy(sci_img_cleaned)
 sci_img_new_bg[idx_negative_err]=np.nan
+
+# Masking
+sci_img_new_bg[idx_maskedout]=np.nan
 
 idx_bad_new = np.where((sci_img<sci_ptiles[1])|(sci_img>sci_ptiles[9])|
                        (err_img<err_ptiles[1])|(err_img>err_ptiles[9]))
