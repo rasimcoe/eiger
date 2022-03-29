@@ -27,8 +27,17 @@
 ## Image 3 from the processed images
 * qsub_exe_pipe_img3.sh --> exe_pipe_img3.sh --> pipeline_Image3.sh
 * Input: asn file e.g., jw01243_nrc_img3_f115w_visit1_medSubt_asn.json
-* Output: calibrated_img3_medSubt/i2d.fits, cat.ecsv   
-
+* Output: calibrated_img3_medSubt/i2d.fits, cat.ecsv
+## Masking
+* Prepare a ds9-format region file from Image3/cat.ecsv, your own Sextractor result, or input catalog.
+* qsub_exe_mask_objects_img2cal.sh --> exe_mask_objects_img2cal.sh --> exe_mask_objects_img2cal.sh
+* Input: calibrated_img2/cal.fits
+* Output: calibrated_img2_mask/mask.fits
+## Re-create globalsky with mask
+* exe_get_globalsky.sh --> get_globalsky.py
+* Input: list created above, mask file list, calibrated_img2/cal.fits
+* Output: globalsky_nrca1_f115w_masked.fits etc
+## 
 
 # WFSS
 ## Detector1
@@ -39,3 +48,4 @@
  * Output dir: calibrated_det1_wfss_hdr_corr
 ## WFSS Image2:
  * qsub_exe_pipe_img2_wfss.sh --> exe_pipe_img2_wfss.sh --> pipeline_Image2_wfss.sh
+ * 
