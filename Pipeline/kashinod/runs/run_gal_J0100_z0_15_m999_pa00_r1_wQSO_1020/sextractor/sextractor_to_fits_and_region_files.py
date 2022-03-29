@@ -26,25 +26,9 @@ fits_fil_array = [
     '../calibrated_img3_wfss_medSubt41/jw01243_nrc_img3_wfss_visit3b_i2d.fits',
     '../calibrated_img3_wfss_medSubt41/jw01243_nrc_img3_wfss_visit4a_i2d.fits',
     '../calibrated_img3_wfss_medSubt41/jw01243_nrc_img3_wfss_visit4b_i2d.fits',
-    '../calibrated_img3_wfss_medSubt2/jw01243_nrc_img3_wfss_visit1a_i2d.fits',
-    '../calibrated_img3_wfss_medSubt2/jw01243_nrc_img3_wfss_visit1b_i2d.fits',
-    '../calibrated_img3_wfss_medSubt2/jw01243_nrc_img3_wfss_visit2a_i2d.fits',
-    '../calibrated_img3_wfss_medSubt2/jw01243_nrc_img3_wfss_visit2b_i2d.fits',
-    '../calibrated_img3_wfss_medSubt2/jw01243_nrc_img3_wfss_visit3a_i2d.fits',
-    '../calibrated_img3_wfss_medSubt2/jw01243_nrc_img3_wfss_visit3b_i2d.fits',
-    '../calibrated_img3_wfss_medSubt2/jw01243_nrc_img3_wfss_visit4a_i2d.fits',
-    '../calibrated_img3_wfss_medSubt2/jw01243_nrc_img3_wfss_visit4b_i2d.fits',
-     '../calibrated_img3/jw01243_nrc_img3_f115w_visit1_i2d.fits',
-    '../calibrated_img3/jw01243_nrc_img3_f115w_visit2_i2d.fits',
-    '../calibrated_img3/jw01243_nrc_img3_f115w_visit3_i2d.fits',
-    '../calibrated_img3/jw01243_nrc_img3_f115w_visit4_i2d.fits',
-    '../calibrated_img3/jw01243_nrc_img3_f200w_visit1_i2d.fits',
-    '../calibrated_img3/jw01243_nrc_img3_f200w_visit2_i2d.fits',
-    '../calibrated_img3/jw01243_nrc_img3_f200w_visit3_i2d.fits',
-    '../calibrated_img3/jw01243_nrc_img3_f200w_visit4_i2d.fits',
-    '../calibrated_img3/jw01243_nrc_img3_f356w_i2d.fits',
     ]
     
+# Sextractor results
 cat_name_array = [
     'results_calibrated_img3_wfss_medSubt41/sex_jw01243_nrc_img3_wfss_visit1a_i2d',
     'results_calibrated_img3_wfss_medSubt41/sex_jw01243_nrc_img3_wfss_visit1b_i2d',
@@ -54,37 +38,17 @@ cat_name_array = [
     'results_calibrated_img3_wfss_medSubt41/sex_jw01243_nrc_img3_wfss_visit3b_i2d',
     'results_calibrated_img3_wfss_medSubt41/sex_jw01243_nrc_img3_wfss_visit4a_i2d',
     'results_calibrated_img3_wfss_medSubt41/sex_jw01243_nrc_img3_wfss_visit4b_i2d',
-    'results/sex_jw01243_nrc_img3_wfss_visit1a_i2d',
-    'results/sex_jw01243_nrc_img3_wfss_visit1b_i2d',
-    'results/sex_jw01243_nrc_img3_wfss_visit2a_i2d',
-    'results/sex_jw01243_nrc_img3_wfss_visit2b_i2d',
-    'results/sex_jw01243_nrc_img3_wfss_visit3a_i2d',
-    'results/sex_jw01243_nrc_img3_wfss_visit3b_i2d',
-    'results/sex_jw01243_nrc_img3_wfss_visit4a_i2d',
-    'results/sex_jw01243_nrc_img3_wfss_visit4b_i2d',
-    'results/sex_jw01243_nrc_img3_f115w_visit1_i2d',
-    'results/sex_jw01243_nrc_img3_f115w_visit2_i2d',
-    'results/sex_jw01243_nrc_img3_f115w_visit3_i2d',
-    'results/sex_jw01243_nrc_img3_f115w_visit4_i2d',
-    'results/sex_jw01243_nrc_img3_f200w_visit1_i2d',
-    'results/sex_jw01243_nrc_img3_f200w_visit2_i2d',
-    'results/sex_jw01243_nrc_img3_f200w_visit3_i2d',
-    'results/sex_jw01243_nrc_img3_f200w_visit4_i2d',
-    'results/sex_jw01243_nrc_img3_f356w_i2d',
     ]
 
 
 # In[3]:
 
-
 i_fil=int(sys.argv[1])
-#i_fil=0 ### <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
 
 fits_fil=fits_fil_array[i_fil]
 cat_name=cat_name_array[i_fil]
 print('Fits file', fits_fil)
-print('Cat name', cat_name)
+print('Cat name: ', cat_name)
 
 
 # In[4]:
