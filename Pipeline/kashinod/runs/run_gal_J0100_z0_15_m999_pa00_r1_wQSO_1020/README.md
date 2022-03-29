@@ -1,29 +1,3 @@
-# Directory tree
-.
-├── simulated_data
-│   ├── jw01243001001_01101_00001_nrca1_linear.fits
-│   ├── jw01243001001_01101_00001_nrca1_uncal_cosmicrays.list
-│   ├── jw01243001001_01101_00001_nrca1_uncal_F115W_CLEAR_final_seed_image.fits
-│   ├── jw01243001001_01101_00001_nrca1_uncal_F115W_CLEAR_galaxy_seed_image.fits
-│   ├── jw01243001001_01101_00001_nrca1_uncal_F115W_CLEAR_ptsrc_seed_image.fits
-│   ├── jw01243001001_01101_00001_nrca1_uncal.fits
-│   ├── jw01243001001_01101_00001_nrca1_uncal_galaxySources.list
-│   ├── jw01243001001_01101_00001_nrca1_uncal_linear_dark_prep_object.fits
-│   ├── jw01243001001_01101_00001_nrca1_uncal_pointsources.list
-│
-│
-├── calibrated_det1
-│   ├── jw01243001001_01101_00001_nrca1_ramp.fits
-│   ├── jw01243001001_01101_00001_nrca1_rate.fits
-│   ├── jw01243001001_01101_00001_nrca1_rateints.fits
-│   ├── jw01243001001_01101_00001_nrca1_trapsfilled.fits
-│
-│
-├── calibrated_img2
-│   ├── jw01243001001_01101_00001_nrca1_cal.fits
-│   ├── jw01243001001_01101_00001_nrca1_i2d.fits
-│
-
 # Imaging: 
 ## Detector1
   * exe_pipe_det1.py --> pipeline_Detector1.py 
