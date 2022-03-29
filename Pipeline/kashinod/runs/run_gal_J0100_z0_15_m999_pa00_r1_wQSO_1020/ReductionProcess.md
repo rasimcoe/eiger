@@ -25,7 +25,7 @@
  - create_asn_img3.ipynb
  - Output asn files:
 ## Image 3 from the processed images
- - qsub_exe_pipe_img3.sh --> exe_pipe_img3.sh --> pipeline_Image3.sh
+ - qsub_exe_pipe_img3.sh --> exe_pipe_img3.sh --> pipeline_Image3.py
  - Input: asn file e.g., jw01243_nrc_img3_f115w_visit1_medSubt_asn.json
  - Output: calibrated_img3_medSubt/i2d.fits, cat.ecsv
 ## Masking
