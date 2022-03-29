@@ -11,9 +11,9 @@
  - qsub_exe_pipe_img3.sh --> exe_pipe_img3.sh --> pipeline_Image3.py
  - Input: calibrated_img2/cal.fits; asn.json
  - Output: calibrated_img3/cat.ecsv, i2d.fits 
-## Create cal.fits lists for globalsky
+## Create cal.fits lists for global sky image creation
  - create_list_for_globalsky.py
-## Get global-sky images
+## Create globalsky images
  - exe_get_globalsky.sh --> get_globalsky.py
  - Input: list created above, calibrated_img2/cal.fits
  - Output: globalsky_nrca1_f115w.fits etc.
@@ -33,29 +33,31 @@
  - qsub_exe_mask_objects_img2cal.sh --> exe_mask_objects_img2cal.sh --> exe_mask_objects_img2cal.sh
  - Input: calibrated_img2/cal.fits
  - Output: calibrated_img2_mask/mask.fits
-## Re-create globalsky with mask
-* exe_get_globalsky.sh --> get_globalsky.py
-* Input: list created above, mask file list, calibrated_img2/cal.fits
-* Output: globalsky_nrca1_f115w_masked.fits etc
+## Re-create global sky images with mask
+ - exe_get_globalsky.sh --> get_globalsky.py
+ - Input: list created above, mask file list, calibrated_img2/cal.fits
+ - Output: globalsky_nrca1_f115w_masked.fits etc
 ## 
 
 # WFSS
 ## Detector1
- * Same as Imaging
+ - Same as Imaging
 ## Modify WFSS fits header
- * modify_wfss_fits_header.py
- * Input dir: calibrated_det1
- * Output dir: calibrated_det1_wfss_hdr_corr
+ - modify_wfss_fits_header.py
+ - Input dir: calibrated_det1
+ - Output dir: calibrated_det1_wfss_hdr_corr
 ## WFSS Image2:
- * qsub_exe_pipe_img2_wfss.sh --> exe_pipe_img2_wfss.sh --> pipeline_Image2_wfss.sh
- * Output dir: calibrated_img2_wfss
+ - qsub_exe_pipe_img2_wfss.sh --> exe_pipe_img2_wfss.sh --> pipeline_Image2_wfss.sh
+ - Output dir: calibrated_img2_wfss
 ## Subtract global medians (at each x) and sources' continua
- * qsub_exe_median_filter_wfss_img2cal.sh --> exe_median_filter_wfss_img2cal.sh --> median_filter_wfss_img2cal_fits_v*.py
- * Kernel: kx=51, ky=1, kx_gap=9
- * Input: calibrated_img2_wfss/cal.fits
- * Output: calibrated_img2_wfss_medFiltered/cal.fits
+ - qsub_exe_median_filter_wfss_img2cal.sh --> exe_median_filter_wfss_img2cal.sh --> median_filter_wfss_img2cal_fits_v*.py
+ - Kernel: kx=51, ky=1, kx_gap=9
+ - Input: calibrated_img2_wfss/cal.fits
+ - Output: calibrated_img2_wfss_medFiltered/cal.fits
 ## Create lists for global sky images
- * create_lists_for_globalsky.ipynb
- * Output: list_nrca5_f356w_wfss.txt etc 
-## Globalsky from median-filtered emission-line images
-  *
+ - create_lists_for_globalsky.ipynb
+ - Output: list_nrca5_f356w_wfss.txt etc 
+## Create global sky images from median-filtered emission-line images
+ - exe_get_globalsky.sh  --> get_globalsky.py
+ - Output: globalsky_nrcb5_f356w_wfss.fits
+## 
