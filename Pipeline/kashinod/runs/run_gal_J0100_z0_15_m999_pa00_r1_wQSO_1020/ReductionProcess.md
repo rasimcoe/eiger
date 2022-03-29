@@ -30,6 +30,7 @@
  - Output: calibrated_img3_medSubt/i2d.fits, cat.ecsv
 ## Masking
  - Prepare a ds9-format region file from Image3/cat.ecsv, your own Sextractor result, or input catalog.
+  - see sextractor/sextractor_to_fits_and_region_files.ipynb
  - qsub_exe_mask_objects_img2cal.sh --> exe_mask_objects_img2cal.sh --> ../scripts/mask_objects_img2cal.sh
  - Input: calibrated_img2/cal.fits
  - Output: calibrated_img2_mask_f115w_m280/mask.fits etc.
@@ -86,6 +87,7 @@
  - Sextractor
  - sextractor result table ==> ds9 region file
    - e.g., ./sextractor/results/sex_jw01243_nrc_img3_wfss_visit3a_i2d_selected.reg
+ - Use sextractor_to_fits_and_region_files.ipynb 
 ## WFSS masking 
  - qsub_exe_mask_objects_wfss_img2cal.sh --> exe_mask_objects_img2cal.sh --> ../scripts/mask_objects_img2cal.py
  - Input: calibrated_img2_wfss/cal.fits
