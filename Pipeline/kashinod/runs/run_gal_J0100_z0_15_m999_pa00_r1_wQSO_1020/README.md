@@ -60,4 +60,15 @@
 ## Create global sky images from median-filtered emission-line images
  - exe_get_globalsky.sh  --> get_globalsky.py
  - Output: globalsky_nrcb5_f356w_wfss.fits
-## 
+## Subtract global sky from median-filtered emission-line images
+ - qsub_exe_subtract_globalsky.sh --> exe_subtract_globalsky.sh --> python ../scripts/subtract_globalsky.py $fil $output_dir $globalsky
+ - Input: calibrated_img2_wfss_medSubt/cal.fits
+ - Output: calibrated_img2_wfss_medSubt_globalskySubtracted/cal.fits
+## Create asn files for WFSS Image3
+ - create_asn_img3_wfss.ipynb
+ - asn_files: 
+## WFSS Image3
+ - qsub_exe_pipe_img3_wfss.sh --> exe_pipe_img3_wfss.sh --> pipeline_Image3_wfss.py
+ - Input: calibrated_img2_wfss_medSubt2/cal.fits
+ - Output dir: calibrated_img3_wfss_medSubt2
+ -
