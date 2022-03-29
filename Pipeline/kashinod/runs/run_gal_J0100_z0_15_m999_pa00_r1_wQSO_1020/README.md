@@ -1,4 +1,4 @@
-# Imaging: 
+# Imaging
 ## Detector1
  - exe_pipe_det1.py --> pipeline_Detector1.py 
  - Input: simulated_data/uncal.fits
@@ -50,7 +50,7 @@
  - Output dir: calibrated_img3_medSubt_withMask
 
 
-# WFSS
+# WFSS in imaging-mode
 ## Detector1
  - Same as Imaging
 ## Modify WFSS fits header
