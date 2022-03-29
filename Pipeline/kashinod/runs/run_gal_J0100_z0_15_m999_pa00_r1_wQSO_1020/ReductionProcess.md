@@ -38,7 +38,7 @@
  - Input: list created above, mask file list, calibrated_img2/cal.fits
  - Output: globalsky_nrca1_f115w_masked.fits etc
 ## Subtract global-sky & global-xy-medians from Image2/cal.fits with mask
- - qsub_exe_median_filter_img2cal_with_mask.sh --> exe_median_filter_img2cal_with_mask.sh --> ../scripts/median_filter_img2cal_v20220329
+ - qsub_exe_median_filter_img2cal_with_mask.sh --> exe_median_filter_img2cal_with_mask.sh --> ../scripts/median_filter_img2cal(_v20220329).py
  - Input: calibrated_img2/cal.fits
  - Output: calibrated_img2_medSubt_withMask
 ## Create asn files for Image3
