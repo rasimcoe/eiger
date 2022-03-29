@@ -18,12 +18,12 @@
  - Input: list created above, calibrated_img2/cal.fits
  - Output: globalsky_nrca1_f115w.fits etc.
 ## Subtract global-sky & global-xy-medians from Image2/cal.fits
- - qsub_exe_median_filter_img2cal.sh --> exe_median_filter_img2cal.sh --> median_filter_img2cal_fits_v20211029.py
+ - qsub_exe_median_filter_img2cal.sh --> exe_median_filter_img2cal.sh --> median_filter_img2cal(_v20220329).py
  - Input: calibrated_img2/cal.fits
  - Output: calibrated_img2_medSubt/cal.fits
 ## Create asn files for Image3
  - create_asn_img3.ipynb
- - Output: list_nrcb5_f115w.txt, list_nrcb5_f356w_imaging.txt etc.
+ - Output asn files:
 ## Image 3 from the processed images
  - qsub_exe_pipe_img3.sh --> exe_pipe_img3.sh --> pipeline_Image3.sh
  - Input: asn file e.g., jw01243_nrc_img3_f115w_visit1_medSubt_asn.json
@@ -37,7 +37,18 @@
  - exe_get_globalsky.sh --> get_globalsky.py
  - Input: list created above, mask file list, calibrated_img2/cal.fits
  - Output: globalsky_nrca1_f115w_masked.fits etc
-## 
+## Subtract global-sky & global-xy-medians from Image2/cal.fits with mask
+ - qsub_exe_median_filter_img2cal_with_mask.sh --> exe_median_filter_img2cal_with_mask.sh --> median_filter_img2cal_v20220329
+ - Input: calibrated_img2/cal.fits
+ - Output: calibrated_img2_medSubt_withMask
+## Create asn files for Image3
+ - create_asn_img3.ipynb
+ - Output asn files: 
+## Image3 for fully processed image
+ - qsub_exe_pipe_img3 --> exe_pipe_img3.sh --> pipeline_Image3.py
+ - Input: asn files
+ - Output dir: calibrated_img3_medSubt_withMask
+
 
 # WFSS
 ## Detector1
@@ -98,5 +109,7 @@
  - create_asn_img3_wfss.ipynb
  - asn files: jw01243_nrc_img3_wfss_visit1a_medFiltered_withMask_globalskySubtracted_asn.json
 ## WFSS Image3 for fully processed images
+ - qsub_exe_pipe_img3_wfss.sh --> exe_pipe_img3_wfss.sh --> pipeline_Image3_wfss.py
+ - Input: asn files
  - Output: calibrated_img3_wfss_medFiltered_withMask_globalskySubtracted/i2d.fits
 
