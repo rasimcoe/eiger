@@ -57,12 +57,17 @@ def parseSpec(fitsfile, instrument):
     outspec = {}
     
     if (instrument == 'FIRE'):
-        tmp = fits.open(fitsfile)[1].data[0]
-        outspec['wave'] = tmp['wave']
-        outspec['flux'] = tmp['flux']
-        outspec['ivar'] = 1.0/tmp['sig']**2
-        outspec['ivar'][np.isinf(outspec['ivar'])] = 0.0
-        
+        tmp = fits.open(fitsfile)[1].data
+        if ('ivar' in tmp.columns.names):
+            outspec['wave'] = tmp['wave']
+            outspec['flux'] = tmp['flux']
+            outspec['ivar'] = tmp['ivar']
+        else:
+            outspec['wave'] = tmp['wave'][0]
+            outspec['flux'] = tmp['flux'][0]
+            outspec['ivar'] = 1.0/tmp['sig'][0]**2
+            outspec['ivar'][np.isinf(outspec['ivar'])] = 0.0
+            
     elif (instrument == 'HIRES'):
         tmp = fits.open(fitsfile)[1].data[0]
         outspec['wave'] = tmp['wave']
@@ -72,9 +77,10 @@ def parseSpec(fitsfile, instrument):
         
     elif (instrument == 'XShooter'):
         tmp = fits.open(fitsfile)[1].data
-        outspec['wave'] = tmp['wave']
-        outspec['flux'] = tmp['flux']
-        outspec['ivar'] = tmp['ivar']
+        gd = tmp['wave'] != 0
+        outspec['wave'] = tmp['wave'][gd]
+        outspec['flux'] = tmp['flux'][gd]
+        outspec['ivar'] = tmp['ivar'][gd]
 
     elif (instrument == 'MOSFIRE'):
         tmp = fits.open(fitsfile)[1].data
@@ -99,7 +105,8 @@ def parseSpec(fitsfile, instrument):
 
 
 
-def loadQsoSpec(obj_id, spectrographs=['XShooter', 'FIRE', 'MOSFIRE', 'HIRES'], files=False):
+def loadQsoSpec(obj_id, spectrographs=['XShooter', 'FIRE', 'MOSFIRE', 'HIRES'], \
+                revision='current', files=False):
 
     if (obj_id < 1 or obj_id > 6):
         print("ERROR: Quasar ID must be between 1 and 6")
@@ -118,6 +125,7 @@ def loadQsoSpec(obj_id, spectrographs=['XShooter', 'FIRE', 'MOSFIRE', 'HIRES'], 
     spectra['objid']   = obj_id
     spectra['objname'] = reply[0][0]
     spectra['z_em'] = reply[0][1]
+    spectra['revision'] = revision
     
     for spectrograph in spectrographs:
 
@@ -125,7 +133,8 @@ def loadQsoSpec(obj_id, spectrographs=['XShooter', 'FIRE', 'MOSFIRE', 'HIRES'], 
         SELECT awsbucket,awspath 
         FROM Observations 
         WHERE quasarid={} 
-        AND instrument=\'{}\'""".format(obj_id,spectrograph)
+        AND revision=\'{}\'
+        AND instrument=\'{}\'""".format(obj_id,revision,spectrograph)
 
         obs = db.query(querystring)
 
