@@ -1,27 +1,27 @@
 import psycopg2
 import sys
 import boto3
+import botocore
 import os
-import eigerdb
+from eiger.Database.SQL import eigerdb
+import numpy as np
 
 class Observation:
 
     def __init__(self, instrument=None, observatory=None, utdate=None, \
-                 datafile=None, errfile=None, quasarID=None,exptime=None,filtername=None):
+                 datafile=None, errfile=None, quasarID=None,exptime=None,disperser=None):
         self.id            = None
         self.quasarid      = quasarID
         self.instrument    = instrument
         self.observatory   = observatory
         self.ut_date       = utdate
-        self.exptime       = None
-        self.filtername    = None
-        self.disperser     = None
+        self.exptime       = exptime
+        self.disperser     = disperser
         self.awsbucket     = 'gto1243'
         self.awspath       = None
-        self.awsurl        = None
-        self.awspath_err   = None
-        self.awsurl_err    = None
+        self.revision      = None
         self.localfile     = datafile
+        self.localerr      = None
         self.localerr      = errfile
 
     def _createObservationsTable(self):
@@ -117,7 +117,7 @@ class Observation:
         
     def _destroyObservationsTable(self):
         kill_command = "DROP TABLE IF EXISTS observations"
-        if (True):
+        if (False):
             edb = eigerdb.Eigerdb()
             edb.getcursor()
             edb.command(kill_command)
@@ -128,7 +128,7 @@ class Observation:
             print("DROP TABLE command not sent")
 
             
-    def addToDatabase(self):
+    def addToDatabase(self, test=True):
 
         # Open a connection to the database
         edb = eigerdb.Eigerdb()
@@ -169,22 +169,75 @@ class Observation:
 
         s3_resource = boto3.resource('s3')
 
-        ##########  Upload the datafile #############
+        ########## Check versioning in the SQL database     ###########
+        ########## If a previous reduction exists, archive  ############
+        ########## it with a new revision number and keep   ############
+        ########## it in the database. Latest version has   ############
+        ########## revision=='current' always               ############
 
+        query_string = """
+        select revision,awspath from Observations 
+        where quasarid={} and 
+        instrument=\'{}\' and 
+        disperser=\'{}\'""".format(self.quasarid,self.instrument,self.disperser)
+
+        # response to this should be a listing of all reductions of this object in the database
+        # using the same instrument and disperser
+        resp = np.array(edb.command(query_string,getreply=True))
+        if (len(resp) != 0):
+            revs = resp[:,0]
+            if (len(revs) == 1):
+                old_awspath = resp[0,1]
+                maxrev      = 0
+                newrev      = 1
+            else:
+                maxrev = max(revs[revs!='current'])
+                old_awspath = resp[revs.index('current'),1]                
+                newrev = maxrev+1
+
+            new_awspath = f"{old_awspath[:-5].split('_rev')[0]}_rev{newrev}.fits"
+                
+            print(f"Renaming prior reduction: {old_awspath}-->{new_awspath}")
+            cmd = f"update Observations set awspath=\'{new_awspath}\',revision=\'{newrev}\' where awspath=\'{old_awspath}\'"
+            if (test==False):
+                # This statement changes the SQL database entry awspath to reflect downrev of the N-1 version
+                edb.command(cmd,getreply=False)
+                # The next 2 statements change the actual filename of the N-1 version on S3
+                # (on S3, you can't rename a file, need to copy to a new file and then delete the original)
+                s3_resource.Object(self.awsbucket,new_awspath).\
+                    copy_from(CopySource={'Bucket':self.awsbucket,'Key':old_awspath})
+                s3_resource.Object(self.awsbucket,old_awspath).delete()
+            
+        ########## Check to see if a file with this name already exists in the database
+        ########## If so, then rename the old file and archive with a revision number.
+        
         try:
-            s3_resource.Bucket(self.awsbucket).upload_file(self.localfile,self.awspath)
-        except:
-            print("Error: file upload aborted")
+            s3_resource.Object(self.awsbucket,old_awspath).load()
+            print(f"File {old_awspath} still exists but should have been renamed, something has gone wrong.")
+            return()
+        except botocore.exceptions.ClientError as e:
+            if (e.response['Error']['Code'] == "404"):
+                # print("File does not exist")
+                print("OK to proceed")
+            else:
+                print("Something has gone wrong accessing S3")
+                return(False)
+                
+        ##########  Upload the datafile to AWS #############
 
-        ########## Build the query string according to how many attributes are known ########
+        if (test == False):
+            try:
+                s3_resource.Bucket(self.awsbucket).upload_file(self.localfile,self.awspath)
+            except:
+                print("Error: file upload aborted")
+                
+        ########## Build the database entry string according to how many attributes are known ########
 
         obsfields = {}
         if (self.observatory != None):
             obsfields['observatory'] = self.observatory
         if (self.instrument != None):
             obsfields['instrument'] = self.instrument
-        if (self.filtername != None):
-            obsfields['filter'] = self.filtername
         if (self.disperser != None):
             obsfields['disperser'] = self.disperser
         if (self.exptime != None):
@@ -193,16 +246,12 @@ class Observation:
             obsfields['awsbucket'] = self.awsbucket
         if (self.awspath != None):
             obsfields['awspath'] = self.awspath
-        if (self.awsurl != None):
-            obsfields['awsurl'] = self.awsurl
         if (self.ut_date != None):
             obsfields['ut_date'] = self.ut_date
-        if (self.awspath_err != None):
-            obsfields['awspath_err'] = self.awspath_err
-        if (self.awsurl_err != None):
-            obsfields['awsurl_err'] = self.awsurl_err
         if (self.quasarid != None):
             obsfields['quasarid'] = self.quasarid
+        if (self.revision == None):
+            obsfields['revision'] = 'current'
 
         query_string = "INSERT INTO observations ("
         nfields = len(obsfields)
@@ -232,8 +281,11 @@ class Observation:
                             
         ##########  Add this to the SQL table of observations ###########
 
-        edb.command(query_string,getreply=False)
-
+        if (test == False):
+            edb.command(query_string,getreply=False)
+        else:
+            print(query_string)
+            
         print("addToDatabase: All done!")
         edb.close()
         
