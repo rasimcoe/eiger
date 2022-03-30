@@ -10,44 +10,50 @@ import matplotlib.pyplot as plt
 import mpl_toolkits.axes_grid1
 
 # This script is for getting the median image from a list of Image2 cal.fits
+# Usage: python get_globalsky.py list_of_input_files output_name [option mask_list] 
 
 # List of cal.fits files
 list_fil = sys.argv[1]
 outname = sys.argv[2]
-
 fits_files = np.loadtxt(list_fil, dtype="str")
 
-do_masking=False
 if len(sys.argv)==4:
-    do_masking=True
+    masking=True
     mask_list_fil = sys.argv[3]
     print('Mask list provided: ', mask_list_fil)
     mask_fits_files = np.loadtxt(mask_list_fil, dtype="str")
     if mask_fits_files.size != fits_files.size:
         raise ValueError('Number of mask fits files must be the same as that of input fits files.')
+else:
+    masking=False
 
+# Read the first file
 hdul = fits.open(fits_files[0])
 sci_img = np.copy(hdul[1].data)
+
+# Prepare empty "cube"
 cube = np.zeros((sci_img.shape[0], sci_img.shape[1], fits_files.size))
 
+
+print(datetime.now(), '-- Start big loop.', flush=True)
 for i in range(0, fits_files.size):
-    print('-----------------------------------', flush=True)
+    print('---------------------------------------', flush=True)
     fil = fits_files[i]
     print('Read ', fil, flush=True)
     sci_img = fits.getdata(fil, 1)
     err_img = fits.getdata(fil, 2)
 
-    n_y, n_x = sci_img.shape[0], sci_img.shape[1]
+    n_y, n_x = sci_img.shape
     print('n_x, n_y=', n_x, n_y, flush=True)
 
     sci_img_original = np.copy(sci_img)
     sci_img_bg = np.copy(sci_img)
 
     idx_negative_err = np.where(err_img <= 0)
-    print('Pixels negative ERR=0: ', idx_negative_err[0].size, flush=True)
+    print('Pixels with negative error: ', idx_negative_err[0].size, flush=True)
     sci_img_bg[idx_negative_err]=np.nan
 
-    if do_masking:
+    if masking:
         mask = fits.getdata(mask_fits_files[i], 0)
         idx_maskedout = np.where(mask==1)
         sci_img[idx_maskedout]=np.nan
@@ -70,6 +76,10 @@ for i in range(0, fits_files.size):
 medimg = np.nanmedian(cube, axis=2)
 medimg[np.where(np.isnan(medimg))]=0.
 hdul[1].data = medimg
-hdul.writeto('median_image_'+outname+'.fits', overwrite=True)
+
+outfil = 'globalsky_'+outname+'.fits'
+print('Save '+outfil, flush=True)
+hdul.writeto(outfil, overwrite=True)
 
 
+ 

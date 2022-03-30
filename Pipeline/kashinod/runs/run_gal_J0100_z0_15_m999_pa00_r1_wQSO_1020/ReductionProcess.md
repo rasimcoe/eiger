@@ -1,0 +1,117 @@
+# Imaging
+## Detector1
+ - exe_pipe_det1.py --> pipeline_Detector1.py 
+ - Input: simulated_data/uncal.fits
+ - Output: calibrated_det1/rate.fits
+## Image2
+ - qsub_exe_pipe_img2.sh --> exe_pipe_img2.sh --> pipeline_Image2.py
+ - Input: calibrated_det1/rate.fits
+ - Output: calibrated_img2/cal.fits
+## Image3 (standard; no manual processing)
+ - qsub_exe_pipe_img3.sh --> exe_pipe_img3.sh --> pipeline_Image3.py
+ - Input: calibrated_img2/cal.fits; asn.json
+ - Output: calibrated_img3/cat.ecsv, i2d.fits 
+## Create cal.fits lists for global sky image creation
+ - create_list_for_globalsky.py
+## Create globalsky images
+ - exe_get_globalsky.sh --> ../scripts/get_globalsky.py
+ - Input: list created above, calibrated_img2/cal.fits
+ - Output: globalsky_nrca1_f115w.fits etc.
+## Subtract global-sky & global-xy-medians from Image2/cal.fits
+ - qsub_exe_median_filter_img2cal.sh --> exe_median_filter_img2cal.sh --> ../scripts/median_filter_img2cal(_v20220329).py
+ - Input: calibrated_img2/cal.fits
+ - Output: calibrated_img2_medSubt/cal.fits
+## Create asn files for Image3
+ - create_asn_img3.ipynb
+ - Output asn files:
+## Image 3 from the processed images
+ - qsub_exe_pipe_img3.sh --> exe_pipe_img3.sh --> pipeline_Image3.py
+ - Input: asn file e.g., jw01243_nrc_img3_f115w_visit1_medSubt_asn.json
+ - Output: calibrated_img3_medSubt/i2d.fits, cat.ecsv
+## Masking
+ - Prepare a ds9-format region file from Image3/cat.ecsv, your own Sextractor result, or input catalog.
+  - see sextractor/sextractor_to_fits_and_region_files.ipynb
+ - qsub_exe_mask_objects_img2cal.sh --> exe_mask_objects_img2cal.sh --> ../scripts/mask_objects_img2cal.sh
+ - Input: calibrated_img2/cal.fits
+ - Output: calibrated_img2_mask_f115w_m280/mask.fits etc.
+## Re-create global sky images with mask
+ - exe_get_globalsky.sh --> get_globalsky.py
+ - Input: list created above, mask file list, calibrated_img2/cal.fits
+ - Output: globalsky_nrca1_f115w_masked.fits etc
+## Subtract global-sky & global-xy-medians from Image2/cal.fits with mask
+ - qsub_exe_median_filter_img2cal_with_mask.sh --> exe_median_filter_img2cal_with_mask.sh --> ../scripts/median_filter_img2cal(_v20220329).py
+ - Input: calibrated_img2/cal.fits
+ - Output: calibrated_img2_medSubt_withMask
+## Create asn files for Image3
+ - create_asn_img3.ipynb
+ - Output asn files: 
+## Image3 for fully processed image
+ - qsub_exe_pipe_img3 --> exe_pipe_img3.sh --> pipeline_Image3.py
+ - Input: asn files
+ - Output dir: calibrated_img3_medSubt_withMask
+
+
+# WFSS in imaging-mode
+## Detector1
+ - Same as Imaging
+## Modify WFSS fits header
+ - modify_wfss_fits_header.py
+ - Input dir: calibrated_det1
+ - Output dir: calibrated_det1_wfss_hdr_corr
+## WFSS Image2:
+ - qsub_exe_pipe_img2_wfss.sh --> exe_pipe_img2.sh --> pipeline_Image2.py
+ - Output dir: calibrated_img2_wfss
+## Subtract global medians (at each x) and sources' continua
+ - qsub_exe_median_filter_wfss_img2cal.sh --> exe_median_filter_wfss_img2cal.sh --> ../scripts/median_filter_wfss_img2cal_fits(_v20220328).py
+ - Kernel: kx=51, ky=1, kx_gap=9
+ - Input: calibrated_img2_wfss/cal.fits
+ - Output: calibrated_img2_wfss_medFiltered/cal.fits
+## Create lists for global sky creation
+ - create_lists_for_globalsky.ipynb
+ - Output: list_nrca5_f356w_wfss.txt etc 
+## Create global sky images from median-filtered emission-line images
+ - exe_get_globalsky.sh  --> ../scripts/get_globalsky.py
+ - Output: globalsky_nrcb5_f356w_wfss.fits
+## Subtract global sky from median-filtered emission-line images
+ - qsub_exe_subtract_globalsky.sh --> exe_subtract_globalsky.sh --> ../scripts/subtract_globalsky.py
+ - Input: calibrated_img2_wfss_medFiltered/cal.fits
+ - Output: calibrated_img2_wfss_medFiltered_globalskySubtracted/cal.fits
+## Create asn files for WFSS Image3
+ - create_asn_img3_wfss.ipynb
+ - asn_files: 
+## WFSS Image3
+ - qsub_exe_pipe_img3_wfss.sh --> exe_pipe_img3_wfss.sh --> pipeline_Image3_wfss.py
+ - Input: calibrated_img2_wfss_medSubt2/cal.fits
+ - Output dir: calibrated_img3_wfss_medSubt2
+## Prepare emission-line masks
+ - Sextractor
+ - sextractor result table ==> ds9 region file
+   - e.g., ./sextractor/results/sex_jw01243_nrc_img3_wfss_visit3a_i2d_selected.reg
+ - Use sextractor_to_fits_and_region_files.ipynb 
+## WFSS masking 
+ - qsub_exe_mask_objects_wfss_img2cal.sh --> exe_mask_objects_img2cal.sh --> ../scripts/mask_objects_img2cal.py
+ - Input: calibrated_img2_wfss/cal.fits
+ - Output: calibrated_img2_wfss_mask/mask.fits
+## Subtract global medians (at each x) and sources' continua with mask
+ - qsub_exe_median_filter_wfss_img2cal_with_mask.sh --> exe_median_filter_wfss_img2cal_with_mask.sh --> ../scripts/median_filter_wfss_img2cal_v20220328.py
+ - kernel (x, y, x_gap): 51 1 9
+ - Input: calibrated_img2_wfss/cal.fits, calibrated_img2_wfss_mask/mask.fits
+ - Output: calibrated_img2_wfss_medFiltered_withMask/cal.fits
+## Create lists for global sky creation
+ - create_lists_for_globalsky.ipynb
+ - Output: list_nrca5_f356w_wfss.txt etc 
+## Re-create global sky images with mask
+ - exe_get_globalsky.sh --> get_globalsky.py
+ - Output: globalsky_nrca5_f356w_wfss_masked.fits etc
+## Subtract global sky from median-filtered emission-line images
+ - qsub_exe_subtract_globalsky.sh --> exe_subtract_globalsky.sh --> ../scripts/subtract_globalsky.py
+ - Input: calibrated_img2_wfss_medFiltered_withMask/cal.fits
+ - Output: calibrated_img2_wfss_medFiltered_withMask_globalskySubtracted/cal.fits
+## Create asn files for WFSS Image3
+ - create_asn_img3_wfss.ipynb
+ - asn files: jw01243_nrc_img3_wfss_visit1a_medFiltered_withMask_globalskySubtracted_asn.json
+## WFSS Image3 for fully processed images
+ - qsub_exe_pipe_img3_wfss.sh --> exe_pipe_img3_wfss.sh --> pipeline_Image3_wfss.py
+ - Input: asn files
+ - Output: calibrated_img3_wfss_medFiltered_withMask_globalskySubtracted/i2d.fits
+
