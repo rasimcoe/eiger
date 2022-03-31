@@ -17,12 +17,12 @@ queries.
 
 For interactive queries the password structure can be somewhat
 cumbersome, because we have set up the database using IAM credentials
-fom AWS, and these used machine generated passwords that are changed
+fom AWS, and these use machine generated passwords that are changed
 every 10 minutes.
 
-# Generating and refreshing AWS IAM credentials from the command line
+# Refreshing your AWS IAM credentials 
 
-In the process of installing the eiger database package, you should have already installed the awstools package. This contains a set of command line tools in your shell that you can use to generate new password sets. The most convenient way to use this is to set up an alias in your .bash_profile or similar configuration files, I call this "eigerpass" on my system:
+In the process of configuring the eiger database package, you should have already installed the awstools package. This contains a set of command line tools that you can use to generate new password sets with AWS. The most convenient way to do this is to set up an alias in your .bash_profile or equivalent configuration file, I call this alias "eigerpass" on my system.  Note that this requires your EIGER_DBSERVER environment variable to be set.
 
 > alias eigerpass="aws rds generate-db-auth-token --hostname $EIGERDB_SERVER --port 5432 --region us-east-2 --username $USER | pbcopy" 
 
