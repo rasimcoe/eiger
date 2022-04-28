@@ -12,41 +12,46 @@ import numpy as np
 # the remote one to the cache and returns the result.
 #
 
-def getSpec(specfile):
+def getSpec(specfile, offline=False):
+
+    localfile = os.getenv('EIGER_CACHE')+'/'+specfile[1]
+
+    offline=False
     
-    try:
+    if (not offline):
+        try:
 
-        # The etag is a MD5 hash stored by AWS for each unique file
-        remote_etag = s3_etag.etag_remotehash(specfile[0],specfile[1])
+            # The etag is a MD5 hash stored by AWS for each unique file
+            remote_etag = s3_etag.etag_remotehash(specfile[0],specfile[1])
 
-        localfile = os.getenv('EIGER_CACHE')+'/'+specfile[1]
-        if (os.path.exists(localfile)):        
-            local_etag  = s3_etag.etag_localhash(localfile)
-        else:
-            local_etag  = ''
+            if (os.path.exists(localfile)):        
+                local_etag  = s3_etag.etag_localhash(localfile)
+            else:
+                local_etag  = ''
+                
+            if (remote_etag != local_etag):
+
+                # If the remote and local hash are out of sync, it means
+                # there is a newer version uploaded to the cloud.  Go and
+                # get it.
+                
+                # Make sure that the local directories exist to write to Cache
+                os.makedirs(os.path.dirname(localfile),exist_ok=True)
+                
+                # Get the appropriate S3 credentials
+                s3_resource = boto3.resource('s3')
+                reply = s3_resource.Bucket(specfile[0]).download_file(\
+                                                    specfile[1],localfile)
+                print("   Downloading remote version of spectrum from the AWS cloud")
+
+            else:
+                # If the hashes align, then the local cache has
+                # an up-to-date version 
+                print("   Using local cached spectrum")
+
+        except:
+            print("ERROR: AWS file could not be retrieved")
             
-        if (remote_etag != local_etag):
-
-            # If the remote and local hash are out of sync, it means
-            # there is a newer version uploaded to the cloud.  Go and
-            # get it.
-            
-            # Make sure that the local directories exist to write to Cache
-            os.makedirs(os.path.dirname(localfile),exist_ok=True)
-
-            # Get the appropriate S3 credentials
-            s3_resource = boto3.resource('s3')
-            reply = s3_resource.Bucket(specfile[0]).download_file(specfile[1],localfile)
-            print("   Downloading remote version of spectrum from the AWS cloud")
-
-        else:
-            # If the hashes align, then the local cache has
-            # an up-to-date version 
-            print("   Using local cached spectrum")
-
-    except:
-        print("ERROR: AWS file could not be retrieved")
-    
     return(localfile)
 
 
@@ -55,6 +60,8 @@ def getSpec(specfile):
 def parseSpec(fitsfile, instrument):
 
     outspec = {}
+
+    np.seterr(divide='ignore', invalid='ignore')
     
     if (instrument == 'FIRE'):
         tmp = fits.open(fitsfile)[1].data
@@ -90,11 +97,19 @@ def parseSpec(fitsfile, instrument):
 
     contname = fitsfile[:-5]+'_contin.fits'
     if(os.path.exists(contname)):
-       tmp = fits.open(contname)[1].data
-       outspec['cont'] = tmp['cont']
-       outspec['inlier_mask'] = tmp['mask']
+        tmp = fits.open(contname)[1].data
+        outspec['cont'] = tmp['cont']
+        outspec['inlier_mask'] = tmp['mask']
     else:
-        print(f"{contname} doesn't exist")
+        # Go and get it from S3
+        cc = contname.split('//')[1]
+        print(f"Fetching continuum file from S3 cloud ({cc})")
+        getSpec(['gto1243',cc])
+        tmp = fits.open(contname)[1].data
+        outspec['cont'] = tmp['cont']
+        outspec['inlier_mask'] = tmp['mask']
+
+    np.seterr(divide='warn', invalid='warn')
         
     return(outspec)
         
