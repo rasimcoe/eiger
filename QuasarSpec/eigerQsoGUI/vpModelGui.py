@@ -14,15 +14,21 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_VoigtProfileModel(object):
     def setupUi(self, VoigtProfileModel):
         VoigtProfileModel.setObjectName("VoigtProfileModel")
-        VoigtProfileModel.resize(402, 467)
+        VoigtProfileModel.resize(434, 469)
         self.buttonBox = QtWidgets.QDialogButtonBox(VoigtProfileModel)
-        self.buttonBox.setGeometry(QtCore.QRect(30, 430, 341, 32))
+        self.buttonBox.setGeometry(QtCore.QRect(250, 430, 171, 32))
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
         self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Ok)
         self.buttonBox.setObjectName("buttonBox")
         self.vpModelTree = QtWidgets.QTreeView(VoigtProfileModel)
-        self.vpModelTree.setGeometry(QtCore.QRect(10, 10, 381, 411))
+        self.vpModelTree.setGeometry(QtCore.QRect(10, 10, 411, 411))
         self.vpModelTree.setObjectName("vpModelTree")
+        self.writeButton = QtWidgets.QPushButton(VoigtProfileModel)
+        self.writeButton.setGeometry(QtCore.QRect(90, 430, 81, 32))
+        self.writeButton.setObjectName("writeButton")
+        self.readButton = QtWidgets.QPushButton(VoigtProfileModel)
+        self.readButton.setGeometry(QtCore.QRect(10, 430, 81, 32))
+        self.readButton.setObjectName("readButton")
 
         self.retranslateUi(VoigtProfileModel)
         self.buttonBox.accepted.connect(VoigtProfileModel.accept)
@@ -32,3 +38,5 @@ class Ui_VoigtProfileModel(object):
     def retranslateUi(self, VoigtProfileModel):
         _translate = QtCore.QCoreApplication.translate
         VoigtProfileModel.setWindowTitle(_translate("VoigtProfileModel", "Dialog"))
+        self.writeButton.setText(_translate("VoigtProfileModel", "Write"))
+        self.readButton.setText(_translate("VoigtProfileModel", "Read"))
