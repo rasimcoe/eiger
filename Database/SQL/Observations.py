@@ -133,6 +133,14 @@ class Observation:
         # Open a connection to the database
         edb = eigerdb.Eigerdb()
         edb.getcursor()
+
+        if (test == True):
+            print("!! RUNNING addToDatabase in TEST mode                   !!!")
+            print("!! Commands will be printed to the screen,              !!!")
+            print("!! but no files will be uploaded to S3 and the SQL      !!!")
+            print("!! database will not be updated. Useful to run          !!!")
+            print("!! this first, and then set test=False when satisfied.  !!!")
+            print(" ")
         
         # Check that observatory name is legal
         obscheck = edb.query("select id from observatories where observatory=\'{}\'".format(self.observatory))
@@ -184,6 +192,7 @@ class Observation:
         # response to this should be a listing of all reductions of this object in the database
         # using the same instrument and disperser
         resp = np.array(edb.command(query_string,getreply=True))
+
         if (len(resp) != 0):
             revs = resp[:,0]
             if (len(revs) == 1):
@@ -191,12 +200,18 @@ class Observation:
                 maxrev      = 0
                 newrev      = 1
             else:
-                maxrev = max(revs[revs!='current'])
-                old_awspath = resp[revs.index('current'),1]                
+                maxrev = int(max(revs[revs!='current']))
+                # old_awspath = resp[revs.index('current'),1]
+                old_awspath = str((resp[np.where(revs == 'current')][0])[1])
                 newrev = maxrev+1
 
-            new_awspath = f"{old_awspath[:-5].split('_rev')[0]}_rev{newrev}.fits"
+            if (old_awspath.split('_rev')[0] == old_awspath):
+                # In this case, the old filename does not have a revnum
+                new_awspath = f"{old_awspath[:-5].split('_rev')[0]}_rev{newrev}.fits"
                 
+            else:
+                new_awspath = f"{old_awspath[:-5].split('_rev')[0]}_rev{newrev}.fits"
+
             print(f"Renaming prior reduction: {old_awspath}-->{new_awspath}")
             cmd = f"update Observations set awspath=\'{new_awspath}\',revision=\'{newrev}\' where awspath=\'{old_awspath}\'"
             if (test==False):
@@ -208,20 +223,21 @@ class Observation:
                     copy_from(CopySource={'Bucket':self.awsbucket,'Key':old_awspath})
                 s3_resource.Object(self.awsbucket,old_awspath).delete()
             
-        ########## Check to see if a file with this name already exists in the database
-        ########## If so, then rename the old file and archive with a revision number.
+            ########## Check to see if a file with this name already exists in the database
+            ########## If so, then rename the old file and archive with a revision number.
         
-        try:
-            s3_resource.Object(self.awsbucket,old_awspath).load()
-            print(f"File {old_awspath} still exists but should have been renamed, something has gone wrong.")
-            return()
-        except botocore.exceptions.ClientError as e:
-            if (e.response['Error']['Code'] == "404"):
-                # print("File does not exist")
-                print("OK to proceed")
-            else:
-                print("Something has gone wrong accessing S3")
-                return(False)
+            try:
+                s3_resource.Object(self.awsbucket,old_awspath).load()
+                if (test == False):
+                    print(f"File {old_awspath} still exists but should have been renamed, something has gone wrong.")
+                    return()
+            except botocore.exceptions.ClientError as e:
+                if (e.response['Error']['Code'] == "404"):
+                    # print("File does not exist")
+                    print("OK to proceed")
+                else:
+                    print("Something has gone wrong accessing S3")
+                    return(False)
                 
         ##########  Upload the datafile to AWS #############
 
