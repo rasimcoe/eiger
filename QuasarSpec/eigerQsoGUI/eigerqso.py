@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from gui import Ui_Dialog
