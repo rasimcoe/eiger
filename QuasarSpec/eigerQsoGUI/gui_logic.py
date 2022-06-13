@@ -12,6 +12,7 @@ from pypeit.core.wave import airtovac
 import astropy.units as u
 import numpy as np
 import pickle
+import os
 
 import eiger.QuasarSpec.loadQsoSpec as spec
 from pypeit.core.wave import airtovac
@@ -42,6 +43,7 @@ class GuiProgram(Ui_Dialog):
         self.plotinstruments = ['XSH_NIR','HIRES','XSH_VIS']
         self.w               = None
         self.idtable         = Table(names=('redshift','ion','restwv'),dtype=('f4','S2','f4'))
+        self.idtablefile     = None
         self.components      = None
         self.regionleftbound = 0.0
         self.regionrightbound = 0.0
@@ -259,11 +261,36 @@ class GuiProgram(Ui_Dialog):
             self.check_lineid(wave0,'CII*')
             redraw = False
         elif (event.key == 'F'):
+            if (self.idtablefile == None):
+                options = QFileDialog.Options()
+                fileName, _ = QFileDialog.getOpenFileName(parent=None, \
+                                                          caption="Open",filter="All Files (*);;Text Files (*.txt)", \
+                                                          options=options)
+                if (fileName != None and fileName != ''):
+                    self.idfilename = fileName
+                    self.idtable.write(self.idfilename,format='ascii.fixed_width')
+                else:
+                    print("Selection cancelled or file not found")
+            else:
+                self.idtable.write(self.idfilename,format='ascii.fixed_width')
+
             self.idtable.write("J0100_idtable.dat",format='ascii.fixed_width')
             print("Writing out ASCII table")
             redraw = False
         elif (event.key == 'R'):
-            self.idtable = Table.read("J0100_idtable.dat",format='ascii.fixed_width')
+            if (self.idtablefile == None):
+                options = QFileDialog.Options()
+                fileName, _ = QFileDialog.getOpenFileName(parent=None, \
+                                                          caption="Open",filter="All Files (*);;Text Files (*.txt)", \
+                                                          options=options)
+                if (fileName != None and fileName != ''):
+                    self.idfilename = fileName
+                    self.idtable = Table.read(self.idfilename,format='ascii.fixed_width')
+                else:
+                    print("Selection cancelled or file not found")
+            else:
+                self.idtable = Table.read(self.idfilename,format='ascii.fixed_width')
+
         elif (event.key == 'c'):
             wave_marked = event.xdata
             obswaves    = (1+self.idtable['redshift']) * self.idtable['restwv']
@@ -271,7 +298,7 @@ class GuiProgram(Ui_Dialog):
             line = self.idtable[diffs == min(diffs)]
             zz = float(wave_marked / line['restwv'] - 1.0)
             # Mark an absorption "component"
-            cmd = f"m.addcomponent({zz:6.4f},bpriors=[2,100])"
+            cmd = f"m.addcomponent({zz:6.4f},bpriors=[2,30])"
             self.vpTree.add_component(round(zz,4))
             print(cmd)
             redraw = False
@@ -350,7 +377,7 @@ class GuiProgram(Ui_Dialog):
         self.change_plot()
 
     def load_linelist(self):
-        self.linelist = Table.read('../atomic_data.txt',format='ascii')
+        self.linelist = Table.read(os.getenv('EIGER_PATH')+'/QuasarSpec/atomic_data.txt',format='ascii')
 
     def label_abslines(self):
 
@@ -413,7 +440,7 @@ class GuiProgram(Ui_Dialog):
         self.selector   = QtWidgets.QDialog()
         self.lineDialog = LineSelect(self.selector)
 
-        linelist = Table.read('../atomic_data.txt',format='ascii')
+        linelist = Table.read(os.getenv('EIGER_PATH')+'/QuasarSpec/atomic_data.txt',format='ascii')
 
         for line in linelist:
             lab = f"{line['ion']}\t{line['wave']:6.2f}"
@@ -773,7 +800,7 @@ class VPModelTree(Ui_VoigtProfileModel):
         self.menu = QtWidgets.QMenu()
 
         if (level == 0):
-            tt = Table.read('../atomic_data.txt',format='ascii')
+            tt = Table.read(os.getenv('EIGER_PATH')+'/QuasarSpec/atomic_data.txt',format='ascii')
             ion_list = unique(tt,keys='ion')['ion']
             [self.menu.addAction(ion_list[i]) for i in range(len(ion_list))]
             self.menu.addSeparator()
@@ -781,7 +808,7 @@ class VPModelTree(Ui_VoigtProfileModel):
             self.menu.triggered.connect(self.addIon)
         elif (level == 1):
             ion = indexes[0].data()
-            linelist = Table.read('../atomic_data.txt',format='ascii')
+            linelist = Table.read(os.getenv('EIGER_PATH')+'/QuasarSpec/atomic_data.txt',format='ascii')
             transitions = linelist[linelist['ion'] == ion]['wave']
             for t in transitions:
                 action = self.menu.addAction(f"{np.floor(t):6.1f}")
