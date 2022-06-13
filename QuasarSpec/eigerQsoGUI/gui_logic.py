@@ -6,7 +6,7 @@ from SpecGui import Ui_SpectrumSelector
 from LineGui import Ui_LineSelector
 from vpModelGui import Ui_VoigtProfileModel
 from eiger.QuasarSpec.loadQsoSpec import loadQsoSpec
-from astropy.table import Table
+from astropy.table import Table, unique
 import matplotlib.pyplot as plt
 from pypeit.core.wave import airtovac
 import astropy.units as u
@@ -46,11 +46,14 @@ class GuiProgram(Ui_Dialog):
         self.regionleftbound = 0.0
         self.regionrightbound = 0.0
         self.regioninstrument = ' '
+        self.prof_guess = None
         self.profs_fire = None
         self.profs_hires = None
         self.profs_xsh_vis = None
         self.profs_xsh_nir = None
-
+        self.vp_model = None
+        self.vpTree = None
+        
         ''' This method gets called when the window is created. '''
         Ui_Dialog.__init__(self)              # Initialize Window
         self.setupUi(dialog)                  # Set up the UI
@@ -95,13 +98,10 @@ class GuiProgram(Ui_Dialog):
         for i in range(len(self.doplot)):
 
             if (self.doplot[i]):
+
                 instrument = self.plotinstruments[i]
 
-                #if (instrument == 'HIRES'):
-                #    xdata = np.array(airtovac(self.spec[instrument]['wave']*u.AA))
-                #else:
                 xdata = self.spec[instrument]['wave']
-
                 ydata = self.spec[instrument]['flux']/self.spec[instrument]['cont']
                 yerr = 1.0/np.sqrt(self.spec[instrument]['ivar'])/self.spec[instrument]['cont']
                 
@@ -121,6 +121,8 @@ class GuiProgram(Ui_Dialog):
 
         if (self.profs_fire != None):
             self.plotVPfits()
+
+        self.plotVPGuess()
             
         # Make sure everything fits inside the canvas
         self.fig.tight_layout()
@@ -154,13 +156,10 @@ class GuiProgram(Ui_Dialog):
 
         self.spec = loadQsoSpec(indx,revision='current')
         self.instruments = list(self.spec.keys())[4:]
-        # self.plotinstruments = self.instruments[0:2]
 
-        # FIRE spectrum for J1030 is bit weird, needs FIREHOSE reduction
-        if (indx < 6 and False):
-            tmp = loadQsoSpec(indx,spectrographs=['FIRE'],revision='1')
-            self.spec['FIRE'] = tmp
+        self.plotinstruments = self.instruments[0:3]
 
+        # The J1030 HIRES reduction is in air wavelengths
         if (indx == 1):
             self.spec['HIRES']['wave'] = np.array(airtovac(self.spec['HIRES']['wave']*u.AA))
             
@@ -363,7 +362,7 @@ class GuiProgram(Ui_Dialog):
                 if (obswave > self.xmin and obswave < self.xmax):
                     nplots = len(self.ax)
                     for i in range(nplots):
-                        self.ax[i].plot([obswave,obswave],[1,1.4],alpha=0.5,color='k')
+                        self.ax[i].plot([obswave,obswave],[-100,100],alpha=0.5,color='k')
                         self.ax[i].text(obswave,1.6,ion,rotation='vertical',horizontalalignment='center',\
                                         picker=True, fontsize=8)
                     
@@ -373,9 +372,10 @@ class GuiProgram(Ui_Dialog):
             if (obswave > self.xmin and obswave < self.xmax):
                 nplots = len(self.ax)
                 for i in range(nplots):
-                    self.ax[i].plot([obswave,obswave],[1,1.4],alpha=0.5,color='r')
-                    self.ax[i].text(obswave,1.6,ion,rotation='vertical',horizontalalignment='center',\
-                                    picker=True, color='r', fontsize=8)
+                    self.ax[i].plot([obswave,obswave],[-100,100],alpha=0.15,color='g')
+                ylims = self.ax[0].get_ylim()
+                self.ax[0].text(obswave,1.1*ylims[1],ion,rotation='vertical',horizontalalignment='center',\
+                                picker=True, color='k', fontsize=7)
                     
                     
     def choose_spectra(self):
@@ -452,7 +452,7 @@ class GuiProgram(Ui_Dialog):
             self.tree.show()
         except:
             self.tree = QtWidgets.QDialog()
-            self.vpTree = VPModelTree(self.tree)
+            self.vpTree = VPModelTree(self.tree, self)
             self.tree.show()
 
     def loadVPfit(self):
@@ -473,22 +473,23 @@ class GuiProgram(Ui_Dialog):
         fire_kernel     = Gaussian1DKernel(stddev=4.0/2.355)
         specobj_fire    = vm.Spectrum(self.spec['FIRE']['wave'],self.spec['FIRE']['flux']/self.spec['FIRE']['cont'], \
                                       1/np.sqrt(self.spec['FIRE']['ivar'])/self.spec['FIRE']['cont'],fire_kernel,\
-                                      lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,2374,2344,1670,5891,5897])
+                                      lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,2374,2344,1670,5891,5897,2852,1854,1862,1304,1302,1260])
             
         hires_kernel     = Gaussian1DKernel(stddev=3.0/2.355)
         specobj_hires    = vm.Spectrum(self.spec['HIRES']['wave'],self.spec['HIRES']['flux']/self.spec['HIRES']['cont'], \
                                        1/np.sqrt(self.spec['HIRES']['ivar'])/self.spec['HIRES']['cont'],hires_kernel,\
-                                       lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,2374,2344,1670,5891,5897])
+                                       lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,2374,2344,1670,5891,5897,2852,1854,1862,1304,1302,1260])
 
         xsh_nir_kernel  = Gaussian1DKernel(stddev=4.2/2.355)
+        xsh_nir_kernel  = Gaussian1DKernel(stddev=2.2/2.355)
         specobj_xsh_nir = vm.Spectrum(self.spec['XSH_NIR']['wave'],self.spec['XSH_NIR']['flux']/self.spec['XSH_NIR']['cont'], \
                                       1/np.sqrt(self.spec['XSH_NIR']['ivar'])/self.spec['XSH_NIR']['cont'],xsh_nir_kernel,\
-                                      lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,2374,2344,1670,5891,5897])
+                                      lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,2374,2344,1670,5891,5897,2852,1854,1862,1304,1302,1260])
         
         xsh_vis_kernel  = Gaussian1DKernel(stddev=4.8/2.355)
         specobj_xsh_vis = vm.Spectrum(self.spec['XSH_VIS']['wave'],self.spec['XSH_VIS']['flux']/self.spec['XSH_VIS']['cont'], \
                                       1/np.sqrt(self.spec['XSH_VIS']['ivar'])/self.spec['XSH_VIS']['cont'],xsh_vis_kernel,\
-                                      lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,2374,2344,1670,5891,5897])
+                                      lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,2374,2344,1670,5891,5897,2852,1854,1862,1304,1302,1260])
         
         self.profs_fire    = vf.sampleVPFits(m,specobj_fire,samples[1000:],50)
         self.profs_hires   = vf.sampleVPFits(m,specobj_hires,samples[1000:],50)
@@ -543,7 +544,53 @@ class GuiProgram(Ui_Dialog):
         linetable.sort('z_median')
         linetable.reverse()
         print(linetable)
-                
+
+    def plotVPGuess(self):
+
+        linelist = [1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,2374,2344,1670,5891,5897,2852,1854,1862,1304,1302,1260]
+
+        if ('FIRE' in self.instruments):
+            fire_kernel     = Gaussian1DKernel(stddev=4.0/2.355)
+            specobj_fire    = vm.Spectrum(self.spec['FIRE']['wave'],self.spec['FIRE']['flux']/self.spec['FIRE']['cont'], \
+                                          1/np.sqrt(self.spec['FIRE']['ivar'])/self.spec['FIRE']['cont'],fire_kernel,\
+                                          lines=linelist)
+
+        if ('HIRES' in self.instruments):
+            hires_kernel     = Gaussian1DKernel(stddev=3.0/2.355)
+            specobj_hires    = vm.Spectrum(self.spec['HIRES']['wave'],self.spec['HIRES']['flux']/self.spec['HIRES']['cont'], \
+                                           1/np.sqrt(self.spec['HIRES']['ivar'])/self.spec['HIRES']['cont'],hires_kernel,\
+                                           lines=linelist)
+            
+        if ('XSH_NIR' in self.instruments):
+            # xsh_nir_kernel  = Gaussian1DKernel(stddev=4.2/2.355)
+            xsh_nir_kernel  = Gaussian1DKernel(stddev=2.2/2.355)
+            specobj_xsh_nir = vm.Spectrum(self.spec['XSH_NIR']['wave'],self.spec['XSH_NIR']['flux']/self.spec['XSH_NIR']['cont'], \
+                                          1/np.sqrt(self.spec['XSH_NIR']['ivar'])/self.spec['XSH_NIR']['cont'],xsh_nir_kernel,\
+                                          lines=linelist)
+        if ('XSH_VIS' in self.instruments):
+            xsh_vis_kernel  = Gaussian1DKernel(stddev=4.8/2.355)
+            specobj_xsh_vis = vm.Spectrum(self.spec['XSH_VIS']['wave'],self.spec['XSH_VIS']['flux']/self.spec['XSH_VIS']['cont'], \
+                                          1/np.sqrt(self.spec['XSH_VIS']['ivar'])/self.spec['XSH_VIS']['cont'],xsh_vis_kernel,\
+                                          lines=linelist)
+        
+        
+        if (self.vpTree != None):
+
+            for i in range(3):
+                if (self.plotinstruments[i] == 'XSH_NIR'):
+                    thisprof = vf.vpTau2Flux(vf.vpFromModel(self.vpTree.vp_model, specobj_xsh_nir),xsh_nir_kernel)
+                    thiswave = self.spec['XSH_NIR']['wave']
+                elif(self.plotinstruments[i] == 'XSH_VIS'):
+                    thisprof = vf.vpTau2Flux(vf.vpFromModel(self.vpTree.vp_model, specobj_xsh_vis),xsh_vis_kernel)
+                    thiswave = self.spec['XSH_VIS']['wave']
+                elif(self.plotinstruments[i] == 'FIRE'):
+                    thisprof = vf.vpTau2Flux(vf.vpFromModel(self.vpTree.vp_model, specobj_fire),fire_kernel)
+                    thiswave = self.spec['FIRE']['wave']
+                elif(self.plotinstruments[i] == 'HIRES'):
+                    thisprof = vf.vpTau2Flux(vf.vpFromModel(self.vpTree.vp_model, specobj_hires),hires_kernel)
+                    thiswave = self.spec['HIRES']['wave']
+                self.ax[i].plot(thiswave,thisprof,color='c',alpha=1.0)
+
     def plotVPfits(self):
 
         if (self.profs_fire == None):
@@ -585,7 +632,8 @@ class GuiProgram(Ui_Dialog):
 
         for thisprof in profs2:
             self.ax[2].plot(self.spec[self.plotinstruments[2]]['wave'],thisprof,color='r',alpha=0.2)
- 
+
+############################################################################            
                
 class SpecSelect(Ui_SpectrumSelector):
 
@@ -605,6 +653,8 @@ class SpecSelect(Ui_SpectrumSelector):
     def reject(self):
         print("Spectrum selection cancelled")
         self.yesno = False
+
+############################################################################
         
 class LineSelect(Ui_LineSelector):
 
@@ -626,12 +676,14 @@ class LineSelect(Ui_LineSelector):
         print("Line selection cancelled")
         self.yesno = False
 
+############################################################################        
 
 class VPModelTree(Ui_VoigtProfileModel):
 
-    def __init__(self, selector):
+    def __init__(self, selector, parentobj):
         Ui_VoigtProfileModel.__init__(self)
         self.setupUi(selector)
+        self.parentobj = parentobj
 
         try:
             print(self.components)
@@ -642,22 +694,60 @@ class VPModelTree(Ui_VoigtProfileModel):
         self.vpModelTree.customContextMenuRequested.connect(self.openMenu)
         self.writeButton.clicked.connect(self.traverseVPTree)
         self.readButton.clicked.connect(self.loadVPTree)
-
+        self.clearButton.clicked.connect(self.clearVPTree)
+        
         try:
             self.vpModelTree.setModel(self.treeModel)
         except:
             self.treeModel = QStandardItemModel()
             self.rootNode = self.treeModel.invisibleRootItem()
-            
             self.vpModelTree.setModel(self.treeModel)
 
-    def add_component(self, redshift):
-        newcomponent = vpComponent(redshift)
+        self.treeModel.setColumnCount(3)
+        self.vpModelTree.setColumnWidth(0,300)
+        self.vpModelTree.setColumnWidth(1,100)
+        self.vpModelTree.setColumnWidth(2,100)
+        
+        self.treeModel.setHorizontalHeaderLabels(['Component','b (km/s)','N (cm-2)'])
+        self.vp_model = vm.Model()        
+
+
+    def updateModel(self,item):
+        # print("Updating the model")
+        txt = item.text()
+        dat = item.data()
+        row = item.row()
+        col = item.column()
+        if (col == 0):
+            # This is changing the redshift of a component, need to set the data field
+            item.setData([txt,dat[1]])
+            dat2=''
+        elif (col == 1):
+            # This is changing the b of a component, need to set the data field
+            parentitem = self.treeModel.item(row,column=0)
+            dat2 = parentitem.data()
+            parentitem.setData([dat2[0],float(txt)])
+        elif (col == 2):
+            # This is changing the column density of an ion
+            parentrow = item.parent().row()
+            parentitem = self.treeModel.item(parentrow,column=0)
+            dat2 = parentitem.data()
+            parentitem.child(row).setData([dat2[0],float(txt)])
+            
+        self.makeVPModel()
+        GuiProgram.change_plot(self.parentobj)
+        
+    def add_component(self, redshift, b = 10.0):
+        newcomponent = vpComponent(redshift, bparam=b)
         self.components.append(newcomponent)
         self.rootNode.appendRow(newcomponent)
+        rr = newcomponent.row()
+        mm = newcomponent.model()
+        bparam_item = QStandardItem(str(b))
+        mm.setItem(rr,1,bparam_item)
 
-    def add_ion(self, redshift, ion):
-        newion = vpIon(ion)
+    def add_ion(self, redshift, ion, column=13.5):
+        newion = vpIon(ion, column=column)
 
         component_redshifts = [c.redshift for c in self.components]
         dz = np.abs(np.array(component_redshifts) - redshift)
@@ -667,8 +757,10 @@ class VPModelTree(Ui_VoigtProfileModel):
         else:
             for c in self.components:
                 if (abs(redshift-c.redshift) == mindz):
-                    c.appendRow(newion)
-
+                    logN_item = QStandardItem(str(column))
+                    blank_item = QStandardItem('')
+                    c.appendRow([newion,blank_item,logN_item])
+                    
     def openMenu(self, position):
         indexes = self.vpModelTree.selectedIndexes()
         if len(indexes) > 0:
@@ -681,42 +773,47 @@ class VPModelTree(Ui_VoigtProfileModel):
         self.menu = QtWidgets.QMenu()
 
         if (level == 0):
-            self.menu.addAction("MgII")
-            self.menu.addAction("CIV")
+            tt = Table.read('../atomic_data.txt',format='ascii')
+            ion_list = unique(tt,keys='ion')['ion']
+            [self.menu.addAction(ion_list[i]) for i in range(len(ion_list))]
             self.menu.addSeparator()
-            self.menu.addAction("Delete")
+            self.menu.addAction("Delete Component")
             self.menu.triggered.connect(self.addIon)
         elif (level == 1):
             ion = indexes[0].data()
             linelist = Table.read('../atomic_data.txt',format='ascii')
             transitions = linelist[linelist['ion'] == ion]['wave']
             for t in transitions:
-                action = self.menu.addAction(f"{t:6.1f}")
+                action = self.menu.addAction(f"{np.floor(t):6.1f}")
             self.menu.addSeparator()
-            self.menu.addAction("Delete")
+            self.menu.addAction("Delete Ion")
             self.menu.triggered.connect(self.addTransition)
         elif (level == 2):
-            self.menu.addAction("Delete")
+            self.menu.addAction("Delete Transition")
             self.menu.triggered.connect(self.removeTransition)
         elif (level == 3):
-            self.menu.addAction("Delete")
+            self.menu.addAction("Delete FitRegion")
             self.menu.triggered.connect(self.removeFitRegion)
             
         self.menu.exec_(self.vpModelTree.viewport().mapToGlobal(position))
 
-    def removeTransition(self,action):
-        if (action.text() == "Delete"):
-            selected_items = self.vpModelTree.selectionModel().selectedRows()
+        
+    def addIon(self,action):
+        selected_items = self.vpModelTree.selectionModel().selectedRows()
+        if (action.text() == "Delete Component"):
+            if (len(selected_items) != 0):
+                self.treeModel.removeRow(selected_items[0].row())
+            return()
+        else:
+            newion = vpIon(action.text(),column=12.0)
+            logN_item = QStandardItem('12.0')
+            blank_item = QStandardItem('')
             indexes = self.vpModelTree.selectedIndexes()
-            for ii in sorted(indexes):
-                selected_item = self.treeModel.itemFromIndex(ii)
-                parent = selected_item.parent()
-                print(selected_item)
-                print(f"Deleting: {selected_item.data()}, {selected_item.row()} ")
-                parent.removeRow(selected_item.row())
-
+            item = self.treeModel.itemFromIndex(indexes[0])
+            item.appendRow([newion,blank_item,logN_item])
+                
     def removeIon(self,action):
-        if (action.text() == "Delete"):
+        if (action.text() == "Delete Ion"):
             selected_items = self.vpModelTree.selectionModel().selectedRows()
             indexes = self.vpModelTree.selectedIndexes()
             for ii in sorted(indexes):
@@ -728,19 +825,29 @@ class VPModelTree(Ui_VoigtProfileModel):
                 
     def addTransition(self,action):
 
-        if (action.text() == "Delete"):
+        if (action.text() == "Delete Ion"):
             self.removeIon(action)
             return()
         else:
             restwv = float(action.text())
 
         indexes = self.vpModelTree.selectedIndexes()
-        if (len(indexes) == 1):
-            redshift = float(indexes[0].parent().data())
-            ion = indexes[0].data()
-            newtransition = vpTransition(restwv)
-            self.treeModel.itemFromIndex(indexes[0]).appendRow(newtransition)
+        redshift = float(indexes[0].parent().data())
+        ion = indexes[0].data()
+        newtransition = vpTransition(restwv)
+        self.treeModel.itemFromIndex(indexes[0]).appendRow(newtransition)
 
+    def removeTransition(self,action):
+        if (action.text() == "Delete Transition"):
+            selected_items = self.vpModelTree.selectionModel().selectedRows()
+            indexes = self.vpModelTree.selectedIndexes()
+            for ii in sorted(indexes):
+                selected_item = self.treeModel.itemFromIndex(ii)
+                parent = selected_item.parent()
+                print(selected_item)
+                print(f"Deleting: {selected_item.data()}, {selected_item.row()} ")
+                parent.removeRow(selected_item.row())
+            
     def addFitRegion(self,instrument,minwv,maxwv):
 
         indexes = self.vpModelTree.selectedIndexes()
@@ -760,15 +867,23 @@ class VPModelTree(Ui_VoigtProfileModel):
         if (len(highlighted) == 1):
             thisitem = self.treeModel.itemFromIndex(highlighted[0])
             if (level == 2):
-                restwv   = float(thisitem.data(0))
+
+                restwv_approx = float(thisitem.data(0))
+                tt = abs(self.parentobj.linelist['wave']-restwv_approx)
+                restwv = float(self.parentobj.linelist[tt == min(tt)]['wave'])
+
                 redshift = float(thisitem.parent().parent().data(0))
                 obswv = restwv * (1+redshift)
                 vmin = (minwv - obswv)/obswv * 299792.4
                 vmax = (maxwv - obswv)/obswv * 299792.4
                 newregion = vpFitRegion(instrument,[vmin,vmax])
                 self.treeModel.itemFromIndex(highlighted[0]).appendRow(newregion)
+                print(f"{redshift},{minwv},{maxwv},{restwv}")
             elif (level == 3):
-                restwv   = float(thisitem.parent().data(0))
+                restwv_approx   = float(thisitem.parent().data(0))
+                tt = abs(self.parentobj.linelist['wave']-restwv_approx)
+                restwv = float(self.parentobj.linelist[tt == min(tt)]['wave'])
+                
                 redshift = float(thisitem.parent().parent().parent().data(0))
                 obswv = restwv * (1+redshift)
                 vmin = (minwv - obswv)/obswv * 299792.4
@@ -782,7 +897,7 @@ class VPModelTree(Ui_VoigtProfileModel):
             print("Error: only one transition can be assigned a fit region at one time")
 
     def removeFitRegion(self, action):
-        if (action.text() == "Delete"):
+        if (action.text() == "Delete FitRegion"):
             selected_items = self.vpModelTree.selectionModel().selectedRows()
             indexes = self.vpModelTree.selectedIndexes()
             for ii in sorted(indexes):
@@ -791,10 +906,20 @@ class VPModelTree(Ui_VoigtProfileModel):
                 print(f"Deleting: {selected_item.data()} ")
                 parent.removeRow(selected_item.row())
 
-    def loadVPTree(self):                
+    def clearVPTree(self):
         # Clear any existing tree
         self.treeModel.removeRows(0,self.treeModel.rowCount())
-
+        self.vp_model = None
+        self.vp_model = vm.Model()
+        self.components = []
+        
+    def loadVPTree(self):                
+        # Clear any existing tree
+        try:
+            self.treeModel.removeRows(0,self.treeModel.rowCount())
+        except:
+            print("Reloading model")
+            
         # Get the file name from the user
         options = QFileDialog.Options()
         fileName, _ = QFileDialog.getOpenFileName(self.vpModelTree, \
@@ -809,40 +934,43 @@ class VPModelTree(Ui_VoigtProfileModel):
             for l in entries:
                 if('addcomponent' in l):
                     redshift = float(l.split(',')[0].split('(')[1])
-                    self.add_component(redshift)
+                    bparam = float(l.split('b_turb=')[1].split(')')[0])
+                    self.add_component(redshift, b=bparam)
                     
             # Second, loop through and populate all of the ions
             for l in entries:
                 if('addion' in l):
                     ion = l.split('\'')[1]
                     redshift = float(l.split(",")[1])
-                    self.add_ion(redshift,ion)
+                    column = float(l.split("N=")[1].split(',')[0])
+                    self.add_ion(redshift,ion,column=column)
                     
             # Third, loop through and populate all of the transitions
             for l in entries:
                 if('addtransition' in l):
                     restwv = float(l.split(',')[0].split('(')[1])
                     ion = l.split("\'")[1]
-                    redshift = l.split(',')[-1][:-2]
-
+                    redshift = float(l.split(',')[-1][:-2])
                     for i in range(self.treeModel.rowCount()):
                         indx = self.treeModel.index(i,0)
-                        component_z = self.treeModel.data(indx)
+                        component_z = float(self.treeModel.data(indx))
+                        # print(f"component_z: {component_z}, {redshift}")
                         if (redshift == component_z):
                             component = self.treeModel.itemFromIndex(indx)
                             break
 
                     if component.hasChildren():
+                        # print(f"Adding transition: {restwv}, {component_z}")
                         for i in range(component.rowCount()):
-                            if(component.child(i).data() == ion):
+                            if(component.child(i).data()[0] == ion):
                                 component.child(i).appendRow(vpTransition(restwv))
-                    
+                                
             # Finally, loop through and populate all of the fitregions
             for l in entries:
                 if('fitregion' in l):
                     restwv = float(l.split(',')[0].split('(')[1])
-                    ion = l.split("\'")[1]
-                    redshift = l.split(',')[2]
+                    ion_name = l.split("\'")[1]
+                    redshift = float(l.split(',')[2])
                     instrument = l.split("\'")[-2]
                     lower_dv = float(l.split('[')[1].split(',')[0])
                     upper_dv = float(l.split(']')[0].split(',')[-1])
@@ -850,14 +978,14 @@ class VPModelTree(Ui_VoigtProfileModel):
 
                     for i in range(self.treeModel.rowCount()):
                         indx = self.treeModel.index(i,0)
-                        component_z = self.treeModel.data(indx)
+                        component_z = float(self.treeModel.data(indx))
                         if (redshift == component_z):
                             component = self.treeModel.itemFromIndex(indx)
                             break
 
                     if component.hasChildren():
                         for i in range(component.rowCount()):
-                            if(component.child(i).data() == ion):
+                            if(component.child(i).data(0) == ion_name):
                                 ion = component.child(i)
                                 
                     if ion.hasChildren():
@@ -865,7 +993,14 @@ class VPModelTree(Ui_VoigtProfileModel):
                             if (ion.child(i).data() == restwv):
                                 ion.child(i).appendRow(vpFitRegion(instrument,[lower_dv,upper_dv]))
 
-                                
+        self.makeVPModel()
+        self.treeModel.itemChanged.connect(self.updateModel)
+        try:
+            GuiProgram.change_plot(self.parentobj)
+        except:
+            print("WARNING: loading model, but no spectrum has been read in")
+
+    # This is to write out a file for running fitting
     def traverseVPTree(self):
 
         options = QFileDialog.Options()
@@ -876,7 +1011,7 @@ class VPModelTree(Ui_VoigtProfileModel):
         
         for i in range(self.treeModel.rowCount()):
             item = self.treeModel.item(i)
-            commands.append(f'm.addcomponent({item.data(0)},bpriors=[5,100])')
+            commands.append(f'm.addcomponent({item.data()[0]},bpriors=[3,50],b_turb={item.data()[1]})')
             ncomponents += 1
             level = 0
             self.getItem(item,level,commands)
@@ -886,8 +1021,8 @@ class VPModelTree(Ui_VoigtProfileModel):
             for cmd in commands:
                 print(cmd)
                 fp.write(f'{cmd}\n')
-        
             
+    # For recursive descent through the tree.
     def getItem(self, item, level, commands):
         if (item != None):
             nions = 0
@@ -897,7 +1032,7 @@ class VPModelTree(Ui_VoigtProfileModel):
                     childitem = item.child(i)
                     if (childitem != None):
                         if (level == 1):
-                            commands.append(f'm.addion(\'{childitem.data(0)}\',{item.data(0)},N=14)')
+                            commands.append(f'm.addion(\'{childitem.data()[0]}\',{item.data(0)},N={childitem.data()[1]},Npriors=[11,15])')
                             nions += 1
                         elif (level == 2):
                             commands.append(f'm.addtransition({childitem.data(0)},\'{item.data(0)}\',{item.parent().data(0)})')
@@ -909,27 +1044,69 @@ class VPModelTree(Ui_VoigtProfileModel):
                     self.getItem(childitem, level, commands)
 
                 print(f"Nions = {nions}")
-                    
                 return(commands)
-            
-            
-                
+
+    def makeVPModel(self):
+
+        # clear the model
+        # print("Clearing the model")
+        self.vp_model = None
+        self.vp_model = vm.Model()
+
+        for i in range(self.treeModel.rowCount()):
+            item = self.treeModel.item(i)
+            z = float(item.data()[0])
+            b = float(item.data()[1])
+            # print(f"AddComponent: {z},{b}")
+            self.vp_model.addcomponent(z,b_turb=b,bpriors=[5,100])
+            level = 0
+            self.descendTree(item,level)
+
+    def descendTree(self, item, level):
+        if (item != None):
+            nions = 0
+            if item.hasChildren():
+                level += 1
+                for i in range(item.rowCount()):
+                    childitem = item.child(i)
+                    if (childitem != None):
+                        if (level == 1):
+                            ion_name = childitem.data(0)
+                            z = float(item.data()[0])
+                            N = childitem.data()[1]
+                            self.vp_model.addion(ion_name, z, N=N)
+                            # print(f"AddIon: {ion_name},{z},{N}")
+                        elif (level == 2):
+                            restwv = float(childitem.data())
+                            ion_name = item.data()[0]
+                            z = float(item.parent().data()[0])
+                            # print(f"Adding transition {restwv},{ion_name},{z}")
+                            self.vp_model.addtransition(restwv, ion_name, z)
+                        elif (level == 3):
+                            # Restwv, ion, redshift [bounds], instrument
+                            self.vp_model.addfitregion(float(item.data(0)),item.parent().data(0),float(item.parent().parent().data(0)),[float(childitem.data()[1]),float(childitem.data()[2])],childitem.data()[0])
+                            
+                    self.descendTree(childitem, level)
+
+
+############################################################################
+                    
 class vpComponent(QStandardItem):
 
-    def __init__(self,redshift):
+    def __init__(self,redshift,bparam=10.0):
         super().__init__()
         self.redshift = redshift
 
         self.setText(str(redshift))
-        self.setData(redshift)
+        self.setData([redshift,bparam])
         
 class vpIon(QStandardItem):
 
-    def __init__(self,ion):
+    def __init__(self,ion,column=14.0):
         super().__init__()
         self.ion = ion
         self.setText(ion)
-        self.setData(ion)
+        self.setData([ion,column])
 
 class vpTransition(QStandardItem):
 
