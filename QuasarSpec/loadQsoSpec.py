@@ -66,9 +66,11 @@ def parseSpec(fitsfile, instrument):
     if (instrument == 'FIRE'):
         tmp = fits.open(fitsfile)[1].data
         if ('ivar' in tmp.columns.names):
-            outspec['wave'] = tmp['wave']
-            outspec['flux'] = tmp['flux']
-            outspec['ivar'] = tmp['ivar']
+            # mask = tmp['mask']
+            mask = np.array(tmp['mask'],dtype=bool)
+            outspec['wave'] = tmp['wave'][mask]
+            outspec['flux'] = tmp['flux'][mask]
+            outspec['ivar'] = tmp['ivar'][mask]
         else:
             outspec['wave'] = tmp['wave'][0]
             outspec['flux'] = tmp['flux'][0]
@@ -81,36 +83,54 @@ def parseSpec(fitsfile, instrument):
         outspec['flux'] = tmp['flux']
         outspec['ivar'] = 1.0/tmp['sig']**2
         outspec['ivar'][np.isinf(outspec['ivar'])] = 0.0
+        outspec['mask'] = np.ones(len(tmp['wave']))
         
     elif (instrument == 'XShooter'):
         tmp = fits.open(fitsfile)[1].data
-        gd = tmp['wave'] != 0
-        outspec['wave'] = tmp['wave'][gd]
-        outspec['flux'] = tmp['flux'][gd]
-        outspec['ivar'] = tmp['ivar'][gd]
-
+        mask = np.array(tmp['mask'],dtype=bool)
+        outspec['wave'] = tmp['wave'][mask]
+        outspec['flux'] = tmp['flux'][mask]
+        outspec['ivar'] = tmp['ivar'][mask]
+        
     elif (instrument == 'MOSFIRE'):
         tmp = fits.open(fitsfile)[1].data
-        outspec['wave'] = tmp['wave']
-        outspec['flux'] = tmp['flux']
-        outspec['ivar'] = tmp['ivar']
+        mask = np.array(tmp['mask'],dtype=bool)
+        # mask = tmp['mask']
+        outspec['wave'] = tmp['wave'][mask]
+        outspec['flux'] = tmp['flux'][mask]
+        outspec['ivar'] = tmp['ivar'][mask]
 
+    elif (instrument == 'FIRE_XSH'):
+        tmp = fits.open(fitsfile)[1].data
+        mask = np.array(tmp['mask'],dtype=bool)
+        outspec['wave'] = tmp['wave'][mask]
+        outspec['flux'] = tmp['flux'][mask]
+        outspec['ivar'] = tmp['ivar'][mask]
+        
     contname = fitsfile[:-5]+'_contin.fits'
     if(os.path.exists(contname)):
         tmp = fits.open(contname)[1].data
-        outspec['cont'] = tmp['cont']
-        outspec['inlier_mask'] = tmp['mask']
+        try:
+            outspec['cont'] = tmp['cont'][mask]
+        except:
+            outspec['cont'] = tmp['cont']
     else:
         # Go and get it from S3
-        cc = contname.split('//')[1]
-        print(f"Fetching continuum file from S3 cloud ({cc})")
-        getSpec(['gto1243',cc])
-        tmp = fits.open(contname)[1].data
-        outspec['cont'] = tmp['cont']
-        outspec['inlier_mask'] = tmp['mask']
-
+        try:
+            cc = contname.split('//')[1]
+            print(f"Fetching continuum file from S3 cloud ({cc})")
+            getSpec(['gto1243',cc])
+            tmp = fits.open(contname)[1].data
+            try:
+                outspec['cont'] = tmp['cont'][mask]
+            except:
+                outspec['cont'] = tmp['cont']
+            # outspec['inlier_mask'] = tmp['mask']
+        except:
+            print("WARNING: No valid continuum spectrum exists for this object, either locally or on the cloud.")
+            
     np.seterr(divide='warn', invalid='warn')
-        
+
     return(outspec)
         
 #############################################################################
@@ -120,7 +140,7 @@ def parseSpec(fitsfile, instrument):
 
 
 
-def loadQsoSpec(obj_id, spectrographs=['XShooter', 'FIRE', 'MOSFIRE', 'HIRES'], \
+def loadQsoSpec(obj_id, spectrographs=['XShooter', 'FIRE', 'MOSFIRE', 'HIRES','FIRE_XSH'], \
                 revision='current', files=False):
 
     if (obj_id < 1 or obj_id > 6):
