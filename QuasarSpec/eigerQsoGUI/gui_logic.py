@@ -461,7 +461,7 @@ class GuiProgram(Ui_Dialog):
         options = QFileDialog.Options()
         picklefile, _ = QFileDialog.getOpenFileName(None,"Open","","All Files (*);;Text Files (*.txt)", options=options)
 
-        if (picklefile == None):
+        if (picklefile == None or picklefile == ''):
             return()
         
         with open(picklefile, "rb") as fp:
@@ -1007,6 +1007,9 @@ class VPModelTree(Ui_VoigtProfileModel):
         fileName, _ = QFileDialog.getSaveFileName(self.vpModelTree, "Save","","All Files (*);;Text Files (*.txt)", options=options)
         commands = []
 
+        if (fileName == None or fileName == ''):
+            return()
+        
         ncomponents = 0
         
         for i in range(self.treeModel.rowCount()):
