@@ -14,6 +14,8 @@ def redsideContin(specdict, instrument, writefile=False, bspline=True):
     
     wave     = spec['wave']
     restwave = wave / (1+redshift)
+    all_wave      = spec['wave']
+    all_restwave  = all_wave / (1+redshift)
     flux     = spec['flux']
     ivar     = spec['ivar']
     naxis1   = len(flux)
@@ -46,6 +48,9 @@ def redsideContin(specdict, instrument, writefile=False, bspline=True):
     if (specdict['objname']=='J0100+2802' or specdict['objid']==4):
         fitmask[np.logical_and(wave > 14600,wave < 14660)] = False
         fitmask[np.logical_and(wave > 9450,wave < 9500)] = False
+        fitmask[np.logical_and(wave > 9430,wave < 9440)] = False
+        fitmask[np.logical_and(wave > 9215,wave < 9225)] = False
+        fitmask[np.logical_and(wave > 9257,wave < 9270)] = False
         fitmask[np.logical_and(wave > 9800,wave < 9850)] = False
     if (specdict['objname']=='J0148+0600' or specdict['objid']==6):
         fitmask[np.logical_and(wave > 9715,wave < 9765)] = False
@@ -95,6 +100,8 @@ def redsideContin(specdict, instrument, writefile=False, bspline=True):
 
     if (instrument=='HIRES'):
         binwidth=250
+    elif (instrument == 'FIRE_XSH'):
+        binwidth = 15
     else:
         binwidth  = 60
 
@@ -164,13 +171,8 @@ def redsideContin(specdict, instrument, writefile=False, bspline=True):
         fitivar = ivar[inmask_ind]/cont[inmask_ind]
         ransac.fit(fitwv.reshape(len(fitwv),1), fitflux, \
                    sample_weight=fitivar)
-        #ransac.fit(restwave.reshape(len(restwave),1), flux, \
-        #           sample_weight=np.abs(ivar))
 
         inlier_mask  = fitmask
-        # inlier_mask[inmask_ind[:]] = ransac.inlier_mask_[:]
-
-        # return(ransac.inlier_mask_)
         
         # Recall that fitmask contains only the regions we masked by hand
         # We need to be sure to re-eliminate them at each iteration
@@ -201,28 +203,20 @@ def redsideContin(specdict, instrument, writefile=False, bspline=True):
 
 
         cont = c(restwave)
-        if (False):
-            plt.plot(fitwv,fitflux)
-            plt.plot(fitwv[ransac.inlier_mask_==False],fitflux[ransac.inlier_mask_==False],'+')
-            plt.plot(restwave,cont)
-            #plt.plot(restwave[inlier_mask==False],flux[inlier_mask==False], '+')
-            #plt.plot(xbin,ybin,'o',color='y',markersize=3)
-            plt.ylim(-3,5)
-            plt.show()
-
 
     # Go back and put back in the crude normalization that we did at the
     # start of the process, so that the output is the same as the input flux
     cont = cont * flux_filt(restwave)
     cont[restwave < 1216] = (cont[restwave > 1216])[0]
     flux = flux * flux_filt(restwave)
-        
+
+    fullcontin = c(all_restwave) * flux_filt(all_restwave)
+    fullcontin[all_restwave < 1216] = (fullcontin[all_restwave > 1216])[0]
+    
     if (True):
         plt.step(wave,flux,where='mid')
         plt.plot(wave,cont,color='r')
-#        plt.plot(wave,flux_filt(restwave))
-#        plt.plot(xbin1 * (1+redshift),ybin1,'+')
-#        plt.plot(wave[inlier_mask==False],flux[inlier_mask==False], '+')
+        plt.plot(all_wave,fullcontin,color='r')
         plt.plot(xbin[use]*(1+redshift),ybin[use]*flux_filt(xbin[use]), 'o',color='y',markersize=3)
         plt.ylim(-1.0*np.median(cont),3*np.median(cont))
         plt.show()
@@ -234,11 +228,11 @@ def redsideContin(specdict, instrument, writefile=False, bspline=True):
         path     = os.path.dirname(infile[instrument])
         contname = os.path.basename(infile[instrument])[:-5]+'_contin.fits'
         outfile  = path+'/'+contname
-        t = Table([wave,cont,inlier_mask],names=('wave','cont','mask'))
+        t = Table([all_wave,fullcontin],names=('wave','cont'))
         t.write(outfile, format='fits', overwrite=True)
         print(f"Writing: {outfile}")
         
-    return(xbin[use]*(1+redshift),ybin[use])
+    # return(xbin[use]*(1+redshift),ybin[use])
 
 
 def allContin(writefile=False):
