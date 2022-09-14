@@ -34,16 +34,17 @@ The bash scripts `exe_*.sh` and `qsub_exe_*.sh` are prepared to run the process 
     
 - Continuum subtraction
   - `bash qsub_exe_subtract_continua_wfss.sh` to run `subtract_continua_wfss.py`
+  - Input dir: `calibrated_img2_wfss_globalMedSubt`
   - Output dir: `calibrated_img2_wfss_globalMedSubt_contSubt_kx51_9_Skx21_5`
-    - jw01243001001_02101_00001_nrcalong_cal_globalMedSubt_continua.fits
-    - jw01243001001_02101_00001_nrcalong_cal_globalMedSubt_continua_lk.fits
-    - jw01243001001_02101_00001_nrcalong_cal_globalMedSubt_continua_sk.fits
-    - jw01243001001_02101_00001_nrcalong_cal_globalMedSubt_continua_wht.fits
-    - jw01243001001_02101_00001_nrcalong_cal_globalMedSubt_emline.fits
+    - `jw01243001001_02101_00001_nrcalong_cal_globalMedSubt_continua.fits` - continuum image
+    - `jw01243001001_02101_00001_nrcalong_cal_globalMedSubt_continua_lk.fits`
+    - `jw01243001001_02101_00001_nrcalong_cal_globalMedSubt_continua_sk.fits`
+    - `jw01243001001_02101_00001_nrcalong_cal_globalMedSubt_continua_wht.fits`
+    - `jw01243001001_02101_00001_nrcalong_cal_globalMedSubt_emline.fits` - emission-line image
 
 - Create lists for global-sky (or master bias) image for each detector
-  - list_nrcalong_wfss_cal_globalMedSubt_contSubt_kx51_9_Skx21_5.txt
-  - list_nrcblong_wfss_cal_globalMedSubt_contSubt_kx51_9_Skx21_5.txt
+  - `list_nrcalong_wfss_cal_globalMedSubt_contSubt_kx51_9_Skx21_5.txt`
+  - `list_nrcblong_wfss_cal_globalMedSubt_contSubt_kx51_9_Skx21_5.txt`
 
 - Get global sky from median-filtered images
     - `python get_globalsky.py list_nrca[b]long_wfss_cal_globalMedSubt_contSubt_kx51_9_Skx21_5.txt nrca[b]long_wfss_cal_globalMedSubt_contSubt_kx51_9_Skx21_5`
@@ -58,8 +59,18 @@ The bash scripts `exe_*.sh` and `qsub_exe_*.sh` are prepared to run the process 
 
 - Again, "global" median-filtering - subtract median values at each column of the images
   - `bash qsub_exe_subtract_globalMed_wfss.sh` to run `subtract_globalMed_wfss.py`
-  - Input: e.g., `calibrated_img2_wfss_globalskySubtV/cal.fits`
-  - Output: e.g., `calibrated_img2_wfss_globalskySubtV_globalMedSubt/cal_.fits`
+  - Input: e.g., `calibrated_img2_wfss_globalskySubtV3/cal.fits`
+  - Output: e.g., `calibrated_img2_wfss_globalskySubtV3_globalMedSubt/cal_.fits`
+
+- Continuum subtraction
+  - `bash qsub_exe_subtract_continua_wfss.sh` to run `subtract_continua_wfss.py`
+  - Input dir: `calibrated_img2_wfss_globalskySubtV3_globalMedSubt/_cal_globalMedSubt.fits`
+  - Output dir: `calibrated_img2_wfss_globalskySubtV3_globalMedSubt_contSubt_kx51_9_Skx21_5`
+    - `jw01243001001_02101_00001_nrcalong_cal_globalMedSubt_continua.fits` - continuum image
+    - `jw01243001001_02101_00001_nrcalong_cal_globalMedSubt_continua_lk.fits`
+    - `jw01243001001_02101_00001_nrcalong_cal_globalMedSubt_continua_sk.fits`
+    - `jw01243001001_02101_00001_nrcalong_cal_globalMedSubt_continua_wht.fits`
+    - `jw01243001001_02101_00001_nrcalong_cal_globalMedSubt_emline.fits` - emission-line image
 
 
 
