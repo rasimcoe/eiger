@@ -1,0 +1,107 @@
+{
+  "asn_type": "image3",
+  "asn_pool": "asn_pool",
+  "products": [
+    {
+      "name": "img3_F356W_wfss_globalskySubtV4_emlineMasked_globalMedSubt_contSubt_kx51_9_Skx21_5_emline_visit3a_pdit123",
+      "members": [
+        {
+          "expname": "calibrated_img2_wfss_globalskySubtV4_emlineMasked_globalMedSubt_contSubt_kx51_9_Skx21_5/jw01243001003_02101_00001_nrcalong_cal_globalMedSubt_emline.fits",
+          "exptype": "science"
+        },
+        {
+          "expname": "calibrated_img2_wfss_globalskySubtV4_emlineMasked_globalMedSubt_contSubt_kx51_9_Skx21_5/jw01243001003_02101_00002_nrcalong_cal_globalMedSubt_emline.fits",
+          "exptype": "science"
+        },
+        {
+          "expname": "calibrated_img2_wfss_globalskySubtV4_emlineMasked_globalMedSubt_contSubt_kx51_9_Skx21_5/jw01243001003_02101_00003_nrcalong_cal_globalMedSubt_emline.fits",
+          "exptype": "science"
+        },
+        {
+          "expname": "calibrated_img2_wfss_globalskySubtV4_emlineMasked_globalMedSubt_contSubt_kx51_9_Skx21_5/jw01243001003_02101_00004_nrcalong_cal_globalMedSubt_emline.fits",
+          "exptype": "science"
+        },
+        {
+          "expname": "calibrated_img2_wfss_globalskySubtV4_emlineMasked_globalMedSubt_contSubt_kx51_9_Skx21_5/jw01243001003_02101_00005_nrcalong_cal_globalMedSubt_emline.fits",
+          "exptype": "science"
+        },
+        {
+          "expname": "calibrated_img2_wfss_globalskySubtV4_emlineMasked_globalMedSubt_contSubt_kx51_9_Skx21_5/jw01243001003_02101_00006_nrcalong_cal_globalMedSubt_emline.fits",
+          "exptype": "science"
+        },
+        {
+          "expname": "calibrated_img2_wfss_globalskySubtV4_emlineMasked_globalMedSubt_contSubt_kx51_9_Skx21_5/jw01243001003_02101_00007_nrcalong_cal_globalMedSubt_emline.fits",
+          "exptype": "science"
+        },
+        {
+          "expname": "calibrated_img2_wfss_globalskySubtV4_emlineMasked_globalMedSubt_contSubt_kx51_9_Skx21_5/jw01243001003_02101_00008_nrcalong_cal_globalMedSubt_emline.fits",
+          "exptype": "science"
+        },
+        {
+          "expname": "calibrated_img2_wfss_globalskySubtV4_emlineMasked_globalMedSubt_contSubt_kx51_9_Skx21_5/jw01243001003_02101_00009_nrcalong_cal_globalMedSubt_emline.fits",
+          "exptype": "science"
+        },
+        {
+          "expname": "calibrated_img2_wfss_globalskySubtV4_emlineMasked_globalMedSubt_contSubt_kx51_9_Skx21_5/jw01243001003_02101_00010_nrcalong_cal_globalMedSubt_emline.fits",
+          "exptype": "science"
+        },
+        {
+          "expname": "calibrated_img2_wfss_globalskySubtV4_emlineMasked_globalMedSubt_contSubt_kx51_9_Skx21_5/jw01243001003_02101_00011_nrcalong_cal_globalMedSubt_emline.fits",
+          "exptype": "science"
+        },
+        {
+          "expname": "calibrated_img2_wfss_globalskySubtV4_emlineMasked_globalMedSubt_contSubt_kx51_9_Skx21_5/jw01243001003_02101_00012_nrcalong_cal_globalMedSubt_emline.fits",
+          "exptype": "science"
+        },
+        {
+          "expname": "calibrated_img2_wfss_globalskySubtV4_emlineMasked_globalMedSubt_contSubt_kx51_9_Skx21_5/jw01243001003_04101_00001_nrcalong_cal_globalMedSubt_emline.fits",
+          "exptype": "science"
+        },
+        {
+          "expname": "calibrated_img2_wfss_globalskySubtV4_emlineMasked_globalMedSubt_contSubt_kx51_9_Skx21_5/jw01243001003_04101_00002_nrcalong_cal_globalMedSubt_emline.fits",
+          "exptype": "science"
+        },
+        {
+          "expname": "calibrated_img2_wfss_globalskySubtV4_emlineMasked_globalMedSubt_contSubt_kx51_9_Skx21_5/jw01243001003_04101_00003_nrcalong_cal_globalMedSubt_emline.fits",
+          "exptype": "science"
+        },
+        {
+          "expname": "calibrated_img2_wfss_globalskySubtV4_emlineMasked_globalMedSubt_contSubt_kx51_9_Skx21_5/jw01243001003_04101_00004_nrcalong_cal_globalMedSubt_emline.fits",
+          "exptype": "science"
+        },
+        {
+          "expname": "calibrated_img2_wfss_globalskySubtV4_emlineMasked_globalMedSubt_contSubt_kx51_9_Skx21_5/jw01243001003_04101_00005_nrcalong_cal_globalMedSubt_emline.fits",
+          "exptype": "science"
+        },
+        {
+          "expname": "calibrated_img2_wfss_globalskySubtV4_emlineMasked_globalMedSubt_contSubt_kx51_9_Skx21_5/jw01243001003_04101_00006_nrcalong_cal_globalMedSubt_emline.fits",
+          "exptype": "science"
+        },
+        {
+          "expname": "calibrated_img2_wfss_globalskySubtV4_emlineMasked_globalMedSubt_contSubt_kx51_9_Skx21_5/jw01243001003_04101_00007_nrcalong_cal_globalMedSubt_emline.fits",
+          "exptype": "science"
+        },
+        {
+          "expname": "calibrated_img2_wfss_globalskySubtV4_emlineMasked_globalMedSubt_contSubt_kx51_9_Skx21_5/jw01243001003_04101_00008_nrcalong_cal_globalMedSubt_emline.fits",
+          "exptype": "science"
+        },
+        {
+          "expname": "calibrated_img2_wfss_globalskySubtV4_emlineMasked_globalMedSubt_contSubt_kx51_9_Skx21_5/jw01243001003_04101_00009_nrcalong_cal_globalMedSubt_emline.fits",
+          "exptype": "science"
+        },
+        {
+          "expname": "calibrated_img2_wfss_globalskySubtV4_emlineMasked_globalMedSubt_contSubt_kx51_9_Skx21_5/jw01243001003_04101_00010_nrcalong_cal_globalMedSubt_emline.fits",
+          "exptype": "science"
+        },
+        {
+          "expname": "calibrated_img2_wfss_globalskySubtV4_emlineMasked_globalMedSubt_contSubt_kx51_9_Skx21_5/jw01243001003_04101_00011_nrcalong_cal_globalMedSubt_emline.fits",
+          "exptype": "science"
+        },
+        {
+          "expname": "calibrated_img2_wfss_globalskySubtV4_emlineMasked_globalMedSubt_contSubt_kx51_9_Skx21_5/jw01243001003_04101_00012_nrcalong_cal_globalMedSubt_emline.fits",
+          "exptype": "science"
+        }
+      ]
+    }
+  ]
+}
