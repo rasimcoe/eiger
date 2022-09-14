@@ -17,30 +17,42 @@ The bash scripts `exe_*.sh` and `qsub_exe_*.sh` are prepared to run the process 
 
 ### Imaging-mode reduction
 - Modify WFSS fits header
-    - `python modify_wfss_fits_header.py`
-    - Input dir: `calibrated_det1`
-    - Output dir: `calibrated_det1_wfss_hdr_corr`
+  - `python modify_wfss_fits_header.py`
+  - Input dir: `calibrated_det1`
+  - Output dir: `calibrated_det1_wfss_hdr_corr`
 
 - Image2:
-    - `bash qsub_exe_pipe_img2_wfss.sh` to run `pipeline_Image2.py`
-    - Output: `calibrated_img2_wfss/cal.fits`
+  - `bash qsub_exe_pipe_img2_wfss.sh` to run `pipeline_Image2.py`
+  - Output: `calibrated_img2_wfss/cal.fits`
 
-- "global" median-filtering - subtract median values at each column of the images 
-    - `bash qsub_exe_subtract_globalMed_wfss.sh` to run `subtract_globalMed_wfss.py`
-    - Input: e.g., `calibrated_img2_wfss/cal.fits`
-    - Output: e.g., `calibrated_img2_wfss_globalMedSubt/cal_.fits`
+- "global" median-filtering - subtract median values at each column of the images
+  - `bash qsub_exe_subtract_globalMed_wfss.sh` to run `subtract_globalMed_wfss.py`
+  - Input: e.g., `calibrated_img2_wfss/cal.fits`
+  - Output: e.g., `calibrated_img2_wfss_globalMedSubt/cal_.fits`
+
+- Continuum subtraction
+  - `bash qsub_exe_subtract_continua_wfss.sh` to run `subtract_continua_wfss.py`
+  - Output dir: `calibrated_img2_wfss_globalMedSubt_contSubt_kx51_9_Skx21_5`
+    - jw01243001001_02101_00001_nrcalong_cal_globalMedSubt_continua.fits
+    - jw01243001001_02101_00001_nrcalong_cal_globalMedSubt_continua_lk.fits
+    - jw01243001001_02101_00001_nrcalong_cal_globalMedSubt_continua_sk.fits
+    - jw01243001001_02101_00001_nrcalong_cal_globalMedSubt_continua_wht.fits
+    - jw01243001001_02101_00001_nrcalong_cal_globalMedSubt_emline.fits
 
 - Create lists for global-sky (or master bias) image for each detector
-    - Output: e.g., `list_nrcalong_wfss.txt`
+  - list_nrcalong_wfss_cal_globalMedSubt_contSubt_kx51_9_Skx21_5.txt
+  - list_nrcblong_wfss_cal_globalMedSubt_contSubt_kx51_9_Skx21_5.txt
 
 - Get global sky from median-filtered images
-    - `python get_globalsky.py list_nrcalong_wfss.txt nrcalong_wfss`
-    - Output: `globalsky_nrcblong_wfss.fits`
+    - `python get_globalsky.py list_nrca[b]long_wfss_cal_globalMedSubt_contSubt_kx51_9_Skx21_5.txt nrca[b]long_wfss_cal_globalMedSubt_contSubt_kx51_9_Skx21_5`
+    - Output:
+      - `globalsky_nrcblong_wfss_cal_globalMedSubt_contSubt_kx51_9_Skx21_5.fits`
+      - `globalsky_nrcblong_wfss_cal_globalMedSubt_contSubt_kx51_9_Skx21_5.fits`
 
 - Subtract global sky from median-filtered (iter1) images
     - `bash qsub_exe_subtract_globalsky_wfss.sh` to run `subtract_globalsky.py`
-    - Input: calibrated_img2_wfss.fits
-    - Output: calibrated_img2_wfss_medSubt2/cal.fits
+    - Input: `calibrated_img2_wfss.fits`
+    - Output: `calibrated_img2_wfss_globalMedSubt/cal.fits
 
 - WFSS Image3
     - create_asn_img3_wfss.ipynb
