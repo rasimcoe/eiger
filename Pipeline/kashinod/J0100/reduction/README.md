@@ -32,13 +32,10 @@ The bash scripts `exe_*.sh` and `qsub_exe_*.sh` are prepared to run the process 
 
 - Create lists for global-sky (or master bias) image for each detector
     - Output: e.g., `list_nrcalong_wfss.txt`
-      - calibrated_img2_wfss_medSubt/jw01243001002_02101_00001_nrcalong_cal.fits
-      - calibrated_img2_wfss_medSubt/jw01243001002_02101_00002_nrcalong_cal.fits
 
-- Get global sky from median-filtered (iter1) images
-    - python ../scripts/get_globalsky.py list_nrca5_f356w_wfss.txt nrca5_f356w_wfss
-    - python ../scripts/get_globalsky.py list_nrcb5_f356w_wfss.txt nrcb5_f356w_wfss
-    - Output: globalsky_nrcb5_f356w_wfss.fits
+- Get global sky from median-filtered images
+    - `python get_globalsky.py list_nrcalong_wfss.txt nrcalong_wfss`
+    - Output: `globalsky_nrcblong_wfss.fits`
 
 - Subtract global sky from median-filtered (iter1) images
     - scripts: ./qsub_exe_subtract_globalsky.sh > exe_subtract_globalsky.sh > python ../scripts/subtract_globalsky.py $fil $output_dir $global_sky
