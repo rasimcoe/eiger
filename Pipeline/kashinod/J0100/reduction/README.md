@@ -76,7 +76,10 @@ The bash scripts `exe_*.sh` and `qsub_exe_*.sh` are prepared to run the process 
     - `jw01243001001_02101_00001_nrcalong_cal_globalMedSubt_emline.fits` - emission-line image
 
 - Create emission-line masks
-  - 
+  - at `./GrismMasking/`
+  - run `execute_sextractor_for_emline_mask.ipynb`
+  - and then `apply_emline_mask.ipynb`
+    - Output mask files: e.g., `calibrated_img2_wfss/jw01243001001_02101_00001_nrcalong_mask.fits`
 
 ### Now with mask!
 
@@ -128,11 +131,12 @@ The bash scripts `exe_*.sh` and `qsub_exe_*.sh` are prepared to run the process 
 
 - Create asn.json file for Image3
   - per visit and module
-    
+    - e.g., `img3_F356W_wfss_globalskySubtV4_emlineMasked_globalMedSubt_contSubt_kx51_9_Skx21_5_emline_visit4b_pdit123_asn.json`
+    - e.g., `img3_F356W_wfss_globalskySubtV4_emlineMasked_globalMedSubt_contSubt_kx51_9_Skx21_5_continua_visit4b_pdit123_asn.json`
 - Image3
   - `python pipeline_Image3noSkyMatch_wfss.py asn_file out_dir`
-  - asn_file: `img3_asn.json`
-  - out_Dir: `calibrated_img3_wfss`
+  - asn_file: e.g., `img3_F356W_wfss_globalskySubtV4_emlineMasked_globalMedSubt_contSubt_kx51_9_Skx21_5_emline_visit4b_pdit123_asn.json`
+  - out_dir: `calibrated_img3noskymatch_wfss_globalskySubtV4_emlineMasked_globalMedSubt_contSubt_kx51_9_Skx21_5`
 
 
 
