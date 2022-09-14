@@ -1,7 +1,7 @@
 Last update: Daichi Kashino, 2022-09-14
 
 These codes assume that uncal.fits files are stored in the directories:
-'../data/uncal_F115W'
+`../data/uncal_F115W`
 ../data/uncal_F200W
 ../data/uncal_F356W
 ../data/uncal_F356W_GRISM
