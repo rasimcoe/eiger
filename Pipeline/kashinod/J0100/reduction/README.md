@@ -11,22 +11,22 @@ The bash scripts `exe_*.sh` and `qsub_exe_*.sh` are prepared to run the process 
 
 ## WFSS:
 - Detector1
-  - `qsub_exe_pipe_det1.sh` >> `pipeline_Detector1.py`
+  - `bash qsub_exe_pipe_det1.sh` to run `pipeline_Detector1.py`
   - Input: `uncal.fits`
   - Output: `calibrated_det1/rate.fits`
 
 ### Imaging-mode reduction
 - Modify WFSS fits header
-    - `modify_wfss_fits_header.py`
+    - `python modify_wfss_fits_header.py`
     - Input dir: `calibrated_det1`
     - Output dir: `calibrated_det1_wfss_hdr_corr`
 
 - Image2:
-    - `qsub_exe_pipe_img2_wfss.sh` >> `pipeline_Image2.py`
+    - `bash qsub_exe_pipe_img2_wfss.sh` to run `pipeline_Image2.py`
     - Output: `calibrated_img2_wfss/cal.fits`
 
 - "global" median-filtering - subtract median values at each column of the images 
-    - `qsub_exe_subtract_globalMed_wfss.sh` >> `subtract_globalMed_wfss.py`
+    - `bash qsub_exe_subtract_globalMed_wfss.sh` to run `subtract_globalMed_wfss.py`
     - Input: e.g., `calibrated_img2_wfss/cal.fits`
     - Output: e.g., `calibrated_img2_wfss_globalMedSubt/cal_.fits`
 
@@ -38,7 +38,7 @@ The bash scripts `exe_*.sh` and `qsub_exe_*.sh` are prepared to run the process 
     - Output: `globalsky_nrcblong_wfss.fits`
 
 - Subtract global sky from median-filtered (iter1) images
-    - scripts: ./qsub_exe_subtract_globalsky.sh > exe_subtract_globalsky.sh > python ../scripts/subtract_globalsky.py $fil $output_dir $global_sky
+    - `bash qsub_exe_subtract_globalsky_wfss.sh` to run `subtract_globalsky.py`
     - Input: calibrated_img2_wfss.fits
     - Output: calibrated_img2_wfss_medSubt2/cal.fits
 
