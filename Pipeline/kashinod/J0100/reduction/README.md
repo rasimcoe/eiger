@@ -17,19 +17,18 @@ The bash scripts `exe_*.sh` and `qsub_exe_*.sh` are prepared to run the process 
 
 ### Imaging-mode reduction
 - Modify WFSS fits header
-    - modify_wfss_fits_header.py 
-    - Input dir: calibrated_det1
-    - Output dir: calibrated_det1_wfss_hdr_corr
+    - `modify_wfss_fits_header.py`
+    - Input dir: `calibrated_det1`
+    - Output dir: `calibrated_det1_wfss_hdr_corr`
 
 - Image2:
-    - qsub_exe_pipe_img2_wfss.sh >> pipeline_Image2.py
-    - Output: calibrated_img2_wfss/cal.fits
+    - `qsub_exe_pipe_img2_wfss.sh` >> `pipeline_Image2.py`
+    - Output: `calibrated_img2_wfss/cal.fits`
 
-- "global" median-filtering
-    - subtract_globalMed_wfss.py
-        * kernel (x, y, x_gap): 51 1 9
-    - Input: `calibrated_img2_wfss/cal.fits`
-    - Output: `calibrated_img2_wfss_globalMedSubt/cal_.fits`
+- "global" median-filtering - subtract median values at each column of the images 
+    - `qsub_exe_subtract_globalMed_wfss.sh` >> `subtract_globalMed_wfss.py`
+    - Input: e.g., `calibrated_img2_wfss/cal.fits`
+    - Output: e.g., `calibrated_img2_wfss_globalMedSubt/cal_.fits`
 
 - Create lists for global sky images
     - create_lists_for_global_sky.ipynb
