@@ -10,19 +10,18 @@ The bash scripts `exe_*.sh` and `qsub_exe_*.sh` are prepared to run the process 
 
 
 ## WFSS:
-### Basic
 - Detector1
-  - pipeline_Detector1.py
+  - qsub_exe_pipe_det1.sh >> pipeline_Detector1.py
   - Input: uncal.fits
   - Output: calibrated_det1/rate.fits
 
-### imaging-mode reduction
+### Imaging-mode reduction
 - Modify WFSS fits header
     - modify_wfss_fits_header.py 
     - Input dir: calibrated_det1
     - Output dir: calibrated_det1_wfss_hdr_corr
 
-- WFSS Image2:
+- Image2:
     - qsub_exe_pipe_img2_wfss.sh
     - Output: calibrated_img2_wfss/jw01243001003_01101_00068_nrca5_cal.fits
 
