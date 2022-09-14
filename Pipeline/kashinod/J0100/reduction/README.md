@@ -28,8 +28,10 @@ The bash scripts `exe_*.sh` and `qsub_exe_*.sh` are prepared to run the process 
 - "global" median-filtering - subtract median values at each column of the images
   - `bash qsub_exe_subtract_globalMed_wfss.sh` to run `subtract_globalMed_wfss.py`
   - Input: e.g., `calibrated_img2_wfss/cal.fits`
-  - Output: e.g., `calibrated_img2_wfss_globalMedSubt/cal_.fits`
-
+  - Output: e.g., `calibrated_img2_wfss_globalMedSubt/`
+    - `jw01243001001_02101_00001_nrcalong_cal_globalMed.fits` - median image
+    - `jw01243001001_02101_00001_nrcalong_cal_globalMedSubt.fits` - median-subtracted image
+    
 - Continuum subtraction
   - `bash qsub_exe_subtract_continua_wfss.sh` to run `subtract_continua_wfss.py`
   - Output dir: `calibrated_img2_wfss_globalMedSubt_contSubt_kx51_9_Skx21_5`
@@ -49,10 +51,17 @@ The bash scripts `exe_*.sh` and `qsub_exe_*.sh` are prepared to run the process 
       - `globalsky_nrcblong_wfss_cal_globalMedSubt_contSubt_kx51_9_Skx21_5.fits`
       - `globalsky_nrcblong_wfss_cal_globalMedSubt_contSubt_kx51_9_Skx21_5.fits`
 
-- Subtract global sky from median-filtered (iter1) images
+- Subtract global sky from wfss cal.fits files
     - `bash qsub_exe_subtract_globalsky_wfss.sh` to run `subtract_globalsky.py`
-    - Input: `calibrated_img2_wfss.fits`
-    - Output: `calibrated_img2_wfss_globalMedSubt/cal.fits
+    - Input: `calibrated_img2_wfss/cal.fits`
+    - Output: `calibrated_img2_wfss_globalskySubtV3/cal.fits`
+
+- Again, "global" median-filtering - subtract median values at each column of the images
+  - `bash qsub_exe_subtract_globalMed_wfss.sh` to run `subtract_globalMed_wfss.py`
+  - Input: e.g., `calibrated_img2_wfss_globalskySubtV/cal.fits`
+  - Output: e.g., `calibrated_img2_wfss_globalskySubtV_globalMedSubt/cal_.fits`
+
+
 
 - WFSS Image3
     - create_asn_img3_wfss.ipynb
