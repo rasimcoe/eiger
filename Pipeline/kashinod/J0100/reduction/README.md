@@ -9,13 +9,12 @@ These codes assume that uncal.fits files are stored in the directories:
 The bash scripts `exe_*.sh` and `qsub_exe_*.sh` are prepared to run the process for each of the all selected files using multi cores.  Usually it's enough to edit `qsub_exe_*.sh` where you can select files and specify output directory name etc.
 
 
-## WFSS:
+# WFSS:
 - Detector1
   - `bash qsub_exe_pipe_det1.sh` to run `pipeline_Detector1.py`
   - Input: `uncal.fits`
   - Output: `calibrated_det1/rate.fits`
 
-### Imaging-mode reduction
 - Modify WFSS fits header
   - `python modify_wfss_fits_header.py`
   - Input dir: `calibrated_det1`
