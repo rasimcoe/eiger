@@ -12,26 +12,26 @@ The bash scripts `exe_*.sh` and `qsub_exe_*.sh` are prepared to run the process 
 # WFSS
 - Detector1
   - `bash qsub_exe_pipe_det1.sh` to run `pipeline_Detector1.py`
-  - Input: `uncal.fits`
-  - Output: `calibrated_det1/rate.fits`
+  - Input files : e.g., `../data/uncal_F356W_GRISM/jw01243001001_02101_00001_nrcalong_uncal.fits`
+  - Output files: e.g., `calibrated_det1/jw01243001001_02101_00001_nrcalong_rate.fits`
 
 ### Image 2 for WFSS
 
 - Modify WFSS fits header
   - `python modify_wfss_fits_header.py`
-  - Input dir: `calibrated_det1`
+  - Input dir : `calibrated_det1`
   - Output dir: `calibrated_det1_wfss_hdr_corr`
 
 - Image2:
   - `bash qsub_exe_pipe_img2_wfss.sh` to run `pipeline_Image2.py`
-  - Output: `calibrated_img2_wfss/cal.fits`
+  - Output files: `calibrated_img2_wfss/jw01243001001_02101_00001_nrcalong_cal.fits`
 
 - "global" median subtraction -- subtract median values at each column of the images
   - `bash qsub_exe_subtract_globalMed_wfss.sh` to run `subtract_globalMed_wfss.py`
-  - Input: `calibrated_img2_wfss/cal.fits`
+  - Input: `calibrated_img2_wfss/jw01243001001_02101_00001_nrcalong_cal.fits`
   - Output: `calibrated_img2_wfss_globalMedSubt/`
-    - `jw01243001001_02101_00001_nrcalong_cal_globalMed.fits` - median image
-    - `jw01243001001_02101_00001_nrcalong_cal_globalMedSubt.fits` - median-subtracted image
+    - `jw01243001001_02101_00001_nrcalong_cal_globalMed.fits` -- median image
+    - `jw01243001001_02101_00001_nrcalong_cal_globalMedSubt.fits` -- median-subtracted image
     
 - Continuum subtraction (get CONTINUA and EMLINE images)
   - `bash qsub_exe_subtract_continua_wfss.sh` to run `subtract_continua_wfss.py`
