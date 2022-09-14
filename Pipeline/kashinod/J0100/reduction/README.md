@@ -11,9 +11,9 @@ The bash scripts `exe_*.sh` and `qsub_exe_*.sh` are prepared to run the process 
 
 ## WFSS:
 - Detector1
-  - qsub_exe_pipe_det1.sh >> pipeline_Detector1.py
-  - Input: uncal.fits
-  - Output: calibrated_det1/rate.fits
+  - `qsub_exe_pipe_det1.sh` >> `pipeline_Detector1.py`
+  - Input: `uncal.fits`
+  - Output: `calibrated_det1/rate.fits`
 
 ### Imaging-mode reduction
 - Modify WFSS fits header
@@ -22,14 +22,14 @@ The bash scripts `exe_*.sh` and `qsub_exe_*.sh` are prepared to run the process 
     - Output dir: calibrated_det1_wfss_hdr_corr
 
 - Image2:
-    - qsub_exe_pipe_img2_wfss.sh
-    - Output: calibrated_img2_wfss/jw01243001003_01101_00068_nrca5_cal.fits
+    - qsub_exe_pipe_img2_wfss.sh >> pipeline_Image2.py
+    - Output: calibrated_img2_wfss/cal.fits
 
-- Median-filtering (iteration 1)
-    - qsub_exe_median_filter_wfss_img2cal.sh > exe_median_filter_wfss_img2cal.sh > python ../scripts/median_filter_wfss_img2cal_fits_v20211105.py $fil $output_dir $kx $ky $kx_gap
+- "global" median-filtering
+    - subtract_globalMed_wfss.py
         * kernel (x, y, x_gap): 51 1 9
-    - Input: calibrated_img2_wfss/cal.fits
-    - Output: calibrated_img2_wfss_medSubt/cal.fits
+    - Input: `calibrated_img2_wfss/cal.fits`
+    - Output: `calibrated_img2_wfss_globalMedSubt/cal_.fits`
 
 - Create lists for global sky images
     - create_lists_for_global_sky.ipynb
