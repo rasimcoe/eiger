@@ -9,11 +9,13 @@ These codes assume that uncal.fits files are stored in the directories:
 The bash scripts `exe_*.sh` and `qsub_exe_*.sh` are prepared to run the process for each of the all selected files using multi cores.  Usually it's enough to edit `qsub_exe_*.sh` where you can select files and specify output directory name etc.
 
 
-# WFSS:
+# WFSS
 - Detector1
   - `bash qsub_exe_pipe_det1.sh` to run `pipeline_Detector1.py`
   - Input: `uncal.fits`
   - Output: `calibrated_det1/rate.fits`
+
+### Image 2 for WFSS
 
 - Modify WFSS fits header
   - `python modify_wfss_fits_header.py`
@@ -31,7 +33,7 @@ The bash scripts `exe_*.sh` and `qsub_exe_*.sh` are prepared to run the process 
     - `jw01243001001_02101_00001_nrcalong_cal_globalMed.fits` - median image
     - `jw01243001001_02101_00001_nrcalong_cal_globalMedSubt.fits` - median-subtracted image
     
-- Continuum subtraction
+- Continuum subtraction (get CONTINUA and EMLINE images)
   - `bash qsub_exe_subtract_continua_wfss.sh` to run `subtract_continua_wfss.py`
   - Input dir: `calibrated_img2_wfss_globalMedSubt`
   - Output dir: `calibrated_img2_wfss_globalMedSubt_contSubt_kx51_9_Skx21_5`
@@ -41,11 +43,11 @@ The bash scripts `exe_*.sh` and `qsub_exe_*.sh` are prepared to run the process 
     - `jw01243001001_02101_00001_nrcalong_cal_globalMedSubt_continua_wht.fits`
     - `jw01243001001_02101_00001_nrcalong_cal_globalMedSubt_emline.fits` - emission-line image
 
-- Create lists for global-sky (or master bias) image for each detector
+- Create lists for globalsky (or master bias) image for each detector
   - `list_nrcalong_wfss_cal_globalMedSubt_contSubt_kx51_9_Skx21_5.txt`
   - `list_nrcblong_wfss_cal_globalMedSubt_contSubt_kx51_9_Skx21_5.txt`
 
-- Get global sky from median-filtered images
+- Get globalsky from EMLINE images
     - `python get_globalsky.py list_fil outname --mask_brightpixels=True`
       - list_fil = `list_nrca[b]long_wfss_cal_globalMedSubt_contSubt_kx51_9_Skx21_5.txt`
       - outname = `nrca[b]long_wfss_cal_globalMedSubt_contSubt_kx51_9_Skx21_5`
@@ -53,7 +55,10 @@ The bash scripts `exe_*.sh` and `qsub_exe_*.sh` are prepared to run the process 
       	- `globalsky_nrcalong_wfss_cal_globalMedSubt_contSubt_kx51_9_Skx21_5.fits`
       	- `globalsky_nrcblong_wfss_cal_globalMedSubt_contSubt_kx51_9_Skx21_5.fits`
 
-- Subtract global sky from wfss cal.fits files
+
+### Go back to the "raw" cal.fits with the globalsky (master-bias)
+
+- Subtract globalsky from wfss cal.fits files
     - `bash qsub_exe_subtract_globalsky_wfss.sh` to run `subtract_globalsky.py`
     - globalsky_img: `globalsky_nrca[b]long_wfss_cal_globalMedSubt_contSubt_kx51_9_Skx21_5.fits`    
     - Input: `calibrated_img2_wfss/cal.fits`
@@ -80,7 +85,7 @@ The bash scripts `exe_*.sh` and `qsub_exe_*.sh` are prepared to run the process 
   - and then `apply_emline_mask.ipynb`
     - Output mask files: e.g., `calibrated_img2_wfss/jw01243001001_02101_00001_nrcalong_mask.fits`
 
-### Now with mask!
+### Do everything again but now with mask!
 
 - Global median subtraction with mask
   - `bash qsub_exe_subtract_globalMed_wfss_with_mask.sh` to run `subtract_globalMed_wfss.py` with `--mask` option
@@ -111,7 +116,7 @@ The bash scripts `exe_*.sh` and `qsub_exe_*.sh` are prepared to run the process 
     - Input: `calibrated_img2_wfss/cal.fits`
     - Output: `calibrated_img2_wfss_globalskySubtV4/cal.fits`  # V4 has no meaning.
 
-- Again "global" median subtraction for master-bias-subtracted images -- subtract median values at each column of the images
+- Again "global" median subtraction for globalsky-subtracted images
   - `bash qsub_exe_subtract_globalMed_wfss.sh` to run `subtract_globalMed_wfss.py`
   - Input: e.g., `calibrated_img2_wfss_globalskySubtV4/cal.fits`
   - Output: e.g., `calibrated_img2_wfss_globalskySubtV4_globalMedSubt/cal_.fits` 
@@ -126,12 +131,13 @@ The bash scripts `exe_*.sh` and `qsub_exe_*.sh` are prepared to run the process 
     - `jw01243001001_02101_00001_nrcalong_cal_globalMedSubt_continua_wht.fits`
     - `jw01243001001_02101_00001_nrcalong_cal_globalMedSubt_emline.fits` - emission-line image
 
-### Let's stack exposures (per visit and module)
+### Okay, now Image3 to stack exposures  (per visit and module)
 
 - Create asn.json file for Image3
   - per visit and module
     - e.g., `img3_F356W_wfss_globalskySubtV4_emlineMasked_globalMedSubt_contSubt_kx51_9_Skx21_5_emline_visit4b_pdit123_asn.json`
     - e.g., `img3_F356W_wfss_globalskySubtV4_emlineMasked_globalMedSubt_contSubt_kx51_9_Skx21_5_continua_visit4b_pdit123_asn.json`
+
 - Image3
   - `python pipeline_Image3noSkyMatch_wfss.py asn_file out_dir`
   - asn_file: e.g., `img3_F356W_wfss_globalskySubtV4_emlineMasked_globalMedSubt_contSubt_kx51_9_Skx21_5_emline_visit4b_pdit123_asn.json`
