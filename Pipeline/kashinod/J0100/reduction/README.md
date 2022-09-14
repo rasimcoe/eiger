@@ -6,9 +6,11 @@ These codes assume that uncal.fits files are stored in the directories:
 `../data/uncal_F356W`
 `../data/uncal_F356W_GRISM`
 
+The bash scripts `exe_*.sh` and `qsub_exe_*.sh` are prepared to run the process for each of the all selected files using multi cores.  Usually it's enough to edit `qsub_exe_*.sh` where you can select files and specify output directory name etc.
+
 
 ## WFSS:
-### Standard
+### Basic
 - Detector1
   - pipeline_Detector1.py
   - Input: uncal.fits
