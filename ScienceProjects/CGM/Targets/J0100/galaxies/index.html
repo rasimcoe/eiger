@@ -1,0 +1,899 @@
+
+    <html>
+    <header>
+        <link href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" rel="stylesheet">
+    </header>
+    <body>
+    <table border="1" class="dataframe" id="table">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>stamps</th>
+      <th>Name</th>
+      <th>RA</th>
+      <th>DEC</th>
+      <th>z</th>
+      <th>z_err</th>
+      <th>Confidence</th>
+      <th>Linelist</th>
+      <th>Flag</th>
+      <th>z_guess</th>
+      <th>mag356W</th>
+      <th>mag200W</th>
+      <th>mag115W</th>
+      <th>mag850LP</th>
+      <th>mag775W</th>
+      <th>mag606W</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td><a href="stamps/v3corstacked_2D_7089.png"><img src="stamps/v3corstacked_2D_7089.png" width="60" > </a></td>
+      <td>v3corstacked_2D_7089</td>
+      <td>15.056547</td>
+      <td>28.049281</td>
+      <td>1.056648</td>
+      <td>0.000016</td>
+      <td>2.0</td>
+      <td>Eiger_Strong</td>
+      <td>check photo-z, likely candidate, based on pontential second line and stamp image size</td>
+      <td>0.0</td>
+      <td>24.070475</td>
+      <td>24.003695</td>
+      <td>24.183588</td>
+      <td>24.850210</td>
+      <td>25.195339</td>
+      <td>25.061874</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td><a href="stamps/v3corstacked_2D_10308.png"><img src="stamps/v3corstacked_2D_10308.png" width="60" > </a></td>
+      <td>v3corstacked_2D_10308</td>
+      <td>15.052965</td>
+      <td>28.041457</td>
+      <td>4.223584</td>
+      <td>0.000052</td>
+      <td>3.0</td>
+      <td>Eiger_Strong</td>
+      <td>confident detection</td>
+      <td>0.0</td>
+      <td>23.159973</td>
+      <td>23.387407</td>
+      <td>24.019217</td>
+      <td>24.240501</td>
+      <td>24.601282</td>
+      <td>25.599981</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td><a href="stamps/v3corstacked_2D_19272.png"><img src="stamps/v3corstacked_2D_19272.png" width="60" > </a></td>
+      <td>v3corstacked_2D_19272</td>
+      <td>15.055434</td>
+      <td>28.033547</td>
+      <td>4.330033</td>
+      <td>0.000164</td>
+      <td>1.5</td>
+      <td>Eiger_Strong</td>
+      <td>Check photo-z</td>
+      <td>0.0</td>
+      <td>22.617226</td>
+      <td>22.924448</td>
+      <td>23.599009</td>
+      <td>24.349028</td>
+      <td>24.846743</td>
+      <td>24.943548</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td><a href="stamps/v3corstacked_2D_8856.png"><img src="stamps/v3corstacked_2D_8856.png" width="60" > </a></td>
+      <td>v3corstacked_2D_8856</td>
+      <td>15.054385</td>
+      <td>28.043725</td>
+      <td>4.646264</td>
+      <td>0.000386</td>
+      <td>2.0</td>
+      <td>Eiger_Strong</td>
+      <td>Very likely H-alpha from the brigher galaxy, Merger?</td>
+      <td>0.0</td>
+      <td>23.998203</td>
+      <td>23.987370</td>
+      <td>24.526312</td>
+      <td>25.580627</td>
+      <td>26.060646</td>
+      <td>25.897745</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td><a href="stamps/v3corstacked_2D_16568.png"><img src="stamps/v3corstacked_2D_16568.png" width="60" > </a></td>
+      <td>v3corstacked_2D_16568</td>
+      <td>15.038863</td>
+      <td>28.042671</td>
+      <td>6.364809</td>
+      <td>0.000141</td>
+      <td>3.0</td>
+      <td>Eiger_Strong</td>
+      <td>Good fit</td>
+      <td>0.0</td>
+      <td>26.709532</td>
+      <td>27.171560</td>
+      <td>27.438511</td>
+      <td>29.527683</td>
+      <td>28.750462</td>
+      <td>30.958197</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td><a href="stamps/v3corstacked_2D_14934.png"><img src="stamps/v3corstacked_2D_14934.png" width="60" > </a></td>
+      <td>v3corstacked_2D_14934</td>
+      <td>15.034753</td>
+      <td>28.039800</td>
+      <td>4.224310</td>
+      <td>0.000461</td>
+      <td>2.5</td>
+      <td>Eiger_Strong</td>
+      <td>Probably a good fit, need photo-z, check morphology of contaminating line. Module A gives a good fit for Halpha</td>
+      <td>0.0</td>
+      <td>25.499504</td>
+      <td>26.621553</td>
+      <td>28.190248</td>
+      <td>27.147024</td>
+      <td>28.741207</td>
+      <td>29.858706</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td><a href="stamps/v3corstacked_2D_31.png"><img src="stamps/v3corstacked_2D_31.png" width="60" > </a></td>
+      <td>v3corstacked_2D_31</td>
+      <td>15.081567</td>
+      <td>28.053463</td>
+      <td>5.939049</td>
+      <td>0.000050</td>
+      <td>3.0</td>
+      <td>Eiger_Strong</td>
+      <td>Very good fit</td>
+      <td>0.0</td>
+      <td>25.284405</td>
+      <td>25.908352</td>
+      <td>26.344151</td>
+      <td>98.461212</td>
+      <td>98.461212</td>
+      <td>98.461212</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td><a href="stamps/v3corstacked_2D_981.png"><img src="stamps/v3corstacked_2D_981.png" width="60" > </a></td>
+      <td>v3corstacked_2D_981</td>
+      <td>15.078681</td>
+      <td>28.053519</td>
+      <td>4.524082</td>
+      <td>0.000225</td>
+      <td>1.5</td>
+      <td>Eiger_Strong</td>
+      <td>Low confidence, need photoz</td>
+      <td>NaN</td>
+      <td>21.950533</td>
+      <td>22.556440</td>
+      <td>23.907246</td>
+      <td>98.683647</td>
+      <td>26.510950</td>
+      <td>26.662111</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td><a href="stamps/v3corstacked_2D_14518.png"><img src="stamps/v3corstacked_2D_14518.png" width="60" > </a></td>
+      <td>v3corstacked_2D_14518</td>
+      <td>15.039485</td>
+      <td>28.031303</td>
+      <td>2.307314</td>
+      <td>0.000196</td>
+      <td>3.0</td>
+      <td>Eiger_Strong</td>
+      <td>High confidence low-z</td>
+      <td>0.0</td>
+      <td>21.359781</td>
+      <td>22.391893</td>
+      <td>23.987495</td>
+      <td>24.939285</td>
+      <td>25.615005</td>
+      <td>26.159950</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td><a href="stamps/v3corstacked_2D_14919.png"><img src="stamps/v3corstacked_2D_14919.png" width="60" > </a></td>
+      <td>v3corstacked_2D_14919</td>
+      <td>15.034846</td>
+      <td>28.039735</td>
+      <td>4.106509</td>
+      <td>0.000313</td>
+      <td>1.0</td>
+      <td>Eiger_Strong</td>
+      <td>Low confidence, need photo-z</td>
+      <td>0.0</td>
+      <td>23.104116</td>
+      <td>23.768408</td>
+      <td>24.976866</td>
+      <td>25.230936</td>
+      <td>25.484819</td>
+      <td>27.033577</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td><a href="stamps/v3corstacked_2D_3007.png"><img src="stamps/v3corstacked_2D_3007.png" width="60" > </a></td>
+      <td>v3corstacked_2D_3007</td>
+      <td>15.071645</td>
+      <td>28.054181</td>
+      <td>4.218103</td>
+      <td>0.000072</td>
+      <td>2.0</td>
+      <td>Eiger_Strong</td>
+      <td>Potential single line Halpha, need photoz</td>
+      <td>0.0</td>
+      <td>21.317896</td>
+      <td>20.512974</td>
+      <td>20.809418</td>
+      <td>21.266880</td>
+      <td>21.720774</td>
+      <td>21.483837</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td><a href="stamps/v3corstacked_2D_13157.png"><img src="stamps/v3corstacked_2D_13157.png" width="60" > </a></td>
+      <td>v3corstacked_2D_13157</td>
+      <td>15.029782</td>
+      <td>28.039471</td>
+      <td>4.313024</td>
+      <td>0.000196</td>
+      <td>2.0</td>
+      <td>Eiger_Strong</td>
+      <td>Low confidence, need photo-z/Merger?</td>
+      <td>0.0</td>
+      <td>23.731174</td>
+      <td>23.707569</td>
+      <td>24.277023</td>
+      <td>24.776896</td>
+      <td>25.238039</td>
+      <td>25.749285</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td><a href="stamps/v3corstacked_2D_2476.png"><img src="stamps/v3corstacked_2D_2476.png" width="60" > </a></td>
+      <td>v3corstacked_2D_2476</td>
+      <td>15.074200</td>
+      <td>28.049114</td>
+      <td>2.428786</td>
+      <td>0.000275</td>
+      <td>3.0</td>
+      <td>Eiger_Strong</td>
+      <td>High confidence, low z galaxy</td>
+      <td>0.0</td>
+      <td>24.066181</td>
+      <td>24.188885</td>
+      <td>24.510981</td>
+      <td>24.986263</td>
+      <td>25.080544</td>
+      <td>25.015984</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td><a href="stamps/v3corstacked_2D_8565.png"><img src="stamps/v3corstacked_2D_8565.png" width="60" > </a></td>
+      <td>v3corstacked_2D_8565</td>
+      <td>15.050729</td>
+      <td>28.051810</td>
+      <td>2.601624</td>
+      <td>0.000095</td>
+      <td>3.0</td>
+      <td>Eiger_Strong</td>
+      <td>High confidence, low z galaxy</td>
+      <td>0.0</td>
+      <td>22.507153</td>
+      <td>23.368250</td>
+      <td>25.682117</td>
+      <td>26.700317</td>
+      <td>27.741610</td>
+      <td>27.433908</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td><a href="stamps/v3corstacked_2D_581.png"><img src="stamps/v3corstacked_2D_581.png" width="60" > </a></td>
+      <td>v3corstacked_2D_581</td>
+      <td>15.071115</td>
+      <td>28.064032</td>
+      <td>4.220755</td>
+      <td>0.000115</td>
+      <td>1.5</td>
+      <td>Eiger_Strong</td>
+      <td>Low confidence, need photo-z</td>
+      <td>0.0</td>
+      <td>25.770435</td>
+      <td>27.207085</td>
+      <td>27.919579</td>
+      <td>27.325615</td>
+      <td>28.648949</td>
+      <td>28.467150</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td><a href="stamps/v3corstacked_2D_6193.png"><img src="stamps/v3corstacked_2D_6193.png" width="60" > </a></td>
+      <td>v3corstacked_2D_6193</td>
+      <td>15.066345</td>
+      <td>28.041272</td>
+      <td>4.512682</td>
+      <td>0.000542</td>
+      <td>1.5</td>
+      <td>Eiger_Strong</td>
+      <td>Low confidence-check photo-z</td>
+      <td>0.0</td>
+      <td>22.843977</td>
+      <td>22.739607</td>
+      <td>23.190945</td>
+      <td>23.920055</td>
+      <td>24.154694</td>
+      <td>24.101900</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td><a href="stamps/v3corstacked_2D_11862.png"><img src="stamps/v3corstacked_2D_11862.png" width="60" > </a></td>
+      <td>v3corstacked_2D_11862</td>
+      <td>15.027963</td>
+      <td>28.033559</td>
+      <td>4.850944</td>
+      <td>0.000315</td>
+      <td>2.0</td>
+      <td>Eiger_Strong</td>
+      <td>Possible-check photo-z</td>
+      <td>0.0</td>
+      <td>27.389683</td>
+      <td>27.519508</td>
+      <td>27.586100</td>
+      <td>27.244297</td>
+      <td>27.423347</td>
+      <td>98.526665</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td><a href="stamps/v3corstacked_2D_9138.png"><img src="stamps/v3corstacked_2D_9138.png" width="60" > </a></td>
+      <td>v3corstacked_2D_9138</td>
+      <td>15.059515</td>
+      <td>28.037460</td>
+      <td>2.352936</td>
+      <td>0.000153</td>
+      <td>3.0</td>
+      <td>Eiger_Strong</td>
+      <td>High confidence, low-z galaxy</td>
+      <td>0.0</td>
+      <td>22.813984</td>
+      <td>23.341707</td>
+      <td>24.826694</td>
+      <td>25.702929</td>
+      <td>26.324055</td>
+      <td>26.649574</td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td><a href="stamps/v3corstacked_2D_15512.png"><img src="stamps/v3corstacked_2D_15512.png" width="60" > </a></td>
+      <td>v3corstacked_2D_15512</td>
+      <td>15.051086</td>
+      <td>28.032251</td>
+      <td>0.978026</td>
+      <td>0.000122</td>
+      <td>1.0</td>
+      <td>Eiger_Strong</td>
+      <td>Photo-z needed, identify the weak line at 3.249 micron</td>
+      <td>0.0</td>
+      <td>19.027725</td>
+      <td>19.287195</td>
+      <td>20.210306</td>
+      <td>20.922022</td>
+      <td>21.521303</td>
+      <td>22.251390</td>
+    </tr>
+    <tr>
+      <th>19</th>
+      <td><a href="stamps/v3corstacked_2D_18550.png"><img src="stamps/v3corstacked_2D_18550.png" width="60" > </a></td>
+      <td>v3corstacked_2D_18550</td>
+      <td>15.047918</td>
+      <td>28.040631</td>
+      <td>4.223912</td>
+      <td>0.000121</td>
+      <td>1.0</td>
+      <td>Eiger_Strong</td>
+      <td>Something odd with the spectrum. visual spectrum plot doesn't match. check</td>
+      <td>0.0</td>
+      <td>25.449327</td>
+      <td>25.403723</td>
+      <td>25.682068</td>
+      <td>25.974827</td>
+      <td>26.047012</td>
+      <td>26.497612</td>
+    </tr>
+    <tr>
+      <th>20</th>
+      <td><a href="stamps/v3corstacked_2D_15504.png"><img src="stamps/v3corstacked_2D_15504.png" width="60" > </a></td>
+      <td>v3corstacked_2D_15504</td>
+      <td>15.051039</td>
+      <td>28.032004</td>
+      <td>4.647485</td>
+      <td>0.000246</td>
+      <td>1.0</td>
+      <td>Eiger_Strong</td>
+      <td>Potential high-z interloper, need photo-z, second solution= merger component with the brighter spiral galaxy</td>
+      <td>0.0</td>
+      <td>23.863060</td>
+      <td>24.003220</td>
+      <td>24.688917</td>
+      <td>25.344210</td>
+      <td>25.935616</td>
+      <td>26.245134</td>
+    </tr>
+    <tr>
+      <th>21</th>
+      <td><a href="stamps/v3corstacked_2D_7015.png"><img src="stamps/v3corstacked_2D_7015.png" width="60" > </a></td>
+      <td>v3corstacked_2D_7015</td>
+      <td>15.060279</td>
+      <td>28.043977</td>
+      <td>4.221978</td>
+      <td>0.000327</td>
+      <td>2.0</td>
+      <td>Eiger_Strong</td>
+      <td>Merger candidate, need photo-z to confirm</td>
+      <td>0.0</td>
+      <td>26.428461</td>
+      <td>26.636925</td>
+      <td>27.219448</td>
+      <td>29.227535</td>
+      <td>27.759075</td>
+      <td>28.353733</td>
+    </tr>
+    <tr>
+      <th>22</th>
+      <td><a href="stamps/v3corstacked_2D_3113.png"><img src="stamps/v3corstacked_2D_3113.png" width="60" > </a></td>
+      <td>v3corstacked_2D_3113</td>
+      <td>15.073298</td>
+      <td>28.049141</td>
+      <td>4.535827</td>
+      <td>0.000158</td>
+      <td>1.0</td>
+      <td>Eiger_Strong</td>
+      <td>Low confidence, need photo-z to verify</td>
+      <td>0.0</td>
+      <td>22.118275</td>
+      <td>21.417873</td>
+      <td>21.715902</td>
+      <td>22.156218</td>
+      <td>22.556667</td>
+      <td>22.370378</td>
+    </tr>
+    <tr>
+      <th>23</th>
+      <td><a href="stamps/v3corstacked_2D_18551.png"><img src="stamps/v3corstacked_2D_18551.png" width="60" > </a></td>
+      <td>v3corstacked_2D_18551</td>
+      <td>15.054300</td>
+      <td>28.030553</td>
+      <td>6.765482</td>
+      <td>0.000470</td>
+      <td>3.0</td>
+      <td>Eiger_Strong</td>
+      <td>High confidence</td>
+      <td>0.0</td>
+      <td>25.097588</td>
+      <td>25.757656</td>
+      <td>25.966301</td>
+      <td>27.205881</td>
+      <td>98.550148</td>
+      <td>29.551985</td>
+    </tr>
+    <tr>
+      <th>24</th>
+      <td><a href="stamps/v3corstacked_2D_18051.png"><img src="stamps/v3corstacked_2D_18051.png" width="60" > </a></td>
+      <td>v3corstacked_2D_18051</td>
+      <td>15.051136</td>
+      <td>28.030863</td>
+      <td>0.985692</td>
+      <td>0.000016</td>
+      <td>2.5</td>
+      <td>Eiger_Strong</td>
+      <td>confident fit, stamp shows a bright big galaxy, confirm with photo-z</td>
+      <td>0.0</td>
+      <td>21.486118</td>
+      <td>21.478880</td>
+      <td>22.014193</td>
+      <td>22.498541</td>
+      <td>22.985731</td>
+      <td>23.573088</td>
+    </tr>
+    <tr>
+      <th>25</th>
+      <td><a href="stamps/v3corstacked_2D_13152.png"><img src="stamps/v3corstacked_2D_13152.png" width="60" > </a></td>
+      <td>v3corstacked_2D_13152</td>
+      <td>15.029615</td>
+      <td>28.039548</td>
+      <td>4.317261</td>
+      <td>0.000150</td>
+      <td>2.0</td>
+      <td>Eiger_Strong</td>
+      <td>Potential merger candidate, see gal id 13157. need photo-z to confirm</td>
+      <td>0.0</td>
+      <td>22.397961</td>
+      <td>22.380592</td>
+      <td>23.030510</td>
+      <td>23.530472</td>
+      <td>23.955338</td>
+      <td>24.637938</td>
+    </tr>
+    <tr>
+      <th>26</th>
+      <td><a href="stamps/v3corstacked_2D_18026.png"><img src="stamps/v3corstacked_2D_18026.png" width="60" > </a></td>
+      <td>v3corstacked_2D_18026</td>
+      <td>15.051091</td>
+      <td>28.033428</td>
+      <td>6.761464</td>
+      <td>0.000118</td>
+      <td>3.0</td>
+      <td>Eiger_Strong</td>
+      <td>Very confident</td>
+      <td>0.0</td>
+      <td>25.328686</td>
+      <td>26.471325</td>
+      <td>26.924721</td>
+      <td>29.904417</td>
+      <td>27.601395</td>
+      <td>98.639168</td>
+    </tr>
+    <tr>
+      <th>27</th>
+      <td><a href="stamps/v3corstacked_2D_8183.png"><img src="stamps/v3corstacked_2D_8183.png" width="60" > </a></td>
+      <td>v3corstacked_2D_8183</td>
+      <td>15.053793</td>
+      <td>28.047379</td>
+      <td>4.544715</td>
+      <td>0.000084</td>
+      <td>1.5</td>
+      <td>Eiger_Strong</td>
+      <td>Potentially clumpy galaxy or a merger. Need photoz for verification</td>
+      <td>0.0</td>
+      <td>26.059673</td>
+      <td>24.867792</td>
+      <td>26.047430</td>
+      <td>26.825066</td>
+      <td>26.979412</td>
+      <td>26.750830</td>
+    </tr>
+    <tr>
+      <th>28</th>
+      <td><a href="stamps/v3corstacked_2D_9950.png"><img src="stamps/v3corstacked_2D_9950.png" width="60" > </a></td>
+      <td>v3corstacked_2D_9950</td>
+      <td>15.055354</td>
+      <td>28.041262</td>
+      <td>4.514417</td>
+      <td>0.000393</td>
+      <td>1.5</td>
+      <td>Eiger_Strong</td>
+      <td>Potential, need photo-z</td>
+      <td>0.0</td>
+      <td>24.254097</td>
+      <td>24.302805</td>
+      <td>24.743656</td>
+      <td>25.292994</td>
+      <td>28.605188</td>
+      <td>98.571411</td>
+    </tr>
+    <tr>
+      <th>29</th>
+      <td><a href="stamps/v3corstacked_2D_18545.png"><img src="stamps/v3corstacked_2D_18545.png" width="60" > </a></td>
+      <td>v3corstacked_2D_18545</td>
+      <td>15.054199</td>
+      <td>28.030599</td>
+      <td>6.754783</td>
+      <td>0.000489</td>
+      <td>3.0</td>
+      <td>Eiger_Strong</td>
+      <td>Confident tripple line detection</td>
+      <td>0.0</td>
+      <td>24.548880</td>
+      <td>25.228376</td>
+      <td>25.715845</td>
+      <td>27.825230</td>
+      <td>98.495445</td>
+      <td>98.495445</td>
+    </tr>
+    <tr>
+      <th>30</th>
+      <td><a href="stamps/v3corstacked_2D_20233.png"><img src="stamps/v3corstacked_2D_20233.png" width="60" > </a></td>
+      <td>v3corstacked_2D_20233</td>
+      <td>15.028923</td>
+      <td>28.023660</td>
+      <td>4.319265</td>
+      <td>0.000183</td>
+      <td>2.0</td>
+      <td>Eiger_Strong</td>
+      <td>Potential Halpha, need photo-z to confirm</td>
+      <td>0.0</td>
+      <td>26.965263</td>
+      <td>27.070044</td>
+      <td>27.244453</td>
+      <td>27.849091</td>
+      <td>28.098663</td>
+      <td>28.004688</td>
+    </tr>
+    <tr>
+      <th>31</th>
+      <td><a href="stamps/v3corstacked_2D_7514.png"><img src="stamps/v3corstacked_2D_7514.png" width="60" > </a></td>
+      <td>v3corstacked_2D_7514</td>
+      <td>15.057518</td>
+      <td>28.045557</td>
+      <td>4.214579</td>
+      <td>0.000267</td>
+      <td>2.0</td>
+      <td>Eiger_Strong</td>
+      <td>Merger candidate, stamp shows clumpy morphology and a potential tidal tail</td>
+      <td>0.0</td>
+      <td>25.634521</td>
+      <td>25.693968</td>
+      <td>26.040239</td>
+      <td>26.732624</td>
+      <td>26.577396</td>
+      <td>27.483406</td>
+    </tr>
+    <tr>
+      <th>32</th>
+      <td><a href="stamps/v3corstacked_2D_18007.png"><img src="stamps/v3corstacked_2D_18007.png" width="60" > </a></td>
+      <td>v3corstacked_2D_18007</td>
+      <td>15.055513</td>
+      <td>28.027079</td>
+      <td>4.533686</td>
+      <td>0.000113</td>
+      <td>2.0</td>
+      <td>Eiger_Strong</td>
+      <td>Potential merger/clumpy galaxy. Photo-z needed</td>
+      <td>0.0</td>
+      <td>24.867676</td>
+      <td>24.541317</td>
+      <td>24.935139</td>
+      <td>25.416782</td>
+      <td>25.721127</td>
+      <td>26.401667</td>
+    </tr>
+    <tr>
+      <th>33</th>
+      <td><a href="stamps/v3corstacked_2D_7938.png"><img src="stamps/v3corstacked_2D_7938.png" width="60" > </a></td>
+      <td>v3corstacked_2D_7938</td>
+      <td>15.057960</td>
+      <td>28.042754</td>
+      <td>6.225223</td>
+      <td>0.000120</td>
+      <td>2.0</td>
+      <td>Eiger_Strong</td>
+      <td>Defeinite OIII triplet, but wavelength solution is off between both modules.</td>
+      <td>0.0</td>
+      <td>27.112957</td>
+      <td>27.215322</td>
+      <td>27.725983</td>
+      <td>28.537680</td>
+      <td>27.474852</td>
+      <td>29.323513</td>
+    </tr>
+    <tr>
+      <th>34</th>
+      <td><a href="stamps/v3corstacked_2D_19021.png"><img src="stamps/v3corstacked_2D_19021.png" width="60" > </a></td>
+      <td>v3corstacked_2D_19021</td>
+      <td>15.052165</td>
+      <td>28.034417</td>
+      <td>6.764831</td>
+      <td>0.000139</td>
+      <td>3.0</td>
+      <td>Eiger_Strong</td>
+      <td>very confident Merger/Lens candidate</td>
+      <td>0.0</td>
+      <td>23.515860</td>
+      <td>23.605808</td>
+      <td>24.280588</td>
+      <td>25.100155</td>
+      <td>25.706102</td>
+      <td>26.362925</td>
+    </tr>
+    <tr>
+      <th>35</th>
+      <td><a href="stamps/v3corstacked_2D_6898.png"><img src="stamps/v3corstacked_2D_6898.png" width="60" > </a></td>
+      <td>v3corstacked_2D_6898</td>
+      <td>15.064898</td>
+      <td>28.038865</td>
+      <td>6.013524</td>
+      <td>0.000043</td>
+      <td>3.0</td>
+      <td>Eiger_Strong</td>
+      <td>vert confident OIII doublet detected</td>
+      <td>0.0</td>
+      <td>26.045519</td>
+      <td>26.468102</td>
+      <td>26.764977</td>
+      <td>27.224415</td>
+      <td>27.391344</td>
+      <td>29.160402</td>
+    </tr>
+    <tr>
+      <th>36</th>
+      <td><a href="stamps/v3corstacked_2D_8263.png"><img src="stamps/v3corstacked_2D_8263.png" width="60" > </a></td>
+      <td>v3corstacked_2D_8263</td>
+      <td>15.055625</td>
+      <td>28.046466</td>
+      <td>0.930189</td>
+      <td>0.000048</td>
+      <td>1.5</td>
+      <td>Eiger_Strong</td>
+      <td>Need photo-z, based on galaxy image size, possibly low-z galaxy</td>
+      <td>0.0</td>
+      <td>23.531925</td>
+      <td>23.404764</td>
+      <td>23.639957</td>
+      <td>24.295630</td>
+      <td>24.715462</td>
+      <td>24.636538</td>
+    </tr>
+    <tr>
+      <th>37</th>
+      <td><a href="stamps/v3corstacked_2D_10424.png"><img src="stamps/v3corstacked_2D_10424.png" width="60" > </a></td>
+      <td>v3corstacked_2D_10424</td>
+      <td>15.054457</td>
+      <td>28.043500</td>
+      <td>4.647040</td>
+      <td>0.000372</td>
+      <td>1.5</td>
+      <td>Eiger_Strong</td>
+      <td>Low confidence, need photo-z, weak single line seen in both modules.</td>
+      <td>0.0</td>
+      <td>23.259016</td>
+      <td>23.158491</td>
+      <td>23.574026</td>
+      <td>23.612289</td>
+      <td>24.032040</td>
+      <td>25.042339</td>
+    </tr>
+    <tr>
+      <th>38</th>
+      <td><a href="stamps/v3corstacked_2D_6569.png"><img src="stamps/v3corstacked_2D_6569.png" width="60" > </a></td>
+      <td>v3corstacked_2D_6569</td>
+      <td>15.059618</td>
+      <td>28.048423</td>
+      <td>2.677379</td>
+      <td>0.000133</td>
+      <td>3.0</td>
+      <td>Eiger_Strong</td>
+      <td>High confident</td>
+      <td>0.0</td>
+      <td>23.120087</td>
+      <td>23.385258</td>
+      <td>24.723402</td>
+      <td>25.529299</td>
+      <td>25.866240</td>
+      <td>25.901098</td>
+    </tr>
+    <tr>
+      <th>39</th>
+      <td><a href="stamps/v3corstacked_2D_7143.png"><img src="stamps/v3corstacked_2D_7143.png" width="60" > </a></td>
+      <td>v3corstacked_2D_7143</td>
+      <td>15.060288</td>
+      <td>28.043867</td>
+      <td>4.222077</td>
+      <td>0.000086</td>
+      <td>3.0</td>
+      <td>Eiger_Strong</td>
+      <td>Merger lower object/Or lensing, need photo-z</td>
+      <td>0.0</td>
+      <td>25.399580</td>
+      <td>25.491209</td>
+      <td>25.964668</td>
+      <td>26.166399</td>
+      <td>26.302818</td>
+      <td>26.963301</td>
+    </tr>
+    <tr>
+      <th>40</th>
+      <td><a href="stamps/v3corstacked_2D_8219.png"><img src="stamps/v3corstacked_2D_8219.png" width="60" > </a></td>
+      <td>v3corstacked_2D_8219</td>
+      <td>15.061340</td>
+      <td>28.038586</td>
+      <td>2.355617</td>
+      <td>0.000034</td>
+      <td>3.0</td>
+      <td>Eiger_Strong</td>
+      <td>High confidence, SIII blended with P-epsilon</td>
+      <td>NaN</td>
+      <td>22.573048</td>
+      <td>22.901871</td>
+      <td>24.239027</td>
+      <td>25.383274</td>
+      <td>25.828184</td>
+      <td>25.848274</td>
+    </tr>
+    <tr>
+      <th>41</th>
+      <td><a href="stamps/v3corstacked_2D_8608.png"><img src="stamps/v3corstacked_2D_8608.png" width="60" > </a></td>
+      <td>v3corstacked_2D_8608</td>
+      <td>15.049409</td>
+      <td>28.051921</td>
+      <td>2.355663</td>
+      <td>0.000124</td>
+      <td>2.5</td>
+      <td>Eiger_Strong</td>
+      <td>very kikely lowz merger, need photo-z to confirm</td>
+      <td>0.0</td>
+      <td>25.847229</td>
+      <td>25.369087</td>
+      <td>25.919317</td>
+      <td>26.309439</td>
+      <td>26.753698</td>
+      <td>26.150536</td>
+    </tr>
+    <tr>
+      <th>42</th>
+      <td><a href="stamps/v3corstacked_2D_17751.png"><img src="stamps/v3corstacked_2D_17751.png" width="60" > </a></td>
+      <td>v3corstacked_2D_17751</td>
+      <td>15.041282</td>
+      <td>28.044664</td>
+      <td>6.370523</td>
+      <td>0.000547</td>
+      <td>3.0</td>
+      <td>Eiger_Strong</td>
+      <td>Solid detection</td>
+      <td>0.0</td>
+      <td>26.148432</td>
+      <td>26.605104</td>
+      <td>26.514956</td>
+      <td>26.959103</td>
+      <td>28.158726</td>
+      <td>29.182104</td>
+    </tr>
+    <tr>
+      <th>43</th>
+      <td><a href="stamps/v3corstacked_2D_15783.png"><img src="stamps/v3corstacked_2D_15783.png" width="60" > </a></td>
+      <td>v3corstacked_2D_15783</td>
+      <td>15.036403</td>
+      <td>28.041047</td>
+      <td>0.820783</td>
+      <td>0.000039</td>
+      <td>1.5</td>
+      <td>Eiger_Strong</td>
+      <td>Potential low-z absorber, need photo-z, based on galaxy size on stamp</td>
+      <td>0.0</td>
+      <td>23.737795</td>
+      <td>23.545120</td>
+      <td>23.779892</td>
+      <td>24.236027</td>
+      <td>24.748566</td>
+      <td>24.787376</td>
+    </tr>
+    <tr>
+      <th>44</th>
+      <td><a href="stamps/v3corstacked_2D_9078.png"><img src="stamps/v3corstacked_2D_9078.png" width="60" > </a></td>
+      <td>v3corstacked_2D_9078</td>
+      <td>15.056028</td>
+      <td>28.040967</td>
+      <td>4.518929</td>
+      <td>0.000091</td>
+      <td>1.5</td>
+      <td>Eiger_Strong</td>
+      <td>Check photo-z</td>
+      <td>0.0</td>
+      <td>26.319860</td>
+      <td>26.399984</td>
+      <td>26.778637</td>
+      <td>27.160683</td>
+      <td>27.053806</td>
+      <td>35.633793</td>
+    </tr>
+  </tbody>
+</table>
+    <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js" integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready( function () {
+            $('#table').DataTable({
+                // paging: false,    
+                // scrollY: 400,
+            });
+        });
+    </script>
+    </body>
+    </html>
+    
