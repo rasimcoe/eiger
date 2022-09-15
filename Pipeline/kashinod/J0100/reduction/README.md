@@ -87,7 +87,7 @@ The bash scripts `exe_*.sh` and `qsub_exe_*.sh` are prepared to run the process 
   - and then `apply_emline_mask.ipynb`
     - Output mask files: e.g., `calibrated_img2_wfss/jw01243001001_02101_00001_nrcalong_mask.fits`
 
-### Do everything again but now with mask!
+### Do everything again with mask!
 
 - Global median subtraction with mask
   - `bash qsub_exe_subtract_globalMed_wfss_with_mask.sh` to run `subtract_globalMed_wfss.py` with `--mask` option
