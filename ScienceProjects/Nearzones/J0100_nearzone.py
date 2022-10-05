@@ -12,7 +12,9 @@ class Nearzone:
 
     def __init__(self):
 
-        self.galtable = Table.read('../../Database/J0100_photcat_v2_O3emitters_Systems_28092022.fits')
+        # Note to self: this table will go in the database once we are out of Ringberg
+        self.galtable = Table.read('/Users/simcoe/Science/eiger/Database/J0100_photcat_v2_O3emitters_Systems_28092022.fits')
+        
         self.zqso     = 6.3258
         self.qso_ra   = 15.054268
         self.qso_dec  = 28.040497
