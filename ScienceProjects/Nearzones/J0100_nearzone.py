@@ -8,6 +8,19 @@ import astropy.constants as c
 import numpy as np
 import eiger.QuasarSpec.loadQsoSpec as spec
 
+
+# Usage:
+#
+# from eiger.ScienceProjects.Nearzones import J0100_nearzone as nz
+# tt = nz.Nearzone()
+#
+# To plot the 3D volume rendering:
+# tt.plot3d()
+#
+# To plot the \Gamma contribution from galaxies near the QSO sightline (partially complete)
+# tt.Gamma_galaxies()
+#
+
 class Nearzone:
 
     def __init__(self):
