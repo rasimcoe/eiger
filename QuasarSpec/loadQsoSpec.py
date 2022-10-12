@@ -12,12 +12,10 @@ import numpy as np
 # the remote one to the cache and returns the result.
 #
 
-def getSpec(specfile, offline=False):
+def getSpec(specfile, offline=False, filenames=False):
 
     localfile = os.getenv('EIGER_CACHE')+'/'+specfile[1]
 
-    offline=False
-    
     if (not offline):
         try:
 
@@ -141,38 +139,60 @@ def parseSpec(fitsfile, instrument):
 
 
 def loadQsoSpec(obj_id, spectrographs=['XShooter', 'FIRE', 'MOSFIRE', 'HIRES','FIRE_XSH'], \
-                revision='current', files=False):
+                revision='current', offline=False):
 
     if (obj_id < 1 or obj_id > 6):
         print("ERROR: Quasar ID must be between 1 and 6")
         return(None)
     
-    db = eigerdb.Eigerdb()
-    db.getcursor()
-
-    reply = db.query(f"select name,zem from Quasars where id={obj_id}")
-    print(f"Object: {reply[0][0]}, quasarid={obj_id}")
-    
-    ##### Find the spectra that exist in the observations database
-
     spectra = {}
 
-    spectra['objid']   = obj_id
-    spectra['objname'] = reply[0][0]
-    spectra['z_em'] = reply[0][1]
-    spectra['revision'] = revision
+    if (offline == False):
+        ##### Find the spectra that exist in the observations database
+        db = eigerdb.Eigerdb()
+        db.getcursor()
+
+        reply = db.query(f"select name,zem from Quasars where id={obj_id}")
+        print(f"Object: {reply[0][0]}, quasarid={obj_id}")
+        spectra['objid']   = obj_id
+        spectra['objname'] = reply[0][0]
+        spectra['z_em'] = reply[0][1]
+        spectra['revision'] = revision
+    else:
+        if (obj_id == 4):
+            spectra['objid']   = obj_id
+            spectra['objname'] = 'J0100'
+            spectra['z_em'] = 6.3258
+            spectra['revision'] = 'current'
+        else:
+            print(f"loadQsoSpec not configured for objid == {obj_id}")
+            return()
     
     for spectrograph in spectrographs:
 
-        querystring = """
-        SELECT awsbucket,awspath 
-        FROM Observations 
-        WHERE quasarid={} 
-        AND revision=\'{}\'
-        AND instrument=\'{}\'""".format(obj_id,revision,spectrograph)
+        if (offline == False):
+            querystring = """
+            SELECT awsbucket,awspath 
+            FROM Observations 
+            WHERE quasarid={} 
+            AND revision=\'{}\'
+            AND instrument=\'{}\'""".format(obj_id,revision,spectrograph)
+            
+            obs = db.query(querystring)
 
-        obs = db.query(querystring)
-
+        else:
+            if (obj_id == 4):
+                if (spectrograph=='XShooter'):
+                    obs = [['gto1243','VLT/XShooter/J0100+2802_VIS_XSHOOTER.fits'], \
+                           ['gto1243','VLT/XShooter/J0100+2802_NIR_XSHOOTER.fits']]
+                elif (spectrograph=='FIRE'):
+                    obs = [['gto1243','Magellan/FIRE/J0100+28_FIRE_firehose.fits']]
+                elif (spectrograph == 'HIRES'):
+                    obs = [['gto1243','Keck/HIRES/J0100_HIRES.fits']]
+                else:
+                    print("ERROR: bad instrument passed in offline mode")
+                    return()
+                    
         if (len(obs) > 0):
 
             print(f"{spectrograph}:")
@@ -180,23 +200,19 @@ def loadQsoSpec(obj_id, spectrographs=['XShooter', 'FIRE', 'MOSFIRE', 'HIRES','F
             if (spectrograph == 'XShooter'):
                 # Grab both the VIS and NIR arms
                 for oo in obs:
-                    local_file = getSpec(oo)
+                    local_file = getSpec(oo, offline=offline)
                     if ('VIS' in local_file):
                         arm = 'XSH_VIS'
                     else:
                         arm = 'XSH_NIR'
 
-                    if (files==True):
-                        spectrum = local_file
-                    else:
-                        spectrum = parseSpec(local_file,spectrograph)
-
+                    spectrum = parseSpec(local_file,spectrograph)
                     spectra[arm] = spectrum
 
             elif (spectrograph == 'MOSFIRE'):
                 # Separate files for Y, J, H, K
                 for oo in obs:
-                    local_file = getSpec(oo)
+                    local_file = getSpec(oo, offline=offline)
                     if ('_Y_' in local_file):
                         arm='MOSFIRE_Y'
                     elif ('_J_' in local_file):
@@ -205,26 +221,20 @@ def loadQsoSpec(obj_id, spectrographs=['XShooter', 'FIRE', 'MOSFIRE', 'HIRES','F
                         arm='MOSFIRE_H'
                     elif ('_K_' in local_file):
                         arm='MOSFIRE_K'
-                    if (files==True):
-                        spectrum = local_file
-                    else:
-                        spectrum = parseSpec(local_file,spectrograph)
+
+                    spectrum = parseSpec(local_file,spectrograph)
                     spectra[arm] = spectrum
 
             else:
-                local_file = getSpec(obs[0])
-
-                if (files==True):
-                    spectrum = local_file
-                else:
-                    spectrum = parseSpec(local_file,spectrograph)
-
+                local_file = getSpec(obs[0], offline=offline)
+                spectrum = parseSpec(local_file,spectrograph)
                 spectra[spectrograph] = spectrum
 
         else:
             continue
             
-    db.close()
+    if (offline == False):
+        db.close()
     
     return(spectra)
 
