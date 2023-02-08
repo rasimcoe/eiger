@@ -41,6 +41,11 @@ SAVE_FOLDER='/scratch/EIGER/extraction/OPTIMAL_PROFILES/'
 CATALOG='/scratch/EIGER/identification/J0100_photcat_v2_CONCAT_O3candidates_HYBRID_BACKWARD_MANUALRADEC.fits'
 
 
+SAVE_FOLDER='/scratch/EIGER/extraction/OPTIMAL_PROFILES_EXTRA/'
+
+FOLDER='/scratch/EIGER/identification/EXTRA_10OCT/'
+CATALOG='/scratch/EIGER/identification/EXTRA_12Oct_24O3.fits'
+CATALOG='/scratch/EIGER/identification/EXTRA_12Oct_FINAL82.fits'
 rescale_noise=True #if true, rescales the mean(err_1d) to be equal to the std(data_1d) with some outlier removal
 
 
@@ -67,8 +72,9 @@ for q in range(len(IDlist)):
 		continue
 	thisNclumps_Y=Nclumps_Y[q]
 
-
-	hdu= fits.open(FOLDER+'v4corstacked_2D_%s.fits'%thisID)
+	#thisNclumps_Y=3.
+	#thisz=6.32724223
+	hdu= fits.open(FOLDER+'v3corstacked_2D_%s.fits'%thisID)
 	hd=hdu['EMLINE'].header
 	data=hdu['EMLINE'].data
 
@@ -102,11 +108,6 @@ for q in range(len(IDlist)):
 		if len(subset_data[sel_real])==0:
 			opt_weight=np.zeros(np.shape(data))
 			continue
-
-
-
-		#if module=='B':
-		#	subset_data=np.fliplr(subset_data)
 
 
 		collapse_y=np.nansum(subset_data,axis=1)
@@ -158,7 +159,7 @@ for q in range(len(IDlist)):
 			model.set_param_hint('m1_c',min=-0.5,max=0.5)
 
 			model.set_param_hint('m1_x0',min=22.,max=28)
-			model.set_param_hint('m2_x0',min=5.,max=26)
+			model.set_param_hint('m2_x0',min=5.,max=21)
 			model.set_param_hint('m3_x0',min=26.,max=38)
 
 
@@ -168,7 +169,7 @@ for q in range(len(IDlist)):
 			params['m3_c'].vary=False
 
 
-		if thisNclumps_Y==4.:
+		if thisNclumps_Y==4.: #honestly this is only used for one object, id 19021
 			model=Model(gaussian,independent_vars=('x'),prefix='m1_')+Model(gaussian,independent_vars=('x'),prefix='m2_')+Model(gaussian,independent_vars=('x'),prefix='m3_')+Model(gaussian,independent_vars=('x'),prefix='m4_')
 			#print(model.param_names)
 			model.set_param_hint('m1_sigma',min=0.8,max=3.5)
@@ -250,12 +251,14 @@ for q in range(len(IDlist)):
 
 			emline_extracted_err=emline_extracted_err * standard/median_err
 
+			print(standard)
+
 		COLS.append(fits.Column(name='flux_tot_%s'%module,unit='1E18 erg/s/cm2/A',format='E',array=emline_extracted))
 		COLS.append(fits.Column(name='flux_tot_%s_err'%module,unit='1E18 erg/s/cm2/A',format='E',array=emline_extracted_err))
 		
 	cols=fits.ColDefs(COLS)#,col13,col14])
 	hdu_1D = fits.BinTableHDU.from_columns(cols)
-	#hdu=fits.PrimaryHDU(numpy.arange(100.))
+	hdu=fits.PrimaryHDU(numpy.arange(100.))
 	hdu_1D.writeto(SAVE_FOLDER+'spectrum_1D_%s.fits'%(thisID),overwrite=True)
 
 
