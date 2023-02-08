@@ -21,11 +21,19 @@ from astropy.wcs import WCS, utils
 import astropy.units as u
 
 
+
+
+field='J0100'
+grismconf_calib_version=4 
+ysize=51
+
+
+
 directimage='/scratch/kashinod/EIGER/J0100/current_best/stack_F356W_pipe4_v3_fluxcal_pipeupdate_20220920.fits'
 
 ### Output directory
 
-FOLDER='/scratch/EIGER/identification/SPECTRA_J0100_20ARCSEC/'
+FOLDER='/scratch/EIGER/identification/TEST/'
 
 
 #CATALOG WITH SOURCES TO EXTRACT // CAN ALSO SKIP AND HAVE IDlist,RAlist and DEClist manually
@@ -59,11 +67,13 @@ DEC_of_the_duplicates=data.field('DEC_others')
 BOOKKEEPING=False
 
 
-
-###OUR IMPROVEMENTS TO THE EXTRACTION USING GRISMCONF V4
 wcscor=True ##WCS correction between visits and parent catalog
-tracecor=True #Trace correction derived by DK based on commissioning data
-lambcor=True #Wavelength correction derived by DK based on commissioning data
+###OUR IMPROVEMENTS TO THE EXTRACTION USING GRISMCONF V4
+if grismconf_calib_version==4:
+	tracecor=True #Trace correction derived by DK based on commissioning data
+	lambcor=True #Wavelength correction derived by DK based on commissioning data
+else:
+	stopping_script #make sure you use grismconf V4 calibrations, otherwise tracecor and lambcor don't work
 
 EXPOSURES=['001','002','003','004','005','006','007','008','009','010','011','012']
 PRIMDITS=['2','4']  ## <--- VISITGRP=02 or 04
@@ -72,15 +82,15 @@ VISITS=[1,2,3,4]
 
 ##Example MANUAL IDs 
 # #BROAD HALPHA EMITTERS ID v4
-# IDlist=[12446,14947,15157,16221]
-# RAlist=[15.048243624454152,15.045550156552324,15.030262274046956,15.034037901840078]
-# DEClist=[28.009717338065087,28.028277304725833,28.050176515256226,28.051578609337152]
+IDlist=[12446,14947,15157,16221]
+RAlist=[15.048243624454152,15.045550156552324,15.030262274046956,15.034037901840078]
+DEClist=[28.009717338065087,28.028277304725833,28.050176515256226,28.051578609337152]
 
 
 ### Reference files for offset correction
 ### Spectral trace "y-offset" map (calibrated using PID 1076)
 eiger_reference_dir = '/scratch/kashinod/EIGER/eiger_reference_files/'
-yoffmap_ver = 'v20221004'
+yoffmap_ver = 'v20230109'
 
 fil = eiger_reference_dir+'yoffset_polyreg_F356W.R.ModA_jw01076101_'+yoffmap_ver+'.npy'
 print('Spectral trace y-offset map for Mod A: ', fil)
@@ -99,7 +109,7 @@ fil = eiger_reference_dir+'lambda_offset_'+lamboff_ver+'.npy'
 lambda_offset = np.load(fil, allow_pickle=True)[()]
 print('Lambda-offset: ', fil, lambda_offset)
 
-
+"""
 ### WCS offset parameters for each Visit/Module
 dirimg_vm_dict = {}
 for vis in [1,2,3,4]:
@@ -120,7 +130,7 @@ for vis in [1,2,3,4]:
 #         dirimg_vm_dict[str(vis)+mod]={'wcs':dirimg_vm_wcs, 
 #                                       'pixscale':dirimg_vm_pixscale,
 #                                       'params':params}
-        
+        """
         
 ### photmjsr
 photmjsr={'a':0.381, 'b':0.372}
@@ -140,12 +150,13 @@ def run(qqq):
     bins= 3.00 + dwav * np.arange(1240) 
 
     start = time.time()
-    print('Start: ', start)
+    print('_______________________________________________________________________________')
+    print('___> Start: ', start)
 
     ID=IDlist[qqq]
     RA0=RAlist[qqq]   ### RA0 and DEC0 should be the accurate position of the source in the coadded direct image 
     DEC0=DEClist[qqq]
-    print('ID', ID, '  (RA0,DEC0)', (RA0, DEC0))
+    print('___> ID (NUMBER) ', ID, '  (RA0,DEC0)', (RA0, DEC0))
 
     dd,cc,ww,mm,ee,ll,emem,contcont,qq,nexp,visitcounter,modulecounter=[],[],[],[],[],[],[],[],[],[],[],[]
 
@@ -158,13 +169,21 @@ def run(qqq):
 
             ### Correct WCS offset
             if wcscor:
-                print('Correct WCS')
+                print('___> Correct WCS')
+#                 RA, DEC = eiger_tracing.radec_in_this_vismod_with_wcs(RA0, DEC0, 
+#                                                              dirimg_vm_dict[vm]['wcs'],
+#                                                              visit=visit, module=module, field=field)
+#                 RA = RA[()]
+#                 DEC = DEC[()]
+#                 print('___> ', (RA0,DEC0), ' ==>', (RA,DEC), ' with wcs')
                 RA, DEC = eiger_tracing.radec_in_this_vismod(RA0, DEC0, 
-                                                             dirimg_vm_dict[vm]['wcs'],
-                                                             visit=visit, module=module,field='J0100')
+                                                             visit=visit, module=module, field=field)
                 RA = RA[()]
                 DEC = DEC[()]
-                print((RA0,DEC0), ' ==>', (RA,DEC))
+                print('___> ', (RA0,DEC0), ' ==>', (RA,DEC))
+                
+                
+
             else:
                 print('No correction for WCS')
                 RA = RA0
@@ -195,7 +214,7 @@ def run(qqq):
                     ratename = ('/scratch/kashinod/EIGER/J0100/reduction/calibrated_spc2_bsub/'+
                                 'jw0124300100%s_0%s101_00%s_nrc%slong_assign_wcs.fits'%(visit,repeat,qj,module))
                     
-                    ratename='../reduce_pipeline/reduced/J0100_v1/grism_F356W/jw0124300100%s_0%s101_00%s_nrc%slong_flatfieldstep.fits'%(visit,repeat,qj,module) ##JM. This is only used for WCS
+                    ratename='/scratch/EIGER/reduce_pipeline/reduced/J0100_v1/grism_F356W/jw0124300100%s_0%s101_00%s_nrc%slong_flatfieldstep.fits'%(visit,repeat,qj,module) ##JM. This is only used for WCS
                 
                     print('___> SCI    : ', scidataname)
                     print('___> EMLINE : ', emdataname)
@@ -246,7 +265,7 @@ def run(qqq):
                                                                                   contdataname,
                                                                                   ratename,
                                                                                   yoffset=0.0,
-                                                                                  yhsize=51,
+                                                                                  yhsize=ysize,
                                                                                   use_wcs=False,
                                                                                   senscorrect=False)
                         print('elllll: ', l)
@@ -295,7 +314,7 @@ def run(qqq):
                         cont[~ok]=np.nan
                       
                         # SCI
-                        shifted,shifted_var,shifted_lamb=eiger_tracing.shift_columns_dk(y,d,e**2,l,q,ysize=51)
+                        shifted,shifted_var,shifted_lamb=eiger_tracing.shift_columns_dk(y,d,e**2,l,q,ysize)
                         scrunchd,scrunchd_var,scrunchd_lamb=eiger_tracing.scrunch_columns_dk(bins,
                                                                                              shifted_lamb,
                                                                                              shifted,
@@ -315,7 +334,7 @@ def run(qqq):
 
 
                         #EMLINE
-                        shifted,shifted_var,shifted_lamb=eiger_tracing.shift_columns_dk(y,em,e**2,l,q,ysize=51)
+                        shifted,shifted_var,shifted_lamb=eiger_tracing.shift_columns_dk(y,em,e**2,l,q,ysize)
                         scrunchd,scrunchd_var,scrunchd_lamb=eiger_tracing.scrunch_columns_dk(bins,
                                                                                              shifted_lamb,
                                                                                              shifted,
@@ -325,7 +344,7 @@ def run(qqq):
 
 
                         #CONT
-                        shifted,shifted_var,shifted_lamb=eiger_tracing.shift_columns_dk(y,cont,e**2,l,q,ysize=51)
+                        shifted,shifted_var,shifted_lamb=eiger_tracing.shift_columns_dk(y,cont,e**2,l,q,ysize)
                         scrunchd,scrunchd_var,scrunchd_lamb=eiger_tracing.scrunch_columns_dk(bins,
                                                                                              shifted_lamb,
                                                                                              shifted,
@@ -348,7 +367,7 @@ def run(qqq):
 
                       
     for attempt in [0]:
-        try:
+       # try:
             dd=numpy.array(dd)
 
             print('____',dd)
@@ -384,6 +403,8 @@ def run(qqq):
                               visitcounter==3,
                               visitcounter==4]
             names=['','A','B']#,'V1','V2','V3','V4']
+            stack_m_outliers = 5.0
+            stack_method='mean'  # mean or median
 
             for jj in range(len(names)):
                 thisname=names[jj]
@@ -400,12 +421,21 @@ def run(qqq):
                 fn=np.nansum(nn[this_selection],axis=0)
 
                 #Emission-line image and Continuum
-                fem,fe=eiger_tracing.stack_with_reject_outliers(emem[this_selection],ee[this_selection]**0.5,fn, m = 5.)
-                fcont,fe=eiger_tracing.stack_with_reject_outliers(contcont[this_selection],ee[this_selection]**0.5,fn, m = 5.)
+                fem,fe,mask_outliers=eiger_tracing.stack_with_reject_outliers(emem[this_selection], 
+                                                                                  ee[this_selection], 
+                                                                                  fn, 
+                                                                                  m = stack_m_outliers, 
+                                                                                  method=stack_method)
+        
+                fcont = eiger_tracing.stack_with_mask_outliers(contcont[this_selection], 
+                                                                   mask_outliers, 
+                                                                   method=stack_method)
 
                 #NEW, data
-                #fd = np.nansum(dd[this_selection],axis=0)/fn
-                fd,fe=eiger_tracing.stack_with_reject_outliers(dd[this_selection],ee[this_selection]**0.5,fn, m = 4.)
+                    #fd = np.nansum(dd[this_selection],axis=0)/fn
+                fd = eiger_tracing.stack_with_mask_outliers(dd[this_selection],
+                                                                mask_outliers,
+                                                                method=stack_method)
 
 
                 LONGLIST.append(fits.ImageHDU(data=fem,header=hdu.header,name='EMLINE%s'%thisname))
@@ -484,12 +514,22 @@ def run(qqq):
 
 
             #Emission-line image and Continuum
-            fem,fe=eiger_tracing.stack_with_reject_outliers(emem[visitcounter>0],ee[visitcounter>0],fn, m = 5.)
-            fcont,fe=eiger_tracing.stack_with_reject_outliers(contcont[visitcounter>0],ee[visitcounter>0],fn, m = 5.)
+            fem,fe,mask_outliers=eiger_tracing.stack_with_reject_outliers(emem[visitcounter>0], 
+                                                                          ee[visitcounter>0], fn, 
+                                                                          m = stack_m_outliers, 
+                                                                          method=stack_method)
+
+            stack_method='mean'
+            fcont=eiger_tracing.stack_with_mask_outliers(contcont[visitcounter>0], 
+                                                         mask_outliers,
+                                                         method=stack_method)
 
             #NEW, data
             #fd = np.nansum(dd[visitcounter>0],axis=0)/fn
-            fd,fe=eiger_tracing.stack_with_reject_outliers(dd[visitcounter>0],ee[visitcounter>0],fn, m = 5.)
+            fd=eiger_tracing.stack_with_mask_outliers(dd[visitcounter>0], 
+                                                      mask_outliers,
+                                                      method=stack_method)
+
 
 
             # Hornes optimal extraction of model
@@ -595,17 +635,19 @@ def run(qqq):
             #LONGLIST.append(hdu_1D)
 
             #SAVE THE 2D
-            print('Saving to:', FOLDER+'v7corstacked_2D_%s.fits'%(ID))
+            print('Saving to:', FOLDER+'stacked_2D_%s_%s.fits'%(field,ID))
             new_hdul = fits.HDUList(LONGLIST)
-            new_hdul.writeto(FOLDER+'v7corstacked_2D_%s.fits'%(ID), overwrite=True)
+            new_hdul.writeto(FOLDER+'stacked_2D_%s_%s.fits'%(field,ID), overwrite=True)
             end = time.time()
 
             print('Time lapsed',end-start,'seconds')
 
-        except:
-            continue
+       # except:
+#            continue
 
 
+run(0)
+stopstopstop
 
 n_procs = 44 # number of cores available
 with Pool(n_procs) as pool:

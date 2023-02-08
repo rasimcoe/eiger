@@ -10,7 +10,9 @@ from astropy.io import fits
 import grismconf
 from astropy.nddata import Cutout2D
 from astropy.wcs import WCS
-from astropy.coordinates import SkyCoord
+from astropy.coordinates import SkyCoord, Angle
+
+import astropy.units as u
 
 
 import numpy as np
@@ -980,27 +982,31 @@ def scrunch_columns(lambda_array,l,shifted_y,shifted_y_var,module):
 
 
 
-def stack_with_reject_outliers(data,err,nobs, m = 5.):
+    
+def stack_with_reject_outliers(data,err,nobs, m = 5., method='mean'):
     median=np.nanmedian(data,axis=0)
     std=np.nanstd(data,axis=0)
     mask_outliers=np.abs((data-median))/std > m
     data[mask_outliers]=np.nan
     var=err**2 
     var[mask_outliers]=np.nan
-    #return np.nanmean(data,axis=0), np.nanmean(np.nansum(var,axis=0))**0.5
 
-    return np.nansum(data,axis=0)/nobs,(np.nansum(var,axis=0)/nobs)**0.5
+    if method=='mean':
+        fdata = np.nanmean(data,axis=0)
+    elif method=='median':
+        fdata = np.nanmedian(data,axis=0)
+    
+    return fdata,(np.nanmean(var,axis=0))**0.5, mask_outliers
 
     
+def stack_with_mask_outliers(data, mask_outliers, method='mean'):
+    data[mask_outliers] = np.nan
+    if method=='mean':
+        fdata = np.nanmean(data,axis=0)
+    elif method=='median':
+        fdata = np.nanmedian(data,axis=0)
     
-def stack_with_reject_outliers_median(data, m = 5.):
-    median=np.nanmedian(data,axis=0)
-    std=np.nanstd(data,axis=0)
-    mask_outliers=np.abs((data-median))/std > m
-    data[mask_outliers]=np.nan
-
-    return np.nanmedian(data,axis=0)
-
+    return fdata
 
 
 def create_simple_optweight(wavelength,scrunched_data,kernel):
@@ -1533,7 +1539,30 @@ def get_yoffset(x, y, module, yoffset_map=None):
     else:
         return np.nan
 
+
+
+
+def offset_wcs_in_sky(ra, dec, p):
+
+    n = np.array(ra).size
     
+    skycen = SkyCoord(ra=p[2], dec=p[3], unit='deg')
+    sky = SkyCoord(ra=ra, dec=dec, unit='deg')
+    sky_off = sky.spherical_offsets_by(np.repeat(p[0],n)*u.mas, 
+                                       np.repeat(p[1],n)*u.mas)
+    
+    sky_off_t = skycen.spherical_offsets_to(sky_off)               
+
+    c, s = np.cos(p[4]), np.sin(p[4])  ## p[4] in radian
+    
+    sky_new_t = SkyCoord(ra = (c*sky_off_t[0].deg - s*sky_off_t[1].deg),
+                         dec = (s*sky_off_t[0].deg + c*sky_off_t[1].deg),
+                         unit='deg')
+    
+    sky_new = skycen.spherical_offsets_by(sky_new_t.ra.deg*u.deg, 
+                                          sky_new_t.dec.deg*u.deg)
+    return sky_new.ra.deg, sky_new.dec.deg
+
 def offset_wcs(x, y, p):
     x_off = x + p[0]
     y_off = y + p[1]
@@ -1549,6 +1578,9 @@ def offset_wcs(x, y, p):
     return x_new, y_new
 
 
+   
+
+
 def offset_wcs_residual(pars, x, y, x2, y2):
     parvals = pars.valuesdict()
     p = [parvals['dx'],
@@ -1560,21 +1592,107 @@ def offset_wcs_residual(pars, x, y, x2, y2):
     residual = np.sqrt((x_new - x2)**2 + (y_new - y2)**2)
     return residual
 
-def radec_in_this_vismod(ra0, dec0, wcs, visit=1, module='a', field=None):
-    
-#     fil = '/scratch/kashinod/EIGER/J0100/reduction_imaging/checkWCS_v2/wcs_offset_params_visit'+str(visit)+module.lower()+'.txt'
-#     params = np.loadtxt(fil)
+
+def get_wcs_offset_params_dict(field, mode='sky'):
+
     if field=='J0100':
-        params_dict = {'1a':[ -0.679936091154,  0.523226446148, -1118.4604275112,  608.4828378726, 0.000558578932507],
-                       '1b':[ -1.111210284948,  3.129704853141,   928.2162884476, 1283.2376923699, 0.000423325155808],
-                       '2a':[ -1.084928574764,  1.745666945788,   750.9150277642, 1696.6610390372, 0.000428338992284],
-                       '2b':[ -0.937111596682,  3.339523725388,   918.3636725379, 1240.0037692349, 0.000457844502586],
-                       '3a':[  0.057536995593, -0.442108779774,   819.2640176016,  835.9240175748, 0.000182900260607],
-                       '3b':[ -0.292402520885,  0.607881819359,  2168.5716962952, 2178.7603750517, 0.000290237599955],
-                       '4a':[ -0.142066614727, -0.457647901154,   140.7245984545, 1392.8826646429, 0.000109932123407],
-                       '4b':[  0.001534739317,  0.659164131917,  2793.8799930654,  881.4838458998, 0.000250044843380]}
+        #     fil = '/scratch/kashinod/EIGER/J0100/reduction_imaging/checkWCS_v2/wcs_offset_params_visit'+str(visit)+module.lower()+'.txt'
+        #     params = np.loadtxt(fil)
+        if mode=='sky':
+            params_dict = {'1a':[-1.92284861e+00,  1.88044700e-02,  1.50258035e+01,  2.81031424e+01, -5.27552483e-04],
+                           '1b':[-1.33417926e+00,  4.50286320e+00,  1.50127890e+01,  2.81313436e+01, -3.94051962e-04],
+                           '2a':[-1.17131648e+02,  1.21901199e+02,  1.49362693e+01,  2.80544577e+01, -3.97039191e-04],
+                           '2b':[-8.72268415e-01, -1.26062571e+01,  1.50350544e+01,  2.81392476e+01, -4.16844530e-04],
+                           '3a':[-1.39928713e-03, -5.13176986e+00,  1.50692772e+01,  2.80485850e+01, -1.72439247e-04],
+                           '3b':[-5.54050193e+00,  1.03332937e+00,  1.50516414e+01,  2.80459069e+01, -2.70985724e-04],
+                           '4a':[-1.68919556e+00,  1.50266899e+01,  1.50257861e+01,  2.80349982e+01, -1.18307824e-04],
+                           '4b':[-1.27300158e+01,  2.84521481e+01,  1.50054374e+01,  2.80265964e+01, -2.48477998e-04]}
+        elif mode=='image':
+            params_dict = {'1a':[ -0.679936091154,  0.523226446148, -1118.4604275112,  608.4828378726, 0.000558578932507],
+                           '1b':[ -1.111210284948,  3.129704853141,   928.2162884476, 1283.2376923699, 0.000423325155808],
+                           '2a':[ -1.084928574764,  1.745666945788,   750.9150277642, 1696.6610390372, 0.000428338992284],
+                           '2b':[ -0.937111596682,  3.339523725388,   918.3636725379, 1240.0037692349, 0.000457844502586],
+                           '3a':[  0.057536995593, -0.442108779774,   819.2640176016,  835.9240175748, 0.000182900260607],
+                           '3b':[ -0.292402520885,  0.607881819359,  2168.5716962952, 2178.7603750517, 0.000290237599955],
+                           '4a':[ -0.142066614727, -0.457647901154,   140.7245984545, 1392.8826646429, 0.000109932123407],
+                           '4b':[  0.001534739317,  0.659164131917,  2793.8799930654,  881.4838458998, 0.000250044843380]}
+    elif field=='J1148':
+        # /net/galaxy-data/export/galaxydata/kashinod/EIGER/J1148/reduction_imaging/checkWCS_v2
+        if mode=='sky':
+            params_dict = {'1a':[-5.22052172e+00, -3.77166435e+01,  1.77116287e+02,  5.31836441e+01, -8.61888669e-05],
+                           '1b':[-1.00233481e+00, -2.48378554e+01,  1.77032728e+02,  5.29710966e+01, -1.76271525e-04],
+                           '2a':[-5.52135046e+00,  1.54133311e-01,  1.77075403e+02,  5.30631157e+01, -1.31854387e-04],
+                           '2b':[-8.91541757e+01, -8.00305305e+00,  1.77086762e+02,  5.28954786e+01, -6.77776314e-06],
+                           '3a':[ 2.96699564e+00, -1.04888479e+01,  1.77059016e+02,  5.28348837e+01, -8.91361290e-05],
+                           '3b':[ 6.19708825e-01, -3.68786148e-01,  1.77045300e+02,  5.28330907e+01, -1.20132357e-04],
+                           '4a':[ 7.82339319e+00, -2.14809686e-01,  1.77017638e+02,  5.28738512e+01, -1.44369631e-04],
+                           '4b':[ 2.61422477e+00, -2.06289081e+00,  1.77030841e+02,  5.28486944e+01, -1.42136092e-04]}
+            
+        elif mode=='image':
+            params_dict = {'1a': [0.837805413135, 2.487559346508, 3108.2124012270, 1267.1472409091, -0.000006582623919],
+                           '1b': [0.787059632147, 2.245594900227, 1705.2217689061, -487.8656071018, -0.000029985894132],
+                           '2a': [0.512913430975, 2.461776542105, 1064.2416491705,  829.4416137441, -0.000008740332443],
+                           '2b': [0.467233841778, 2.321461559777, 1407.5529270521,   18.8176487703, -0.000061814449389],
+                           '3a': [0.231866383239,-1.050091020704,-1691.4364154766,  596.7843987598,  0.000135110674380],
+                           '3b': [0.505132559356,-0.306546753254,  966.1245768030,-1079.5363898621,  0.000193306148084],
+                           '4a': [0.255913643120,-0.636130396339, 1272.7314351786,  392.8503631849,  0.000185581786706],
+                           '4b': [0.776445325796,-0.339055684816,  145.3952998526,-2566.6119666198,  0.000186876742781]}
+    elif field=='J1120':
+        # /net/galaxy-data/export/galaxydata/kashinod/EIGER/J1120/reduction_imaging/checkWCS_v2
+        if mode=='sky':
+            params_dict = {'1a':[],
+                           '1b':[],
+                           '2a':[],
+                           '2b':[],
+                           '3a':[],
+                           '3b':[],
+                           '4a':[],
+                           '4b':[]}
+            
+        elif mode=='image':
+            params_dict = {'1a': [  0.546840728915, 2.085508651419,   755.7441976306, 1903.0543294730, -0.000116966255265],
+                           '1b': [  0.278208978687, 1.575616170670,  1618.7300826916,   38.2347480120, -0.000132133772380],
+                           '2a': [  0.106012209935, 1.955256534241,  1281.8575530614, -321.0904517591, -0.000095834807390],
+                           '2b': [  0.265442933350, 1.695606870906,  -301.3231313075, 1809.5191721428, -0.000106731228007],
+                           '3a': [  0.124723659284, 2.546896349490, -1278.5682060299,  875.1604874917, -0.000107604547391],
+                           '3b': [ -0.060101127529, 1.827324548451,  1203.0067973049,  140.1525599840, -0.000106604806396],
+                           '4a': [],
+                           '4b': []}
+    elif field=='J0148':
+        # /net/galaxy-data/export/galaxydata/kashinod/EIGER/J0148/reduction_imaging/checkWCS_v2
+        if mode=='sky':
+            params_dict = {'1a':[207.391216171414,-21.003666696626, 27.151822573146, 5.930165941027,  0.000070159605639],
+                           '1b':[152.537887986363, -7.629500354660, 27.157305853915, 5.930759735036, -0.000097545591472],
+                           '2a':[ 24.121312945620,-28.988398222381, 27.129097729427, 5.936188098798, -0.000006925410051],
+                           '2b':[ -1.213112092297,-12.258138682229, 27.119083606057, 5.944811531643, -0.000109424606538],
+                           '3a':[153.554439743794,-16.075405206854, 27.105529660076, 5.816029325306, -0.000030558396804],
+                           '3b':[163.158792445578,-24.962983704924, 27.109603537234, 5.958668473446, -0.000017158386011],
+                           '4a':[165.233242217694,-11.768772125565, 27.256719473959, 5.849131353619, -0.000023250099495],
+                           '4b':[ -1.340515644704, 15.385218055429, 27.122145752164, 5.677427956358, -0.000140591341944]}
+
+        elif mode=='image':
+            params_dict = {'1a': [ -1.544828286611, 2.734060484019,   953.6005885861, -1090.5244729844, -0.000069649779291],
+                           '1b': [ -1.104126070655, 2.870779963096,  2211.4687114834, -1215.8840060722,  0.000072128514995],
+                           '2a': [ -0.617929388718, 0.168118151111,   416.9034036184,  1999.4210346918,  0.000029696221771],
+                           '2b': [ -0.345978621152, 0.440055846913,  1602.2610155278,  -201.0166753042,  0.000111243393144],
+                           '3a': [ -1.294802104057, 2.298034755265, -1442.8260173397, -1352.4870468687,  0.000029836032946],
+                           '3b': [ -1.459288191226, 2.350796315496,  3608.6993246073,  3075.7115174845,  0.000024962266898],
+                           '4a': [ -1.165578561294, 2.545221110188,   -79.8694290227,  1678.2717340060,  0.000015429592314],
+                           '4b': [ -1.110228965745, 2.428816532077,   485.2342311744,   910.8941360321,  0.000094626985098]}
     else:
         raise ValueError('field='+field+' cannot be found.')
+
+    return params_dict
+
+
+def radec_in_this_vismod(ra0, dec0, visit=1, module='a', field=None):
+    params_dict = get_wcs_offset_params_dict(field, mode='sky')
+    params=params_dict[str(visit)+module.lower()]
+    ra, dec = offset_wcs_in_sky(ra0, dec0, params)
+    return ra, dec
+
+def radec_in_this_vismod_with_wcs(ra0, dec0, wcs, visit=1, module='a', field=None):
+    params_dict = get_wcs_offset_params_dict(field, mode='image')
     
     params=params_dict[str(visit)+module.lower()]
      
@@ -1583,3 +1701,4 @@ def radec_in_this_vismod(ra0, dec0, wcs, visit=1, module='a', field=None):
     #print(x_radec0, y_radec0, '==>', x_radec, y_radec)
     ra_vm, dec_vm = wcs.all_pix2world(x_radec, y_radec, 0)
     return ra_vm, dec_vm
+
