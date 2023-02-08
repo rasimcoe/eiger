@@ -1039,7 +1039,7 @@ def extract_dk(ra0, dec0,
                use_wcs=False, 
                senscorrect=False):
     
-    hdul = fits.open(emfile) ##emfile for COLA1 
+    hdul = fits.open(scifile) 
     wcs= WCS(hdul[1].header)
 
     grism_with_wcs = datamodels.open(ratefile)

@@ -214,7 +214,7 @@ def run(qqq):
                     ratename = ('/scratch/kashinod/EIGER/J0100/reduction/calibrated_spc2_bsub/'+
                                 'jw0124300100%s_0%s101_00%s_nrc%slong_assign_wcs.fits'%(visit,repeat,qj,module))
                     
-                    ratename='/scratch/EIGER/reduce_pipeline/reduced/J0100_v1/grism_F356W/jw0124300100%s_0%s101_00%s_nrc%slong_flatfieldstep.fits'%(visit,repeat,qj,module) ##JM. This is only used for WCS
+                    ratename='/scratch/EIGER/reduce_pipeline/reduced/J0100_v1/grism_F356W/jw0124300100%s_0%s101_00%s_nrc%slong_flatfieldstep.fits'%(visit,repeat,qj,module) ##JM. This is only used for WCS, The other assign_wcs doesnt work for my installation. Unclear origin.
                 
                     print('___> SCI    : ', scidataname)
                     print('___> EMLINE : ', emdataname)
@@ -367,7 +367,7 @@ def run(qqq):
 
                       
     for attempt in [0]:
-       # try:
+       # try: ###remove commented try, except bit in case you are extracting the full catalog and some sources may have no spectral coverage
             dd=numpy.array(dd)
 
             print('____',dd)
