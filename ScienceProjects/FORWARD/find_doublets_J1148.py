@@ -123,8 +123,8 @@ LBLUE=[np.zeros(len(IDlist)),np.zeros(len(IDlist)),np.zeros(len(IDlist)),np.zero
 
 
 ##NEW
-for jjj in range(100):#range(len(IDlist)):
-	thisID=IDlist[jjj]+1000
+for jjj in range(len(IDlist)):
+	thisID=IDlist[jjj]#+1000
 	#thisID=17242
 	print(thisID)
 	try:
