@@ -983,11 +983,16 @@ def scrunch_columns(lambda_array,l,shifted_y,shifted_y_var,module):
 
 
     
-def stack_with_reject_outliers(data,err,nobs, m = 5., method='mean'):
-    median=np.nanmedian(data,axis=0)
-    std=np.nanstd(data,axis=0)
-    mask_outliers=np.abs((data-median))/std > m
-    data[mask_outliers]=np.nan
+def stack_with_reject_outliers(data,err,nobs, m = 5., method='mean',iterations=1):
+    for i in range(iterations):
+    	median=np.nanmedian(data,axis=0)
+    	std=np.nanstd(data,axis=0)
+    	if i>1:
+    		mask_outliers+=np.abs((data-median))/std > m
+    	else:
+    		mask_outliers=np.abs((data-median))/std > m
+    	data[mask_outliers]=np.nan
+    	
     var=err**2 
     var[mask_outliers]=np.nan
 

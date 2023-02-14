@@ -60,7 +60,7 @@ lamblist=(1+redshift)*5008.28
 
 #
 #OPEN THE RGB IMAGE -- THIS MUST HAVE THE SAME DIMENSIONS AS THE DIRECT IMAGE
-img=Image.open('/scratch/EIGER/identification/stiff_j1148_v2.tif')
+img=Image.open('/scratch/EIGER/identification/stiff_bin1_j1148.tif')
 img = np.asarray(img)
 img=img[::-1,:,:]
 

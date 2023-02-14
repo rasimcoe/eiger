@@ -40,7 +40,7 @@ from PIL import Image
 
 CATALOG='/scratch/EIGER/identification/J1148+5251_photcat_v1_noisemodel_short_withCandidateDoublets.fits' 
 
-CATALOG='/scratch/EIGER/identification/J1148_redblue2.fits'
+CATALOG='/scratch/EIGER/identification/J1148_REDcrit_mag26.fits'
 FOLDER='/scratch/EIGER/identification/SPECTRA_J1148/' #FOLDER WITH SPECTRA
 
 field='J1148'
@@ -65,10 +65,13 @@ hdu = fits.open(directimage)
 wcs = WCS(hdu['SCI'].header)
 
 for q in range(len(IDlist)):
+
 	thisID=IDlist[q]
 
-
-	hdu= fits.open(FOLDER+'stacked_2D_J1148_%s.fits'%thisID)
+	try:
+		hdu= fits.open(FOLDER+'stacked_2D_J1148_%s.fits'%thisID)
+	except:
+		continue
 	hd=hdu['EMLINE'].header
 	data=hdu['EMLINE'].data
 
