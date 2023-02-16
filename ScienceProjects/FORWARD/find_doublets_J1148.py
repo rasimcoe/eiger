@@ -15,6 +15,9 @@ from mirage.catalogs import catalog_generator
 
 CATALOG='/scratch/EIGER/identification/J1148+5251_photcat_v1_noisemodel_short.fits'
 NEW_CATALOG='/scratch/EIGER/identification/J1148+5251_photcat_v1_noisemodel_short_withCandidateDoublets.fits' #SAVE it like this
+
+CATALOG='/scratch/EIGER/identification/J1148_DKO3_algo_missed.fits'
+NEW_CATALOG='/scratch/EIGER/identification/J1148_DKO3_algo_missed_Cands.fits'
 FOLDER='/scratch/EIGER/identification/SPECTRA_J1148/' #FOLDER WITH SPECTRA
 
 field='J1148'
@@ -126,6 +129,7 @@ LBLUE=[np.zeros(len(IDlist)),np.zeros(len(IDlist)),np.zeros(len(IDlist)),np.zero
 for jjj in range(len(IDlist)):
 	thisID=IDlist[jjj]#+1000
 	#thisID=17242
+	#thisID=4210
 	print(thisID)
 	try:
 		file=FOLDER+'stacked_2D_%s_%s.fits'%(field,thisID)
@@ -186,13 +190,15 @@ for jjj in range(len(IDlist)):
 		SN=SN[sort]
 		x=x[sort]
 
-		sel=(y>25-3)*(y<25+3)*(SN>2.)
+		sel=(y>25-3)*(y<25+4)*(SN>2.)
 
 		#print(x[sel],SN[sel])
 		#print(x[sel][np.argsort(x[sel])])
 
 		#print(wav[sel],wav[sel]/4960. -1,wav[sel]/5008. -1, SN[sel])
+
 		###sel=(y>31)*(y<34)*(SN>3)
+
 
 		if len(x[sel])==0:
 			#print(thisID,'The number of detected lines is:',len(x[sel]))
@@ -205,12 +211,13 @@ for jjj in range(len(IDlist)):
 			PAIRNAME=PAIRS[thispair]
 			l1=BLUELIST[thispair]
 			l2=REDLIST[thispair]
-			min_redshift=-1+31500/l1
-			max_redshift=-1+39500/l2
+			min_redshift=5.33##-1+31500/l1 ##Update manual
+			max_redshift=6.96#-1+39500/l2 #Update manual
 			min_separation=(l2-l1)*(1+min_redshift)
 			max_separation=(l2-l1)*(1+max_redshift)
 			minflux=MINRATIO[thispair]
 			maxflux=MAXRATIO[thispair]
+
 
 			for q in range(len(x[sel])):
 				thiswav=wav[sel][q]
@@ -224,7 +231,7 @@ for jjj in range(len(IDlist)):
 				othery=np.abs(thisy-y[sel])
 
 				#print(flux_differences)
-				#print(numpy.nanmin(SN[sel]))
+
 
 				#sel_candidates=(flux_differences>1.5)*(flux_differences<6)*(distances>0)*(distances>min_separation-20.)*(distances<max_separation+20.)
 
@@ -232,9 +239,9 @@ for jjj in range(len(IDlist)):
 				expected_z=-1+thiswav/l1
 				expected_separation=(l2-l1)*(1+expected_z)
 
-				#print(thisID,PAIRNAME,distances,expected_separation,'fluxdif',flux_differences)
+				#print(thisID,expected_z,expected_separation,'fluxdif',flux_differences,'distances',distances)
 
-				sel_candidates=(flux_differences>minflux)*(flux_differences<maxflux)*(distances>0)*(distances>expected_separation-20.)*(distances<expected_separation+20.)*(othery<2)
+				sel_candidates=(flux_differences>minflux)*(flux_differences<maxflux)*(distances>0)*(distances>expected_separation-20.)*(distances<expected_separation+20.)*(othery<3)*(expected_z>min_redshift)*(expected_z<max_redshift)
 
 
 				if len(distances[sel_candidates])>0.1:
@@ -259,7 +266,7 @@ for jjj in range(len(IDlist)):
 
 	except:
 		continue
-
+stop
 COLS=[]
 #NOW SAVE RESULTS
 for thispair in range(len(PAIRS)):

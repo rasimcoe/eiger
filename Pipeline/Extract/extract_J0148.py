@@ -23,22 +23,22 @@ import astropy.units as u
 
 
 
-field='J1148'
+field='J0148'
 grismconf_calib_version=4 
 ysize=51
 
 
 
-directimage='/net/phoebe/scratch/mruari/EIGER/imaging/J1148+5251/F356W/pipe4_filt/stack_F356W_pipe4_v2_20230109.fits'
+directimage='/net/phoebe/scratch/mruari/EIGER/imaging/J0148+0600/F356W/pipe4_filt/stack_F356W_pipe4_v1_20230119.fits'
 
 ### Output directory
 
-FOLDER='/scratch/EIGER/identification/SPECTRA_J1148/'
+#FOLDER='/scratch/EIGER/identification/SPECTRA_J1048/'
 FOLDER='/scratch/EIGER/BROAD/SPECTRA_COLSEL/'
 
 #CATALOG WITH SOURCES TO EXTRACT // CAN ALSO SKIP AND HAVE IDlist,RAlist and DEClist manually
-CATALOG='/scratch/EIGER/identification/J1148+5251_photcat_v1_noisemodel_short.fits'
-CATALOG='/scratch/EIGER/BROAD/J1148_photcat1_BROADsel_16022023.fits'
+
+CATALOG='/scratch/EIGER/BROAD/J0148_photcat1_BROADsel_16022023.fits'
 cat=fits.open(CATALOG)
 
 data=cat[1].data
@@ -77,7 +77,7 @@ else:
 	stopping_script #make sure you use grismconf V4 calibrations, otherwise tracecor and lambcor don't work
 
 EXPOSURES=['001','002','003','004','005','006','007','008','009','010','011','012']
-PRIMDITS=['2','4']  ## <--- VISITGRP=02 or 04
+PRIMDITS=['1','3']  ## <--- VISITGRP=02 or 04
 VISITS=[1,2,3,4]
 
 
@@ -172,28 +172,28 @@ def run(qqq):
                 for qj in EXPOSURES:
                     #print('Extracting',qq,'id',ID) 
 
-                    reduction_dir = '/net/galaxy-data/export/galaxydata/kashinod/EIGER/J1148/reduction/'
+                    reduction_dir = '/net/galaxy-data/export/galaxydata/kashinod/EIGER/J0148/reduction/'
                     scidataname = (reduction_dir+
                                    'calibrated_img2photomskip_wfss_globalskySubtV2_globalMedSubt/'+
-                                   'jw0124300200%s_0%s101_00%s_nrc%slong_cal_globalMedSubt.fits'                            
+                                   'jw0124300600%s_0210%s_00%s_nrc%slong_cal_globalMedSubt.fits'                            
                                    %(visit,repeat,qj,module))
                     
                     emdataname = (reduction_dir+
                                    'calibrated_img2photomskip_wfss_globalskySubtV2_globalMedSubt_emlineMaskedV2_contSubt_kx51_9_Skx21_5/'+
-                                  'jw0124300200%s_0%s101_00%s_nrc%slong_cal_globalMedSubt_emline.fits'
+                                  'jw0124300600%s_0210%s_00%s_nrc%slong_cal_globalMedSubt_emline.fits'
                                   %(visit,repeat,qj,module))
                     
                     contdataname = (reduction_dir+
                                    'calibrated_img2photomskip_wfss_globalskySubtV2_globalMedSubt_emlineMaskedV2_contSubt_kx51_9_Skx21_5/'+
-                                   'jw0124300200%s_0%s101_00%s_nrc%slong_cal_globalMedSubt_continua.fits'
+                                   'jw0124300600%s_0210%s_00%s_nrc%slong_cal_globalMedSubt_continua.fits'
                                    %(visit,repeat,qj,module))
               
                     ### Spec2 assign_wcs
                     ratename = (reduction_dir+'/calibrated_spc2_bsub/'+
-                                'jw0124300200%s_0%s101_00%s_nrc%slong_assign_wcs.fits'%(visit,repeat,qj,module))
+                                'jw0124300600%s_0210%s_00%s_nrc%slong_assign_wcs.fits'%(visit,repeat,qj,module))
                 
                     print('___> SCI ')
-                    ratename='/scratch/EIGER/reduce_pipeline/reduced/j1148/grism_F356W/jw0124300200%s_0%s101_00%s_nrc%slong_flatfieldstep.fits'%(visit,repeat,qj,module) ##JM. This is only used for WCS, The other assign_wcs doesnt work for my installation. Unclear origin.
+                    ratename='/scratch/EIGER/reduce_pipeline/reduced/j0148/grism_F356W/jw0124300600%s_0210%s_00%s_nrc%slong_flatfieldstep.fits'%(visit,repeat,qj,module) ##JM. This is only used for WCS, The other assign_wcs doesnt work for my installation. Unclear origin.
                 
                     print('___> SCI    : ', scidataname)
                     print('___> EMLINE : ', emdataname)
@@ -209,10 +209,10 @@ def run(qqq):
                     grism_data_wcs = WCS(fits.getheader(scidataname,1))
                     
                     ### Get datamodel
-                    #try: ##TEMPORARY
-                    grism_wcs_dmdl = datamodels.open(ratename)
-                    #except:
-                    #	continue 
+                    try: ##TEMPORARY
+                    	grism_wcs_dmdl = datamodels.open(ratename)
+                    except:
+                    	continue 
 
                     ### PHOTOM Conversion factor
                     sci_photom_conversion_factor = 1.0
@@ -629,8 +629,6 @@ def run(qqq):
             continue
 
 
-#run(0)
-#stopstopstop
 
 n_procs = 44 # number of cores available
 with Pool(n_procs) as pool:

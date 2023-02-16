@@ -33,11 +33,12 @@ directimage='/scratch/kashinod/EIGER/J0100/current_best/stack_F356W_pipe4_v3_flu
 
 ### Output directory
 
-FOLDER='/scratch/EIGER/identification/TEST/'
+FOLDER='/scratch/EIGER/BROAD/SPECTRA_COLSEL/'
 
 
 #CATALOG WITH SOURCES TO EXTRACT // CAN ALSO SKIP AND HAVE IDlist,RAlist and DEClist manually
 CATALOG='/scratch/EIGER/identification/J0100_photcat_v4_within20arcsec_QSO.fits'
+CATALOG='/scratch/EIGER/BROAD/J0100_photcat4_BROADsel_16022023.fits'
 cat=fits.open(CATALOG)
 
 data=cat[1].data
@@ -82,9 +83,9 @@ VISITS=[1,2,3,4]
 
 ##Example MANUAL IDs 
 # #BROAD HALPHA EMITTERS ID v4
-IDlist=[12446,14947,15157,16221]
-RAlist=[15.048243624454152,15.045550156552324,15.030262274046956,15.034037901840078]
-DEClist=[28.009717338065087,28.028277304725833,28.050176515256226,28.051578609337152]
+#IDlist=[12446,14947,15157,16221]
+#RAlist=[15.048243624454152,15.045550156552324,15.030262274046956,15.034037901840078]
+#DEClist=[28.009717338065087,28.028277304725833,28.050176515256226,28.051578609337152]
 
 
 ### Reference files for offset correction
@@ -403,7 +404,8 @@ def run(qqq):
                               visitcounter==3,
                               visitcounter==4]
             names=['','A','B']#,'V1','V2','V3','V4']
-            stack_m_outliers = 5.0
+            stack_m_outliers = 3.0
+            outlier_iter=5            
             stack_method='mean'  # mean or median
 
             for jj in range(len(names)):
@@ -425,7 +427,7 @@ def run(qqq):
                                                                                   ee[this_selection], 
                                                                                   fn, 
                                                                                   m = stack_m_outliers, 
-                                                                                  method=stack_method)
+                                                                                  method=stack_method,iterations=outlier_iter)
         
                 fcont = eiger_tracing.stack_with_mask_outliers(contcont[this_selection], 
                                                                    mask_outliers, 
@@ -517,7 +519,7 @@ def run(qqq):
             fem,fe,mask_outliers=eiger_tracing.stack_with_reject_outliers(emem[visitcounter>0], 
                                                                           ee[visitcounter>0], fn, 
                                                                           m = stack_m_outliers, 
-                                                                          method=stack_method)
+                                                                          method=stack_method,iterations=outlier_iter)
 
             stack_method='mean'
             fcont=eiger_tracing.stack_with_mask_outliers(contcont[visitcounter>0], 
@@ -646,8 +648,7 @@ def run(qqq):
 #            continue
 
 
-run(0)
-stopstopstop
+
 
 n_procs = 44 # number of cores available
 with Pool(n_procs) as pool:

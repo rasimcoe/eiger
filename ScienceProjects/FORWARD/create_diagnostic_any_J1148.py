@@ -41,6 +41,7 @@ from PIL import Image
 CATALOG='/scratch/EIGER/identification/J1148+5251_photcat_v1_noisemodel_short_withCandidateDoublets.fits' 
 
 CATALOG='/scratch/EIGER/identification/J1148_REDcrit_mag26.fits'
+
 FOLDER='/scratch/EIGER/identification/SPECTRA_J1148/' #FOLDER WITH SPECTRA
 
 field='J1148'
@@ -56,7 +57,7 @@ DEClist=orig_table.field('DELTA_J2000_det')
 
 #
 #OPEN THE RGB IMAGE -- THIS MUST HAVE THE SAME DIMENSIONS AS THE DIRECT IMAGE
-img=Image.open('/scratch/EIGER/identification/stiff_j1148_v2.tif')
+img=Image.open('/scratch/EIGER/identification/stiff_bin1_j1148.tif')
 img = np.asarray(img)
 img=img[::-1,:,:]
 
