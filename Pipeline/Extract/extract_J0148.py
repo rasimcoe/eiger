@@ -50,6 +50,9 @@ DEClist=data.field('DELTA_J2000_det')
 #RAlist=data.field('RA_MANUAL')
 #DEClist=data.field('DEC_MANUAL')
 
+IDlist=[10628]
+RAlist=[27.15386859664742]
+DEClist=[6.00522676604142]
 
 #This bit is a placeholder for "bookkeeping" (i.e. keeping track of lines that are seen in this spectrum, but also seen in other spectra). Implemented for simulated data, not for real data.
 """
