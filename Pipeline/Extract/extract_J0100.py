@@ -33,7 +33,7 @@ directimage='/scratch/kashinod/EIGER/J0100/current_best/stack_F356W_pipe4_v3_flu
 
 ### Output directory
 
-FOLDER='/scratch/EIGER/BROAD/SPECTRA_COLSEL/'
+FOLDER='/scratch/EIGER/'#BROAD/SPECTRA_COLSEL/'
 
 
 #CATALOG WITH SOURCES TO EXTRACT // CAN ALSO SKIP AND HAVE IDlist,RAlist and DEClist manually
@@ -87,6 +87,10 @@ VISITS=[1,2,3,4]
 #RAlist=[15.048243624454152,15.045550156552324,15.030262274046956,15.034037901840078]
 #DEClist=[28.009717338065087,28.028277304725833,28.050176515256226,28.051578609337152]
 
+#FOR RONGMON
+IDlist=['1030800']
+RAlist=[15.0528963]
+DEClist=[28.0416036]
 
 ### Reference files for offset correction
 ### Spectral trace "y-offset" map (calibrated using PID 1076)
