@@ -1600,7 +1600,7 @@ def offset_wcs_residual(pars, x, y, x2, y2):
 
 def get_wcs_offset_params_dict(field, mode='sky'):
 
-   if field=='J0100':
+    if field=='J0100':
         # 2022-02-19 [image: much earlier]
         # /scratch/kashinod/EIGER/J0100/reduction_imaging/checkWCS_v2
         # stack_F356W_pipe4_v2_fluxcal_20220831.fits
