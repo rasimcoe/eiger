@@ -47,12 +47,6 @@ RGBFILE='/scratch/EIGER/identification/stiff_bin1_j1120.tif'
 directimage='/scratch/EIGER/identification/j1120_F356W.fits' #this is F356W purely SCI extension 
 
 
-#J1148
-CATALOG='/scratch/EIGER/BROAD/J1148_photcat1_BROADsel_16022023.fits'
-field='J1148'
-RGBFILE='/scratch/EIGER/identification/stiff_bin1_j1148.tif'
-directimage='/scratch/EIGER/identification/j1148_r.fits' #this is F356W purely SCI extension 
-
 
 #J0148
 CATALOG='/scratch/EIGER/BROAD/J0148_photcat1_BROADsel_16022023.fits'
@@ -66,6 +60,13 @@ CATALOG='/scratch/EIGER/BROAD/J0100_photcat4_BROADsel_16022023.fits'
 field='J0100'
 RGBFILE='/scratch/EIGER/identification/stiff_bin1_j0100.tif'
 directimage='/scratch/EIGER/identification/j0100_r.fits' #this is F356W purely SCI extension 
+
+#J1148
+CATALOG='/scratch/EIGER/BROAD/J1148_photcat1_BROADsel_16022023.fits'
+field='J1148'
+RGBFILE='/scratch/EIGER/identification/stiff_bin1_j1148.tif'
+directimage='/scratch/EIGER/identification/j1148_r.fits' #this is F356W purely SCI extension 
+
 
 
 with fits.open(CATALOG) as hdul:
