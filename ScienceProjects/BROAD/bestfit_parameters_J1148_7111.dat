@@ -1,0 +1,35 @@
+# Best-fit model results for imfit 1.6.1 (OpenMP-enabled)
+# Generated on Mon Mar  6 23:06:28 2023 by the following command:
+#    /net/theia/scratch/mattheej/MUSE_VR7/imfit-1.6.1/imfit /scratch/EIGER/BROAD/STAMP/F200W_image_J1148_7111.fits -c bestfit_parameters_imfit.dat --noise /scratch/EIGER/BROAD/STAMP/F200W_image_J1148_7111_wht.fits --save-model bestfit.fits --save-residual residual.fits
+
+# Results of fit:
+#   Algorithm: Levenberg-Marquardt: status = 1 -- SUCCESS: Convergence in fit-statistic value.
+#   Fit statistic: chi-squared (user-supplied errors)
+#   Best-fit value: 4129.682563
+#   Reduced value: 1.663853
+#   AIC: 4165.958258
+#   BIC: 4270.515391
+
+X0		26.9167 # +/- 0.0262
+Y0		27.4135 # +/- 0.0204
+FUNCTION Gaussian
+PA		46.0594 # +/- 6.6871
+ell		0.124135 # +/- 0.025313
+I_0		0.188457 # +/- 0.0036531
+sigma		1.13767 # +/- 0.024992
+
+X0		22.9984 # +/- 0.0843
+Y0		26.0316 # +/- 0.0787
+FUNCTION Gaussian
+PA		139.214 # +/- 6.3703
+ell		0.303162 # +/- 0.056031
+I_0		0.0553631 # +/- 0.002845
+sigma		1.61709 # +/- 0.10871
+
+X0		24.1842 # +/- 0.1539
+Y0		21.8022 # +/- 0.2603
+FUNCTION Gaussian
+PA		8.26536e-09 # +/- 0
+ell		0.271149 # +/- 0.036891
+I_0		0.0211561 # +/- 0.00087832
+sigma		5.79389 # +/- 0.20468

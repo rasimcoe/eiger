@@ -9,12 +9,15 @@ from astropy.convolution import Gaussian2DKernel
 import scipy.ndimage as snd
 from astropy.convolution import convolve
 import copy
-
+from matplotlib import colors
 import matplotlib
 import numpy as np
 
 from astropy.io import fits
 
+import matplotlib
+
+matplotlib.rcParams.update({ 'font.family': 'serif','mathtext.fontset':'cm'}) # change for diff style
 
 import lmfit
 from lmfit.models import Gaussian2dModel
@@ -76,6 +79,102 @@ def read_fitsdata(hdu,module='A',extension='EMLINE'):
 	return thisdata,errdata,unmasked_data
 	
 
+def read_fitsdata_SCI(hdu,module='A',extension='EMLINE',thisz=5.0):
+	thisdata=hdu[extension+module].data
+	hd=hdu[extension+module].header
+	print(hd['CRVAL1'],hd['CDELT1'])
+
+
+	
+	if extension=='SCI': #kernel filter!
+		ly,lx=np.shape(thisdata)
+		n_y=ly
+		n_x=lx
+		continua_img = np.zeros((n_y, n_x))
+
+		x_array=np.arange(0,lx,1)
+		wav_array=x_array*hd['CDELT1'] + hd['CRVAL1']
+
+		print(wav_array)
+		sel_wav=(wav_array>6564.633*(1+thisz) - 260)*(wav_array< 6564.633*(1+thisz)   +260)
+		orig_data=copy.deepcopy(thisdata)
+		
+		#mask line!
+		thisdata[:,sel_wav]=numpy.nan
+	
+		#Mid kernel
+		kx=141
+		kx_gap=31
+		
+		#Widekernel
+		kx=251
+		kx_gap=71		
+	#
+		#kx=55
+		#kx_gap=13
+		ky=1
+		kernel=str(kx)+'x'+str(ky)
+		print('Kernel size: ', kernel, flush=True)
+
+		idx_x = np.fromfunction(lambda  i, j: i+j, (n_x, kx), dtype=np.int64) - kx // 2
+		idx_y = np.fromfunction(lambda  i, j: i+j, (n_y, ky), dtype=np.int64) - ky // 2
+
+	# Exclude the center gap
+		if kx_gap>0:
+	    		print('Gap size: ', kx_gap, flush=True)
+	    		cols_remain=np.append(np.arange((kx - kx_gap)/2., dtype=np.int64),
+	                           np.flip(kx-1-np.arange((kx - kx_gap)/2., dtype=np.int64)))
+	    		idx_x = idx_x[:, cols_remain]
+
+		idx_x[idx_x < 0]=0
+		idx_x[idx_x > n_x-1]=n_x-1
+		idx_y[idx_y < 0]=0
+		idx_y[idx_y > n_y-1]=n_y-1
+
+		print( ': Loop start (',flush=True)
+		for iy in np.arange(n_y):
+	    	#print('Loop: ', iy, ' /', n_y)
+			med_tmp = np.nanmedian(thisdata[idx_y[iy,0]:idx_y[iy,-1]+1,idx_x], axis=[0,2])
+			continua_img[iy,:] = med_tmp[:]
+		print( ': Loop end (', flush=True)
+		fits.writeto('cont.fits',continua_img,overwrite=True)
+		
+		
+		thisdata=orig_data-continua_img
+	
+	
+	thisdata_err=hdu['ERR%s'%module].data**0.5  #THIS IS BECAUSE THE ERR extension is actually VARIANCE -- needs to be fixed
+
+	#RENORMALISE NOISE
+	use_err=copy.deepcopy(thisdata_err[:,200:980])
+	sel_ignore=use_err==0.
+	use_err[sel_ignore]=numpy.nan
+
+	use_dat=copy.deepcopy(thisdata[:,200:980])
+	standard=numpy.nanstd(use_dat)
+	sel_ignore=numpy.abs(use_dat)>5*standard
+	use_dat[sel_ignore]=numpy.nan
+	standard=numpy.nanstd(use_dat)
+	sel_ignore=numpy.abs(use_dat)>3*standard
+	use_dat[sel_ignore]=numpy.nan
+	standard=numpy.nanstd(use_dat-numpy.nanmedian(use_dat))		
+	sel_ignore=numpy.abs(use_dat)>3*standard
+	use_dat[sel_ignore]=numpy.nan
+	standard=numpy.nanstd(use_dat-numpy.nanmedian(use_dat))	
+
+	sel_ignore=numpy.abs(use_dat)>3*standard
+	use_dat[sel_ignore]=numpy.nan
+	standard=numpy.nanstd(use_dat-numpy.nanmedian(use_dat))	
+	
+	errdata=thisdata_err * standard/numpy.nanmedian(use_err) #Renormalising
+	
+	unmasked_data=copy.deepcopy(thisdata)
+	unmasked_data[:,200:980]=use_dat
+
+	
+	return thisdata,errdata,unmasked_data
+	
+
 
 
 FOLDER='/scratch/EIGER/BROAD/SPECTRA_COLSEL/' #FOLDER WITH SPECTRA
@@ -83,7 +182,7 @@ SAVE_FOLDER='/scratch/EIGER/BROAD/EXTRACTIONS/'
 
 
 CATALOG='/scratch/EIGER/BROAD/BROADsel_allfields_17022023_zguess.fits'
-
+CATALOG='/scratch/EIGER/BROAD/BROADsel_allfields_23022023_zguess_classed.fits'
 FIELDNAMES=['1120','0100','1148','0148']
 
 
@@ -102,26 +201,27 @@ Nlist=orig_table.field('Ncomponents')
 MODlist=orig_table.field('MODULE')
 
 
-for q in range(len(IDlist)):
+for q in [15]:#range(len(IDlist)):
 
 	thisField=FIELDlist[q]
 	thisz=Zlist[q]
 
 	thisID=IDlist[q]
-	thisNclumps=Nlist[q]
+	thisNclumps=3.#Nlist[q]
 	thisMod=MODlist[q]
 	if thisMod=='BOTH':
 		thisMod=''
 	print('Now doing',thisField,thisID)
 	#try:
 	hdu= fits.open(FOLDER+'stacked_2D_%s_%s.fits'%(thisField,thisID))
+	thisID=str(thisID)+'_widekernel'
 	#except:
 		#continue
 	hd=hdu['EMLINE'].header
 	data=hdu['EMLINE'].data
 
-	data_A,errdata_A,unmasked_data_A=read_fitsdata(hdu,module=thisMod,extension='EMLINE')
-
+	#data_A,errdata_A,unmasked_data_A=read_fitsdata(hdu,module=thisMod,extension='EMLINE')
+	data_A,errdata_A,unmasked_data_A=read_fitsdata_SCI(hdu,module=thisMod,extension='SCI',thisz=thisz)
 	x_peak=int((6564.633*(1+thisz) -3E4)/9.75)
 
 	pyfits.writeto('input_EMA.fits',data_A,overwrite=True)
@@ -142,11 +242,11 @@ for q in range(len(IDlist)):
 	err_image=errdata_A[:,sel_wav]
 	unmasked_image=unmasked_data_A[:,sel_wav]
 	use_image=use_image-numpy.nanmedian(unmasked_image)
-		
+	
 	ly2,lx2=np.shape(use_image)
 	Yg, Xg = numpy.mgrid[:ly2, :lx2]
 
-
+	print(ly2,lx2)
 
 	if thisNclumps==1:
 		model=Model(rotated_2dgauss,independent_vars=('x','y'))
@@ -186,7 +286,7 @@ for q in range(len(IDlist)):
 		model=Model(rotated_2dgauss,independent_vars=('x','y'),prefix='m1_') + Model(rotated_2dgauss,independent_vars=('x','y'),prefix='m2_') +  Model(rotated_2dgauss,independent_vars=('x','y'),prefix='m3_') 
 		#print(model.param_names)
 		model.set_param_hint('m1_sigma_x',min=1.1,max=2.5)
-		model.set_param_hint('m2_sigma_x',min=2.5,max=11.5)
+		model.set_param_hint('m2_sigma_x',min=2.5,max=13.5)
 		model.set_param_hint('m3_sigma_x',min=1.1,max=5.5)
 
 		model.set_param_hint('m1_sigma_y',min=0.5,max=4.)
@@ -201,7 +301,7 @@ for q in range(len(IDlist)):
 		model.set_param_hint('m2_x0',min=20.,max=40.)
 		model.set_param_hint('m3_x0',min=20.,max=40.)	
 		
-		model.set_param_hint('m1_y0',min=15.,max=40.)
+		model.set_param_hint('m1_y0',min=20.,max=35.)
 		model.set_param_hint('m2_y0',min=23.,max=27.)
 		model.set_param_hint('m3_y0',min=15.,max=40.)					
 					
@@ -209,7 +309,7 @@ for q in range(len(IDlist)):
 		model.set_param_hint('m2_theta',min=-10,max=10)		
 		model.set_param_hint('m3_theta',min=0,max=360)		
 
-		params=model.make_params(m1_A=0.0,m1_x0=lx2/2,m1_y0=25,m1_sigma_x=0.5,m1_sigma_y=2.,m1_theta=0, m2_A=0.1,m2_x0=lx2/2,m2_y0=25,m2_sigma_x=7.,m2_sigma_y=1.,m2_theta=0, m3_A=0.1,m3_x0=lx2/2,m3_y0=20,m3_sigma_x=1,m3_sigma_y=2,m3_theta=0)
+		params=model.make_params(m1_A=0.0,m1_x0=lx2/2,m1_y0=25,m1_sigma_x=0.5,m1_sigma_y=2.,m1_theta=0, m2_A=0.1,m2_x0=lx2/2,m2_y0=25,m2_sigma_x=7.,m2_sigma_y=1.,m2_theta=0, m3_A=0.1,m3_x0=24.7,m3_y0=20,m3_sigma_x=1,m3_sigma_y=2,m3_theta=0)
 
 
 		params['m3_theta'].vary=False
@@ -256,29 +356,42 @@ for q in range(len(IDlist)):
 				
 		model_broad=model.eval(result_1.params,x=Xg,y=Yg)	
 		model_narrow=model.eval(result_2.params,x=Xg,y=Yg)
-		model_third=model.eval(result_3.params,x=Xg,y=Yg)				
-	print(result.fit_report())
+		model_third=model.eval(result_3.params,x=Xg,y=Yg)
 
+	print(result.fit_report())
+	print('Total narrow,broad,third',9.75*numpy.nansum(model_narrow),9.75*numpy.nansum(model_broad),9.75*numpy.nansum(model_third))				
+	#STOP
 
 
 
 	#SAVE DIAGNOSTIC FIGURE
-	fig, (ax1, ax2,ax3,ax4,ax5,ax6) = pyplot.subplots(1, 6,figsize=(10,2.5))
+	fig, (ax1, ax2,ax3,ax4,ax5,ax6) = pyplot.subplots(6,1,figsize=(1.3,6.))
 	ax1.imshow(use_image)
 	imgs = ax1.get_images()
-	fig.suptitle(thisField+'-'+str(thisID))
+	fig.suptitle(thisField+'-'+str(IDlist[q]))
 	if len(imgs) > 0:
    		vmin, vmax = imgs[0].get_clim()
+   		MIN,MAX=vmin,vmax
+	vlmn=0.05
+	vlmx=0.15
+	ax1.imshow(5*use_image,cmap='cubehelix',norm=colors.PowerNorm(gamma=0.33,vmin=-0.005,vmax=0.6),origin='lower') #DATA
 
-	ax1.imshow(use_image,vmin=0.1*vmin,vmax=0.25*vmax,origin='lower') #DATA
-
-	ax2.imshow(model_narrow,vmin=0.1*vmin,vmax=0.25*vmax,origin='lower') #NARROW
-	ax3.imshow(model_broad,vmin=0.1*vmin,vmax=0.25*vmax,origin='lower') #BROAD
-	ax4.imshow(model_third,vmin=0.1*vmin,vmax=0.25*vmax,origin='lower') #NARROW
-	ax5.imshow(model_image,vmin=0.1*vmin,vmax=0.25*vmax,origin='lower') #MODE	
-	ax6.imshow(use_image-model_image,vmin=0.1*vmin,vmax=0.25*vmax,origin='lower') #RESIDUAL
+	ax2.imshow(5*model_narrow,cmap='cubehelix',norm=colors.PowerNorm(gamma=0.33,vmin=-0.005,vmax=0.6),origin='lower') #NARROW
+	ax3.imshow(5*model_broad,cmap='cubehelix',norm=colors.PowerNorm(gamma=0.33,vmin=-0.005,vmax=0.6),origin='lower') #BROAD
+	ax4.imshow(5*model_third,cmap='cubehelix',norm=colors.PowerNorm(gamma=0.33,vmin=-0.005,vmax=0.6),origin='lower') #NARROW
+	ax5.imshow(5*model_image,cmap='cubehelix',norm=colors.PowerNorm(gamma=0.33,vmin=-0.005,vmax=0.6),origin='lower') #MODE	
+	ax6.imshow(5*(use_image-model_image),cmap='cubehelix',norm=colors.PowerNorm(gamma=0.33,vmin=-0.005,vmax=0.6),origin='lower') #RESIDUAL
 
 
+
+	print(np.shape(use_image))
+	ax2.plot([1,60],[25.5,25.5],color='white',ls='--',lw=1,alpha=0.6)
+	ax3.plot([1,60],[25.5,25.5],color='white',ls='--',lw=1,alpha=0.6)
+	ax4.plot([1,60],[25.5,25.5],color='white',ls='--',lw=1,alpha=0.6)
+	ax5.plot([1,60],[25.5,25.5],color='white',ls='--',lw=1,alpha=0.6)	
+	
+	
+	
 	ax1.text(5,40,'DATA',color='white')
 	ax2.text(5,40,'NARROW',color='white')
 	ax3.text(5,40,'BROAD',color='white')
@@ -286,21 +399,27 @@ for q in range(len(IDlist)):
 	ax5.text(5,40,'MODEL',color='white')
 	ax6.text(5,40,'RESIDUAL',color='white')
 
-	ax1.text(5,10,'z ~ '+str(thisz),color='white')
-	ax2.text(5,10,str(int(fwhm_vel_narrow))+' km/s',color='white')	
-	ax3.text(5,10,str(int(fwhm_vel))+' km/s',color='white')
+	#ax1.text(5,10,'z ~ '+str(thisz),color='white')
+	#ax2.text(5,10,str(int(fwhm_vel_narrow))+' km/s',color='white')	
+	#ax3.text(5,10,str(int(fwhm_vel))+' km/s',color='white')
 
-
+	ax6.minorticks_on()
 	ax1.tick_params(left=False,right=False,bottom=False,top=False,labelleft=False,labelbottom=False) # Get ticks to look nice
 	ax2.tick_params(left=False,right=False,bottom=False,top=False,labelleft=False,labelbottom=False) # Get ticks to look nice
 	ax3.tick_params(left=False,right=False,bottom=False,top=False,labelleft=False,labelbottom=False) # Get ticks to look nice
 	ax4.tick_params(left=False,right=False,bottom=False,top=False,labelleft=False,labelbottom=False) # Get ticks to look nice
 	ax5.tick_params(left=False,right=False,bottom=False,top=False,labelleft=False,labelbottom=False) # Get ticks to look nice
-	ax6.tick_params(left=False,right=False,bottom=False,top=False,labelleft=False,labelbottom=False) # Get ticks to look nice
+	ax6.tick_params(which='both',left=False,right=False,top=False,labelleft=False) # Get ticks to look nice
 	
+	ax6.set_xticks((30-2*13,30.5,30.5+2*13),(-2000,0,2000))
+	ax6.set_xlabel(r'$\Delta v$ [km s$^{-1}$]')
+
 	pyplot.tight_layout()
-	pyplot.savefig(SAVE_FOLDER+'fits_%s_%s.png'%(thisField,thisID))
+	#pyplot.show()
+	#stop
+	pyplot.savefig(SAVE_FOLDER+'fits_%s_%s.pdf'%(thisField,thisID),dpi=150)
 	pyplot.clf()
+	STOP
 
 
 
@@ -316,9 +435,9 @@ for q in range(len(IDlist)):
 	#NOW EXTRACT THE 1D SPECTRUM:
 	#CREATE OPTIMAL WEIGHT
 	model_y=model_broad+model_narrow
-	model_y=model_y/np.nansum(model_y)
-	optmodel=numpy.nansum(model_y,axis=1)
 
+	optmodel=numpy.nansum(model_y,axis=1)
+	optmodel=optmodel/np.nansum(optmodel)
 	COLS=[]
 
 	opt_weight=numpy.zeros(numpy.shape(data_A))
@@ -345,7 +464,7 @@ for q in range(len(IDlist)):
 	cols=fits.ColDefs(COLS)#,col13,col14])
 	hdu_1D = fits.BinTableHDU.from_columns(cols)
 	hdu=fits.PrimaryHDU(numpy.arange(100.))
-	hdu_1D.writeto(SAVE_FOLDER+'cleaned_spectrum_1D_%s.fits'%(thisID),overwrite=True)
+	hdu_1D.writeto(SAVE_FOLDER+'cleaned_spectrum_1D_%s_%s.fits'%(thisField,thisID),overwrite=True)
 
 
 

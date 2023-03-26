@@ -20,6 +20,9 @@ CATALOG='/scratch/EIGER/identification/J1148_DKO3_algo_missed.fits'
 NEW_CATALOG='/scratch/EIGER/identification/J1148_DKO3_algo_missed_Cands.fits'
 FOLDER='/scratch/EIGER/identification/SPECTRA_J1148/' #FOLDER WITH SPECTRA
 
+
+CATALOG='/scratch/EIGER/identification/J1148_O3candidates_v2_TOTAL_27022023_reconciled.fits'
+NEW_CATALOG='/scratch/EIGER/identification/J1148_O3candidates_v2_TOTAL_27022023_reconciled_withCands.fits'
 field='J1148'
 with fits.open(CATALOG) as hdul:
     orig_table = hdul[1].data
@@ -192,7 +195,9 @@ for jjj in range(len(IDlist)):
 
 		sel=(y>25-3)*(y<25+4)*(SN>2.)
 
-		#print(x[sel],SN[sel])
+
+		sel=(y>25-5)*(y<25+5)*(SN>1.5)
+		##print(x[sel],SN[sel])
 		#print(x[sel][np.argsort(x[sel])])
 
 		#print(wav[sel],wav[sel]/4960. -1,wav[sel]/5008. -1, SN[sel])
@@ -266,7 +271,7 @@ for jjj in range(len(IDlist)):
 
 	except:
 		continue
-stop
+
 COLS=[]
 #NOW SAVE RESULTS
 for thispair in range(len(PAIRS)):

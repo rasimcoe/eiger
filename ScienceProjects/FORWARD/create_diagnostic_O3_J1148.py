@@ -42,18 +42,22 @@ CATALOG='/scratch/EIGER/identification/J1148+5251_photcat_v1_noisemodel_short_wi
 
 CATALOG='/scratch/EIGER/identification/J1148_list1.fits'
 CATALOG='/scratch/EIGER/identification/J1148_O3DK_missed_by_JM.fits'
+
 FOLDER='/scratch/EIGER/identification/SPECTRA_J1148/' #FOLDER WITH SPECTRA
 
+
+CATALOG='/scratch/EIGER/identification/J1148_O3candidates_v2_TOTAL_27022023_reconciled_withCands.fits'
+FOLDER='/scratch/EIGER/identification/SPECTRA_O3_J1148/'
 field='J1148'
 with fits.open(CATALOG) as hdul:
     orig_table = hdul[1].data
     orig_cols = orig_table.columns
     
 
-IDlist=orig_table.field('NUMBER_2')
-RAlist=orig_table.field('ALPHA_J2000_det_2')
-DEClist=orig_table.field('DELTA_J2000_det_2')
-redshift=orig_table.field('z_O3')
+IDlist=orig_table.field('NUMBER')
+RAlist=orig_table.field('ALPHA_J2000_det')
+DEClist=orig_table.field('DELTA_J2000_det')
+redshift=orig_table.field('z_O3doublet')
 exp_sep=(5008.28-4960.)*(1+redshift)
 lamblist=(1+redshift)*5008.28
 
@@ -188,7 +192,7 @@ for q in range(len(IDlist)):
 
 
 	pyplot.tight_layout
-	pyplot.savefig('/scratch/EIGER/identification/VISCHECK_JMmissed/spectrum_J1148_%s.png'%thisID,dpi=120)	
+	pyplot.savefig('/scratch/EIGER/identification/VISCHECK_J1148_O3_FINAL/spectrum_J1148_%s.png'%thisID,dpi=120)	
 	#pyplot.savefig('/scratch/EIGER/identification/VISCHECK_J1148/spectrum_O3candidate_%s.png'%thisID,dpi=120)
 	pyplot.clf()
 
