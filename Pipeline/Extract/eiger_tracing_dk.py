@@ -912,50 +912,60 @@ def shift_columns(y,d,var,lamb,q,ysize=31,yoffset=-2):
 
     return shifted_y,shifted_y_var,shifted_y_lamb
 
+def scrunch_columns_dk(lambda_array,l,shifted_y,shifted_y_var,module,flambda=False):
 
-def scrunch_columns(lambda_array,l,shifted_y,shifted_y_var,module):
+    ## shifted_y in the unit of DN/s (count rate)
+
     ly,lx=np.shape(shifted_y)
     len_lamb=len(lambda_array)
-    scrunchd_x=np.zeros((ly,len_lamb))
-    scrunchd_x_var=np.zeros((ly,len_lamb))
-    scrunchd_lamb=np.zeros((ly,len_lamb))
+    scrunched_x=np.zeros((ly,len_lamb))
+    scrunched_x_var=np.zeros((ly,len_lamb))
+    scrunched_lamb=np.zeros((ly,len_lamb))
 
     dwav=lambda_array[1]-lambda_array[0]
 
 
-
     for iy in range(ly):
-        lambaxis=l[iy,:]
+        lambaxis = l[iy,:]
         flx_col = shifted_y[iy,:]
         var_col = shifted_y_var[iy,:]
 
 
-        if module=='b':
+        if module.upper()=='B':
             lambaxis=lambaxis[::-1]
+            axis=lambaxis[::-1]
             flx_col=flx_col[::-1]
             var_col=var_col[::-1]
+
+        lxi = np.arange(lambaxis.size)
+        lambgrid = np.interp(lxi-0.5, lxi, lambaxis)
+        lambgrid[0]=lambgrid[1]-(lambgrid[2]-lambgrid[1])
+        lambgrid = np.append(lambgrid,lambgrid[-1]+(lambgrid[-1]-lambgrid[-2]))
+
+
+        if flambda==False:
+            dlambdadx = (lambgrid[1:]-lambgrid[0:-1])*1e4
+            flx_col = flx_col * dlambdadx ## (DN/s) --> (DN/s)/angstrom
+            var_col = var_col * dlambdadx**2 ## (DN/s)^2 --> (DN/s)^2/angstrom^2
 
         bad_col = var_col*0.
         bad_col[np.where((var_col<=0.0)|(np.isnan(var_col))|(np.isnan(flx_col)))[0]]=1.0
 
         ### Cumulative sum
-       # flx_row_cum = np.append([0],np.nancumsum(flx_col)) #Update 22 aug, [0] append
-        #bad_row_cum = np.append([0],np.nancumsum(bad_col)) #Update 22 aug, [0] append
-        #var_row_cum = np.append([0],np.nancumsum(var_col)) #Update 22 aug, [0] append
+        flx_row_cum = np.append(0,np.nancumsum(flx_col))
+        bad_row_cum = np.append(0,np.nancumsum(bad_col))
+        var_row_cum = np.append(0,np.nancumsum(var_col))
 
-        flx_row_cum = np.nancumsum(flx_col) #Update 22 aug, [0] append
-        bad_row_cum = np.nancumsum(bad_col) #Update 22 aug, [0] append
-        var_row_cum = np.nancumsum(var_col) #Update 22 aug, [0] append
 
-  
         #print(np.flip(lambaxis)+0.5)
         #print((lambda_array-dwav/2.),np.flip(lambaxis)+0.5)
-        flx_row_new0 = np.interp(lambda_array-dwav/2., lambaxis, flx_row_cum, left=np.nan, right=np.nan)
-        flx_row_new1 = np.interp(lambda_array+dwav/2., lambaxis, flx_row_cum, left=np.nan, right=np.nan)
-        var_row_new0 = np.interp(lambda_array-dwav/2., lambaxis, var_row_cum, left=np.nan, right=np.nan)
-        var_row_new1 = np.interp(lambda_array+dwav/2., lambaxis, var_row_cum, left=np.nan, right=np.nan)
-        bad_row_new0 = np.interp(lambda_array-dwav/2., lambaxis, bad_row_cum, left=np.nan, right=np.nan)
-        bad_row_new1 = np.interp(lambda_array+dwav/2., lambaxis, bad_row_cum, left=np.nan, right=np.nan)
+        ##-dwav in lambrgrid-dwav added JM 30 Nov 22 ==> DK deleted
+        flx_row_new0 = np.interp(lambda_array-dwav/2., lambgrid, flx_row_cum, left=np.nan, right=np.nan)
+        flx_row_new1 = np.interp(lambda_array+dwav/2., lambgrid, flx_row_cum, left=np.nan, right=np.nan)
+        var_row_new0 = np.interp(lambda_array-dwav/2., lambgrid, var_row_cum, left=np.nan, right=np.nan)
+        var_row_new1 = np.interp(lambda_array+dwav/2., lambgrid, var_row_cum, left=np.nan, right=np.nan)
+        bad_row_new0 = np.interp(lambda_array-dwav/2., lambgrid, bad_row_cum, left=np.nan, right=np.nan)
+        bad_row_new1 = np.interp(lambda_array+dwav/2., lambgrid, bad_row_cum, left=np.nan, right=np.nan)
 
         bad_row_new = bad_row_new1-bad_row_new0
         flx_row_new = bad_row_new * 0.
@@ -966,33 +976,29 @@ def scrunch_columns(lambda_array,l,shifted_y,shifted_y_var,module):
 
         bad_row_new[idx_bad]=1.0
 
-        flx_row_new[idx_good] = (flx_row_new1-flx_row_new0)[idx_good]/(1-bad_row_new[idx_good])
+        flx_row_new[idx_good] = (flx_row_new1-flx_row_new0)[idx_good]/(dwav*1e4)/(1-bad_row_new[idx_good])
         flx_row_new[idx_bad] = np.nan
 
-        var_row_new[idx_good] = (var_row_new1-var_row_new0)[idx_good]/(1-bad_row_new[idx_good])
+        var_row_new[idx_good] = (var_row_new1-var_row_new0)[idx_good]/(dwav*1e4)**2/(1-bad_row_new[idx_good])
         var_row_new[idx_bad] = np.nan
 
 
-        scrunchd_x[iy,:] = flx_row_new/(dwav*1E4) #this is bc of the /Angstrom term
-        scrunchd_x_var[iy,:] = var_row_new/(dwav*1E4) #this is bc of the /Angstrom term
+        scrunched_x[iy,:] = flx_row_new
+        scrunched_x_var[iy,:] = var_row_new
+        scrunched_lamb[iy,:]=lambda_array
 
-
-        scrunchd_lamb[iy,:]=lambda_array
-    return scrunchd_x,scrunchd_x_var,scrunchd_lamb
-
-
-
+    return scrunched_x,scrunched_x_var,scrunched_lamb
+def stack_with_reject_outliers(data,err,nobs, m = 5., method='mean', iterations=1):
     
-def stack_with_reject_outliers(data,err,nobs, m = 5., method='mean',iterations=1):
+    mask_outliers=np.isnan(data)
+    mask_outliers+=np.isnan(err)
+    
     for i in range(iterations):
-    	median=np.nanmedian(data,axis=0)
-    	std=np.nanstd(data,axis=0)
-    	if i>1:
-    		mask_outliers+=np.abs((data-median))/std > m
-    	else:
-    		mask_outliers=np.abs((data-median))/std > m
-    	data[mask_outliers]=np.nan
-    	
+        median=np.nanmedian(data,axis=0)
+        std=np.nanstd(data,axis=0)
+        mask_outliers+=np.abs((data-median))/std > m
+        data[mask_outliers]=np.nan
+
     var=err**2 
     var[mask_outliers]=np.nan
 
@@ -1001,8 +1007,10 @@ def stack_with_reject_outliers(data,err,nobs, m = 5., method='mean',iterations=1
     elif method=='median':
         fdata = np.nanmedian(data,axis=0)
     
-    return fdata,(np.nanmean(var,axis=0))**0.5, mask_outliers
-
+    nf = np.zeros_like(data)
+    nf[mask_outliers]=0
+    ferr = np.nansum(var,axis=0)**0.5/np.sum(nf,axis=0)
+    return fdata, ferr, mask_outliers
     
 def stack_with_mask_outliers(data, mask_outliers, method='mean'):
     data[mask_outliers] = np.nan

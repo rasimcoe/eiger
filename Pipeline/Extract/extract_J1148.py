@@ -39,6 +39,9 @@ FOLDER='/scratch/EIGER/BROAD/SPECTRA_COLSEL/'
 #CATALOG WITH SOURCES TO EXTRACT // CAN ALSO SKIP AND HAVE IDlist,RAlist and DEClist manually
 CATALOG='/scratch/EIGER/identification/J1148+5251_photcat_v1_noisemodel_short.fits'
 CATALOG='/scratch/EIGER/BROAD/J1148_photcat1_BROADsel_16022023.fits'
+
+CATALOG='/scratch/EIGER/identification/J1148_O3candidates_v2_TOTAL_27022023_reconciled_withCands.fits'
+FOLDER='/scratch/EIGER/identification/SPECTRA_O3_J1148/'
 cat=fits.open(CATALOG)
 
 data=cat[1].data
@@ -49,6 +52,18 @@ DEClist=data.field('DELTA_J2000_det')
 
 #RAlist=data.field('RA_MANUAL')
 #DEClist=data.field('DEC_MANUAL')
+
+
+FOLDER='/scratch/mattheej/BROAD/GRID_SPECTRA/J1148/'
+CATALOG='/scratch/mattheej/BROAD/grid_spec_points_200x200_J1148.fits'
+cat=fits.open(CATALOG)
+
+
+data=cat[1].data
+IDlist=data.field('NUMBER')
+RAlist=data.field('RA')
+DEClist=data.field('DEC')
+Xlist=data.field('x')
 
 
 #This bit is a placeholder for "bookkeeping" (i.e. keeping track of lines that are seen in this spectrum, but also seen in other spectra). Implemented for simulated data, not for real data.
@@ -311,7 +326,7 @@ def run(qqq):
                         n[scrunchd>-1E9]+=1
                         nexp.append(n)
 
-                        ee.append(scrunchd_var)
+                        ee.append(scrunchd_var**0.5)
                         qq.append((-1+scrunchd_var/scrunchd_var)) #just a placeholder
 
 
@@ -384,7 +399,7 @@ def run(qqq):
                               visitcounter==2,
                               visitcounter==3,
                               visitcounter==4]
-            names=['','A','B']#,'V1','V2','V3','V4']
+            names=['']#,'A','B']#,'V1','V2','V3','V4']
             stack_m_outliers = 3.0
             outlier_iter=5
             stack_method='mean'  # mean or median
@@ -425,7 +440,7 @@ def run(qqq):
 
                 LONGLIST.append(fits.ImageHDU(data=fd,header=hdu.header,name='SCI%s'%thisname))
                 LONGLIST.append(fits.ImageHDU(data=fe,header=hdu.header,name='ERR%s'%thisname))
-                LONGLIST.append(fits.ImageHDU(data=fcont,header=hdu.header,name='CONT%s'%thisname))
+                #LONGLIST.append(fits.ImageHDU(data=fcont,header=hdu.header,name='CONT%s'%thisname))
                 #LONGLIST.append(fits.ImageHDU(data=fq,header=hdu.header,name='QUALITY%s'%thisname))
                 #LONGLIST.append(fits.ImageHDU(data=fn,header=hdu.header,name='NEXP%s'%thisname)
                 #LONGLIST.append(fits.ImageHDU(data=fw,header=hdu.header,name='OPT_WEIGHT%s'%thisname))

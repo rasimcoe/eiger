@@ -33,22 +33,38 @@ directimage='/scratch/kashinod/EIGER/J0100/current_best/stack_F356W_pipe4_v3_flu
 
 ### Output directory
 
-FOLDER='/scratch/EIGER/'#BROAD/SPECTRA_COLSEL/'
+FOLDER='/scratch/EIGER/O3SPECTRA/'#BROAD/SPECTRA_COLSEL/'
 
 
 #CATALOG WITH SOURCES TO EXTRACT // CAN ALSO SKIP AND HAVE IDlist,RAlist and DEClist manually
 CATALOG='/scratch/EIGER/identification/J0100_photcat_v4_within20arcsec_QSO.fits'
 CATALOG='/scratch/EIGER/BROAD/J0100_photcat4_BROADsel_16022023.fits'
+
+CATALOG='/scratch/EIGER/RONGMON/zcat_crossmatched.fits'
+CATALOG='/scratch/EIGER/O3SPECTRA/J0100_photcat_v2_O3emitters_Systems_29122022.fits'
 cat=fits.open(CATALOG)
 
 data=cat[1].data
 IDlist=data.field('NUMBER')
-RAlist=data.field('ALPHA_J2000_det')
-DEClist=data.field('DELTA_J2000_det')
+#RAlist=data.field('RA')#ALPHA_J2000_det')
+#DEClist=data.field('DEC')#DELTA_J2000_det')
 #Xlist=data.field('X_IMAGE_det')
 
-#RAlist=data.field('RA_MANUAL')
-#DEClist=data.field('DEC_MANUAL')
+RAlist=data.field('RA_MANUAL')
+DEClist=data.field('DEC_MANUAL')
+
+
+
+FOLDER='/scratch/mattheej/BROAD/GRID_SPECTRA/J0100/'
+CATALOG='/scratch/mattheej/BROAD/grid_spec_points_200x200_J0100.fits'
+cat=fits.open(CATALOG)
+
+
+data=cat[1].data
+IDlist=data.field('NUMBER')
+RAlist=data.field('RA')
+DEClist=data.field('DEC')
+Xlist=data.field('x')
 
 
 #This bit is a placeholder for "bookkeeping" (i.e. keeping track of lines that are seen in this spectrum, but also seen in other spectra). Implemented for simulated data, not for real data.
@@ -88,9 +104,9 @@ VISITS=[1,2,3,4]
 #DEClist=[28.009717338065087,28.028277304725833,28.050176515256226,28.051578609337152]
 
 #FOR RONGMON
-IDlist=['1030800']
-RAlist=[15.0528963]
-DEClist=[28.0416036]
+#IDlist=['1030800']
+#RAlist=[15.0528963]
+#DEClist=[28.0416036]
 
 ### Reference files for offset correction
 ### Spectral trace "y-offset" map (calibrated using PID 1076)
@@ -334,7 +350,7 @@ def run(qqq):
                         n[scrunchd>-1E9]+=1
                         nexp.append(n)
 
-                        ee.append(scrunchd_var)
+                        ee.append(scrunchd_var**0.5)
                         qq.append((-1+scrunchd_var/scrunchd_var)) #just a placeholder
 
 
@@ -651,7 +667,9 @@ def run(qqq):
        # except:
 #            continue
 
+#run(0)
 
+#STOP
 
 
 n_procs = 44 # number of cores available

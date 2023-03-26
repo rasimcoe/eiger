@@ -51,6 +51,18 @@ DEClist=data.field('DELTA_J2000_det')
 #DEClist=data.field('DEC_MANUAL')
 
 
+FOLDER='/scratch/mattheej/BROAD/GRID_SPECTRA/J1120/'
+CATALOG='/scratch/mattheej/BROAD/grid_spec_points_200x200_J1120.fits'
+cat=fits.open(CATALOG)
+
+
+data=cat[1].data
+IDlist=data.field('NUMBER')
+RAlist=data.field('RA')
+DEClist=data.field('DEC')
+Xlist=data.field('x')
+
+
 #This bit is a placeholder for "bookkeeping" (i.e. keeping track of lines that are seen in this spectrum, but also seen in other spectra). Implemented for simulated data, not for real data.
 """
 N_in_others=data.field('Nlines_appear_in_others')
@@ -315,7 +327,7 @@ def run(qqq):
                         n[scrunchd>-1E9]+=1
                         nexp.append(n)
 
-                        ee.append(scrunchd_var)
+                        ee.append(scrunchd_var**0.5)
                         qq.append((-1+scrunchd_var/scrunchd_var)) #just a placeholder
 
 
@@ -388,7 +400,7 @@ def run(qqq):
                               visitcounter==2,
                               visitcounter==3,
                               visitcounter==4]
-            names=['','A','B']#,'V1','V2','V3','V4']
+            names=['']#,'A','B']#,'V1','V2','V3','V4']
             stack_m_outliers = 3.0
             outlier_iter=5
             stack_method='mean'  # mean or median
@@ -429,7 +441,7 @@ def run(qqq):
 
                 LONGLIST.append(fits.ImageHDU(data=fd,header=hdu.header,name='SCI%s'%thisname))
                 LONGLIST.append(fits.ImageHDU(data=fe,header=hdu.header,name='ERR%s'%thisname))
-                LONGLIST.append(fits.ImageHDU(data=fcont,header=hdu.header,name='CONT%s'%thisname))
+               # LONGLIST.append(fits.ImageHDU(data=fcont,header=hdu.header,name='CONT%s'%thisname))
                 #LONGLIST.append(fits.ImageHDU(data=fq,header=hdu.header,name='QUALITY%s'%thisname))
                 #LONGLIST.append(fits.ImageHDU(data=fn,header=hdu.header,name='NEXP%s'%thisname)
                 #LONGLIST.append(fits.ImageHDU(data=fw,header=hdu.header,name='OPT_WEIGHT%s'%thisname))
