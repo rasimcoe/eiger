@@ -34,7 +34,7 @@ def main():
     catname = qso_name+'_photcat_v'+str(dataMap['ver'])
 
     #copy config files
-    os.system('cp /net/galaxy-data/export/galaxydata/mruari/EIGER/imaging/param_files/photcat/* .')
+    os.system('cp '+basedir+'photometry/param_files/photcat/* .')
 
     paramfile = 'config.v4'
     det_band = dataMap['det_band']
