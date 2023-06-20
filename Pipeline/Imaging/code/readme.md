@@ -43,12 +43,12 @@ Fixes the crf.fits files with the better wisp templates, as well as snowball mas
 Finally it stacks the data into final mosaics.
 
 Notes: \
-It is not fully sequential. You cannot delete all the files in the last step after you run the next. step5 reads the crf.fits files from step2/pipe2 for example.
-You can delete useless files like the *outlier_i2d.fits made in outlier rejection, or the blank *trapsfilled.fits and intermediate *rate.fits *rateints.fits. \
+It is not fully sequential. You cannot delete all the files in the last step after you run the next. step5 reads the crf.fits files from step2/pipe2 for example. \
+You can delete useless files like the \*outlier_i2d.fits made in outlier rejection, or the blank \*trapsfilled.fits and intermediate \*rate.fits \*rateints.fits. \
 If you are running out of space delete: \
  the redudant mast download dir (download/mastDownload), which are copied into download/organised_output. \
- the FXXXW/pipe1_basic/jw*.fits files after running step2. \
- the FXXXW/pipe3_skyfix/jw*.fits files after running step4.
+ the FXXXW/pipe1_basic/jw\*.fits files after running step2. \
+ the FXXXW/pipe3_skyfix/jw\*.fits files after running step4.
 
 
 
