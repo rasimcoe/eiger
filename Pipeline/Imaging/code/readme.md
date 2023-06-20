@@ -14,7 +14,7 @@ Check the files are all there, astroquery sometimes misses some. Currently the l
 You can rerun the script and it should find them. \
 There are three command line options for this script, but only this one. \
     -q or --qso quasar name on MAST  e.g. "2MASS J01001301+2802257" "QSO J1120+0641" \
-    -d or --di base directory e.g. "/scratch/mruari/EIGER/imaging/J0100+2802/"" \
+    -d or --dir base directory e.g. "/scratch/mruari/EIGER/imaging/J0100+2802/"" \
     -p or --pmap CRDS pmap e.g. "jwst_0988.pmap"        #use the latest one \
 These options are writen to a params yaml file which the other steps read.
 
