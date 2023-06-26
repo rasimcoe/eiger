@@ -16,6 +16,7 @@ There are three command line options for this script, but only this one. \
     -q or --qso quasar name on MAST  e.g. "2MASS J01001301+2802257" "QSO J1120+0641" \
     -d or --dir base directory e.g. "/scratch/mruari/EIGER/imaging/J0100+2802/"" \
     -p or --pmap CRDS pmap e.g. "jwst_0988.pmap"        #use the latest one \
+    -c or --cache  CRDS cache directory e.g. "/scratch/mruari/EIGER/cache/crds_cache" \
 These options are writen to a params yaml file which the other steps read.
 
 step1__imaging_pipe1_basic_findgrid.py \
