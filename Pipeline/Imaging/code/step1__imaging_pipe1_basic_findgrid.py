@@ -2,9 +2,6 @@ from glob import glob
 import os
 import shutil
 import urllib
-os.environ["CRDS_DATA"] = "/scratch/mruari/EIGER/cache/crds_cache"
-os.environ["CRDS_PATH"] = "/scratch/mruari/EIGER/cache/crds_cache"
-os.environ["CRDS_SERVER_URL"] = "https://jwst-crds.stsci.edu"
 # Third Party Imports
 from astropy.io import ascii as asc
 from astropy.io import fits
@@ -117,8 +114,12 @@ def main():
     # use safe_load instead load
         dataMap = yaml.safe_load(f)
 
-    os.environ["CRDS_CONTEXT"] = dataMap['pmap']
-    basedir                    = dataMap['basedir']
+    os.environ["CRDS_SERVER_URL"]   = "https://jwst-crds.stsci.edu"
+    os.environ["CRDS_DATA"]         = dataMap['cache']
+    os.environ["CRDS_PATH"]         = dataMap['cache']
+    os.environ["CRDS_CONTEXT"]      = dataMap['pmap']
+    basedir                         = dataMap['basedir']
+
 
     n_procs = 40
     FILTERS = ['F115W', 'F200W', 'F356W']

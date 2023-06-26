@@ -106,7 +106,8 @@ def make_directories(basedir):
 def write_paramfile(qso_name, basedir, pmap):
     data =  {'qso_name': qso_name,
                          'basedir': basedir,
-                         'pmap': pmap}
+                         'pmap': pmap,
+                         'cache': cache}
 
     with open('reduction_params.yml', 'w') as yaml_file:
         yaml.dump(data, yaml_file, default_flow_style=False)
@@ -121,6 +122,7 @@ def main():
     p.add_argument("-q", "--qso", help='quasar name on MAST  e.g. "2MASS J01001301+2802257" "QSO J1120+0641" ')
     p.add_argument("-d", "--dir", help='base directory e.g. "/scratch/mruari/EIGER/imaging/J0100+2802/"')
     p.add_argument("-p", "--pmap", help='CRDS pmap e.g. "jwst_0988.pmap"')
+    p.add_argument("-c", "--cache", help='CRDS cache directory e.g. "/scratch/mruari/EIGER/cache/crds_cache"')
 
     args = p.parse_args() 
 

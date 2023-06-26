@@ -194,8 +194,11 @@ def main():
     # use safe_load instead load
         dataMap = yaml.safe_load(f)
 
-    os.environ["CRDS_CONTEXT"] = dataMap['pmap']
-    basedir                    = dataMap['basedir']
+    os.environ["CRDS_SERVER_URL"]   = "https://jwst-crds.stsci.edu"
+    os.environ["CRDS_DATA"]         = dataMap['cache']
+    os.environ["CRDS_PATH"]         = dataMap['cache']
+    os.environ["CRDS_CONTEXT"]      = dataMap['pmap']
+    basedir                         = dataMap['basedir']
 
     FILTERS = ['F115W', 'F200W', 'F356W']
     for FILTER in FILTERS:
@@ -208,7 +211,7 @@ def main():
         mosaic = fits.open(mosaic_name)
 
         #make mask
-        #mosaic_mask = fast_mosaic_mask(mosaic, FILTER, save_dir)
+        mosaic_mask, hdu = fast_mosaic_mask(mosaic, FILTER, save_dir)
         mask_hdu = fits.open(save_dir+'sourcemask_cal2_v1.fits')
 
         #remake wisps

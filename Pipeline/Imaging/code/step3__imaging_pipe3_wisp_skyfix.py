@@ -1,9 +1,6 @@
 import matplotlib.pyplot as plt
 from scipy.stats import binned_statistic
 import os
-os.environ["CRDS_DATA"] = "/scratch/mruari/EIGER/cache/crds_cache"
-os.environ["CRDS_PATH"] = "/scratch/mruari/EIGER/cache/crds_cache"
-os.environ["CRDS_SERVER_URL"] = "https://jwst-crds.stsci.edu"
 from jwst.pipeline import Image3Pipeline
 from astropy.visualization import simple_norm
 import numpy as np
@@ -176,8 +173,11 @@ def main():
     # use safe_load instead load
         dataMap = yaml.safe_load(f)
 
-    os.environ["CRDS_CONTEXT"] = dataMap['pmap']
-    basedir                    = dataMap['basedir']
+    os.environ["CRDS_SERVER_URL"]   = "https://jwst-crds.stsci.edu"
+    os.environ["CRDS_DATA"]         = dataMap['cache']
+    os.environ["CRDS_PATH"]         = dataMap['cache']
+    os.environ["CRDS_CONTEXT"]      = dataMap['pmap']
+    basedir                         = dataMap['basedir']
 
     #first loop over filters and make wisp templates
     FILTERS = ['F115W', 'F200W', 'F356W']

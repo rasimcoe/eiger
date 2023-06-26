@@ -46,6 +46,13 @@ params['NOT_OBS_THRESHOLD'] = -90
 params['CAT_HAS_EXTCORR'] = False
 params['MW_EBV'] = 0.0273                                                           #from Planck Change dust extinction for different field
 
+#EBV Planck query
+# from dustmaps.planck import PlanckQuery
+# cent_coord = SkyCoord(ra='11h48m16.647s',dec='+52d51m50.31s')       0.02734
+# planck = PlanckQuery()
+# ebv = planck(cent_coord)
+# print('E(B-V) = {:.5f} mag'.format(ebv))
+
 #inputs
 cat_name = basename + '_input.csv'
 params['CATALOG_FILE'] = cat_name

@@ -1,9 +1,6 @@
 import shutil
 from glob import glob
 import os
-os.environ["CRDS_DATA"] = "/scratch/mruari/EIGER/cache/crds_cache"
-os.environ["CRDS_PATH"] = "/scratch/mruari/EIGER/cache/crds_cache"
-os.environ["CRDS_SERVER_URL"] = "https://jwst-crds.stsci.edu"
 import sys
 import logging
 import matplotlib.pyplot as plt
@@ -279,8 +276,11 @@ def main():
     # use safe_load instead load
         dataMap = yaml.safe_load(f)
 
-    os.environ["CRDS_CONTEXT"] = dataMap['pmap']
-    basedir                    = dataMap['basedir']
+    os.environ["CRDS_SERVER_URL"]   = "https://jwst-crds.stsci.edu"
+    os.environ["CRDS_DATA"]         = dataMap['cache']
+    os.environ["CRDS_PATH"]         = dataMap['cache']
+    os.environ["CRDS_CONTEXT"]      = dataMap['pmap']
+    basedir                         = dataMap['basedir']
 
     #run gaia align on
     gaia_align(basedir, 'F356W')
