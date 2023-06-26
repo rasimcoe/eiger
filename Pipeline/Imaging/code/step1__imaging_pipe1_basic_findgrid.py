@@ -2,6 +2,7 @@ from glob import glob
 import os
 import shutil
 import urllib
+import sys
 # Third Party Imports
 from astropy.io import ascii as asc
 from astropy.io import fits

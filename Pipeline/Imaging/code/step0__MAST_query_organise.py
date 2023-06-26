@@ -39,13 +39,13 @@ def check_EIGER_complete(savedir):
                         if not os.path.isfile(savedir +'IMAGING_'+group['FILTER']+'/'+filename):
                             print('%s missing file, main obs %s' % (filename, group['FILTER']))
 
-    filelist = glob(savedir +'IMAGING_F356W/jw01243*03101*_uncal.fits')
+    filelist = glob(savedir +'IMAGING_F356W/jw01243*02101*_uncal.fits')
     ext_base = filelist[0].split('/')[-1][0:10]
     for fname in filelist:
         if fname.split('/')[-1][0:10] != ext_base: print('more than one obs id!')
 
-    ext_std = [dict(FILTER='F200W', seqid=['04101','03101'], nint=1 , nvis=2, modules=['a','b'], cams=['1','2','3','4']), #extra
-               dict(FILTER='F356W', seqid=['04101','03101'], nint=1 , nvis=2, modules=['a','b'], cams=['long'])]          #extra                      
+    ext_std = [dict(FILTER='F200W', seqid=['02101','02101'], nint=1 , nvis=2, modules=['a','b'], cams=['1','2','3','4']), #extra
+               dict(FILTER='F356W', seqid=['02101','02101'], nint=1 , nvis=2, modules=['a','b'], cams=['long'])]          #extra                      
     
     for group in ext_std:
         for iint in range(1,group['nint']+1):
@@ -63,7 +63,7 @@ def check_EIGER_complete(savedir):
     # tab['Message']
 ##########################################################
 def organise_output(workdir, savedir):
-    file_list = glob(workdir + 'mastDownload/JWST/jw0124300*/*uncal.fits')
+    file_list = glob(workdir + 'mastDownload/JWST/jw012430*/*uncal.fits')
 
     for filename in file_list:
         hdr = fits.getheader(filename)
@@ -103,7 +103,7 @@ def make_directories(basedir):
             workdir = filtdir+dir_type+'/'
             if not os.path.isdir(workdir): os.mkdir(workdir)
 ##########################################################  
-def write_paramfile(qso_name, basedir, pmap):
+def write_paramfile(qso_name, basedir, pmap, cache):
     data =  {'qso_name': qso_name,
                          'basedir': basedir,
                          'pmap': pmap,
@@ -134,7 +134,7 @@ def main():
 
     print( args.dir, args.qso )
     if not os.path.isfile('reduction_params.yml'):
-        write_paramfile(args.qso, args.dir, args.pmap)
+        write_paramfile(args.qso, args.dir, args.pmap, args.cache)
     #if os.path.isfile('reduction_params.yml'):
     #    sys.exit('existing reduction_params.yml found: delete or rename')
 
