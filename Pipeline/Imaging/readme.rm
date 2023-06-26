@@ -1,0 +1,8 @@
+#EIGER imaging and photometry reduction
+These scripts are a template for the imaging and photometry reduction. Each field is slightly different, and often require modification to optimise the quality.
+To start make a directory which will be the base directory (basedir) for the reduction.
+Copy the contents of this Imaging directory into this directory and see the readme.md in code/
+
+
+
+

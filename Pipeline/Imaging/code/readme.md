@@ -14,7 +14,7 @@ Check the files are all there, astroquery sometimes misses some. Currently the l
 You can rerun the script and it should find them. \
 There are three command line options for this script, but only this one. \
     -q or --qso quasar name on MAST  e.g. "2MASS J01001301+2802257" "QSO J1120+0641" \
-    -d or --di base directory e.g. "/scratch/mruari/EIGER/imaging/J0100+2802/"" \
+    -d or --dir base directory e.g. "/scratch/mruari/EIGER/imaging/J0100+2802/"" \
     -p or --pmap CRDS pmap e.g. "jwst_0988.pmap"        #use the latest one \
 These options are writen to a params yaml file which the other steps read.
 
@@ -32,7 +32,7 @@ The F200W and F115W mosaics are then aligned to the new F356W. These adjustments
 
 step3__imaging_pipe3_wisp_skyfix.py \
 This step creates median sky flats to remove wisp features for the short wavelength channels. It makes a source mask on the fly for each image, this is quite slow.
-It writes these files to the mycals directory in each filter directory, these are maksed median stacks.
+It writes these files to the mycals directory in each filter directory, these are masked median stacks.
 It then applies these to the individual image crf.fits files, along with sky subtraction, snowball masking. It then makes new stacks.
 
 step4__imaging_cal2_sourcemask_wisp.py \
@@ -46,7 +46,7 @@ Notes: \
 It is not fully sequential. You cannot delete all the files in the last step after you run the next. step5 reads the crf.fits files from step2/pipe2 for example. \
 You can delete useless files like the \*outlier_i2d.fits made in outlier rejection, or the blank \*trapsfilled.fits and intermediate \*rate.fits \*rateints.fits. \
 If you are running out of space delete: \
- the redudant mast download dir (download/mastDownload), which are copied into download/organised_output. \
+ the redundant mast download dir (download/mastDownload), which are copied into download/organised_output. \
  the FXXXW/pipe1_basic/jw\*.fits files after running step2. \
  the FXXXW/pipe3_skyfix/jw\*.fits files after running step4.
 
