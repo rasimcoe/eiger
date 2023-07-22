@@ -33,6 +33,14 @@ xsh_vis_kernel = Gaussian1DKernel(stddev=4.8/2.355)
 # See https://www2.keck.hawaii.edu/inst/hires/manual2.pdf
 hires_kernel   = Gaussian1DKernel(stddev=3.0/2.355)
 
+# MOSFIRE (0.7" Slit) per webpage:
+# and our slits were 0.7" on the mask
+#
+# Y = 3380
+# J = 3310
+# H = 3660
+# K = 3620
+
 # VP fit model class
 m = vm.Model()
 
