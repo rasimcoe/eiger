@@ -1,0 +1,59 @@
+# Best-fit model results for imfit 1.6.1 (OpenMP-enabled)
+# Generated on Thu Mar  9 09:45:03 2023 by the following command:
+#    /net/theia/scratch/mattheej/MUSE_VR7/imfit-1.6.1/imfit /scratch/mattheej/FRESCO/SW_image_GOODS-S_13971.fits -c imfit_conf_1.config --noise /scratch/mattheej/FRESCO/dummynoise.fits --save-model bestfit.fits --save-residual residual.fits
+
+# Results of fit:
+#   Algorithm: Levenberg-Marquardt: status = 1 -- SUCCESS: Convergence in fit-statistic value.
+#   Fit statistic: chi-squared (user-supplied errors)
+#   Best-fit value: 6561.667532
+#   Reduced value: 2.661934
+#   AIC: 6632.690259
+#   BIC: 6835.509142
+
+X0		25.8231 # +/- 0.0367
+Y0		25.6427 # +/- 0.0515
+FUNCTION Gaussian
+PA		    180 # +/- 0
+ell		      0 # +/- 0
+I_0		0.630173 # +/- 0.02258
+sigma		1.05465 # +/- 0.035754
+
+X0		21.8022 # +/- 0.0283
+Y0		16.2570 # +/- 0.0308
+FUNCTION Gaussian
+PA		46.7354 # +/- 2.3592e+08
+ell		      0 # +/- 0
+I_0		0.800843 # +/- 0.02129
+sigma		1.11185 # +/- 0.021445
+
+X0		30.9065 # +/- 0.0783
+Y0		30.6083 # +/- 0.0857
+FUNCTION Gaussian
+PA		82.5043 # +/- 6.9328e+08
+ell		      0 # +/- 0
+I_0		0.370403 # +/- 0.030925
+sigma		0.83421 # +/- 0.083741
+
+X0		24.0929 # +/- 0.1262
+Y0		20.9719 # +/- 0.1351
+FUNCTION Gaussian
+PA		64.4692 # +/- 3.426e+08
+ell		      0 # +/- 0
+I_0		0.181004 # +/- 0.012549
+sigma		1.80472 # +/- 0.099634
+
+X0		27.7105 # +/- 0.3217
+Y0		28.5933 # +/- 0.1353
+FUNCTION Gaussian
+PA		93.0961 # +/- 5.4351
+ell		0.588849 # +/- 0.061206
+I_0		0.151037 # +/- 0.013649
+sigma		2.59549 # +/- 0.27595
+
+X0		36.5947 # +/- 0.1682
+Y0		31.5026 # +/- 0.1677
+FUNCTION Gaussian
+PA		85.5798 # +/- 3.2758e+09
+ell		      0 # +/- 0
+I_0		0.135435 # +/- 0.024617
+sigma		0.971679 # +/- 0.12578
