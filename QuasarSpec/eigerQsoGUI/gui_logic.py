@@ -273,37 +273,43 @@ class GuiProgram(Ui_Dialog):
             wave0 = event.xdata        
             self.check_lineid(wave0,'CII*')
             redraw = False
-        elif (event.key == 'F'):
-            if (self.idtablefile == None):
-                options = QFileDialog.Options()
-                fileName, _ = QFileDialog.getOpenFileName(parent=None, \
-                                                          caption="Open",filter="All Files (*);;Text Files (*.txt)", \
-                                                          options=options)
-                if (fileName != None and fileName != ''):
-                    self.idfilename = fileName
-                    self.idtable.write(self.idfilename,format='ascii.fixed_width')
-                else:
-                    print("Selection cancelled or file not found")
-            else:
-                self.idtable.write(self.idfilename,format='ascii.fixed_width')
 
-            self.idtable.write("J1148_idtable.dat",format='ascii.fixed_width')
+        # Write out the ID table
+        elif (event.key == 'F'):
+            # if (self.idtablefile == None):
+            options = QFileDialog.Options()
+            fileName, _ = QFileDialog.getSaveFileName(parent=None, \
+                                                      caption="Open",filter="All Files (*);;Text Files (*.txt)", \
+                                                      options=options)
+            if (fileName != None and fileName != ''):
+                self.idtablefile = fileName
+                self.idtable.write(self.idtablefile,format='ascii.fixed_width')
+            else:
+                print("Selection cancelled or file not found")
+            #else:
+            #        self.idtable.write(self.idtablefile,format='ascii.fixed_width')
+            
+            # self.idtable.write("J1148_idtable.dat",format='ascii.fixed_width')
             print("Writing out ASCII table")
             redraw = False
+            
+        # Read in an ID table
         elif (event.key == 'R'):
-            if (self.idtablefile == None):
-                options = QFileDialog.Options()
-                fileName, _ = QFileDialog.getOpenFileName(parent=None, \
-                                                          caption="Open",filter="All Files (*);;Text Files (*.txt)", \
-                                                          options=options)
-                if (fileName != None and fileName != ''):
-                    self.idfilename = fileName
-                    self.idtable = Table.read(self.idfilename,format='ascii.fixed_width')
-                else:
-                    print("Selection cancelled or file not found")
+            # if (self.idtablefile == None):
+            options = QFileDialog.Options()
+            fileName, _ = QFileDialog.getOpenFileName(parent=None, \
+                                                      caption="Open",filter="All Files (*);;Text Files (*.txt)", \
+                                                      options=options)
+            if (fileName != None and fileName != ''):
+                self.idtablefile = fileName
+                self.idtable = Table.read(self.idtablefile,format='ascii.fixed_width')
             else:
-                self.idtable = Table.read(self.idfilename,format='ascii.fixed_width')
+                print("Selection cancelled or file not found")
+            # else:
+            #    self.idtable = Table.read(self.idfilename,format='ascii.fixed_width')
 
+
+                
         elif (event.key == 'c'):
             wave_marked = event.xdata
             obswaves    = (1+self.idtable['redshift']) * self.idtable['restwv']
