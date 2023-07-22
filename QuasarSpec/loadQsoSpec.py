@@ -80,7 +80,7 @@ def parseSpec(fitsfile, instrument):
         outspec['wave'] = tmp['wave']
         outspec['flux'] = tmp['flux']
         outspec['ivar'] = 1.0/tmp['sig']**2
-        outspec['ivar'][np.isinf(outspec['ivar'])] = 0.0
+        #outspec['ivar'][np.isinf(outspec['ivar'])] = 0.0
         outspec['mask'] = np.ones(len(tmp['wave']))
         
     elif (instrument == 'XShooter'):
@@ -139,7 +139,7 @@ def parseSpec(fitsfile, instrument):
 
 
 def loadQsoSpec(obj_id, spectrographs=['XShooter', 'FIRE', 'MOSFIRE', 'HIRES','FIRE_XSH'], \
-                revision='current', offline=False):
+                revision='current', offline=False, files=False):
 
     if (obj_id < 1 or obj_id > 6):
         print("ERROR: Quasar ID must be between 1 and 6")
@@ -235,6 +235,9 @@ def loadQsoSpec(obj_id, spectrographs=['XShooter', 'FIRE', 'MOSFIRE', 'HIRES','F
             
     if (offline == False):
         db.close()
-    
-    return(spectra)
+
+    if (files == True):
+        return(local_file)
+    else:
+        return(spectra)
 
