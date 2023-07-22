@@ -15,7 +15,6 @@ import pickle
 import os
 
 import eiger.QuasarSpec.loadQsoSpec as spec
-from pypeit.core.wave import airtovac
 from mcvp import model as vm
 from mcvp import vfit as vf
 from astropy.convolution import convolve, Gaussian1DKernel
@@ -53,6 +52,10 @@ class GuiProgram(Ui_Dialog):
         self.profs_hires = None
         self.profs_xsh_vis = None
         self.profs_xsh_nir = None
+        self.profs_mosfire_y = None
+        self.profs_mosfire_j = None
+        self.profs_mosfire_h = None
+        self.profs_mosfire_k = None
         self.vp_model = None
         self.vpTree = None
         
@@ -121,7 +124,7 @@ class GuiProgram(Ui_Dialog):
         if (self.zabs != None or len(self.idtable)>0):
             self.label_abslines()
 
-        if (self.profs_fire != None):
+        if (self.profs_hires != None):
             self.plotVPfits()
 
         self.plotVPGuess()
@@ -164,9 +167,12 @@ class GuiProgram(Ui_Dialog):
         # The J1030 HIRES reduction is in air wavelengths
         if (indx == 1):
             self.spec['HIRES']['wave'] = np.array(airtovac(self.spec['HIRES']['wave']*u.AA))
+        #if (indx == 5):
+            # self.spec['HIRES']['wave'] = np.array(airtovac(self.spec['HIRES']['wave']*u.AA))
+            # self.spec['MOSFIRE_K']['wave'] = np.array(airtovac(self.spec['MOSFIRE_K']['wave']*u.AA))
             
         self.xmin = 8000
-        self.xmax = 20000
+        self.xmax = 23000
         self.ymin = -1.0
         self.ymax = 3.0
         self.change_plot()
@@ -274,7 +280,7 @@ class GuiProgram(Ui_Dialog):
             else:
                 self.idtable.write(self.idfilename,format='ascii.fixed_width')
 
-            self.idtable.write("J0100_idtable.dat",format='ascii.fixed_width')
+            self.idtable.write("J1148_idtable.dat",format='ascii.fixed_width')
             print("Writing out ASCII table")
             redraw = False
         elif (event.key == 'R'):
@@ -497,32 +503,91 @@ class GuiProgram(Ui_Dialog):
         m       = vpfit['model']
         samples = vpfit['samples']
 
-        fire_kernel     = Gaussian1DKernel(stddev=4.0/2.355)
-        specobj_fire    = vm.Spectrum(self.spec['FIRE']['wave'],self.spec['FIRE']['flux']/self.spec['FIRE']['cont'], \
-                                      1/np.sqrt(self.spec['FIRE']['ivar'])/self.spec['FIRE']['cont'],fire_kernel,\
-                                      lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,2374,2344,1670,5891,5897,2852,1854,1862,1304,1302,1260])
+        if ('FIRE' in self.spec.keys()):
+            fire_kernel     = Gaussian1DKernel(stddev=4.0/2.355)
+            specobj_fire    = vm.Spectrum(self.spec['FIRE']['wave'],self.spec['FIRE']['flux']/self.spec['FIRE']['cont'], \
+                                          1/np.sqrt(self.spec['FIRE']['ivar'])/self.spec['FIRE']['cont'],fire_kernel,\
+                                          lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,2374,2344,\
+                                                 1670,5891,5897,2852,1854,1862,1304,1302,1260])
+            self.profs_fire    = vf.sampleVPFits(m,specobj_fire,samples[1000:],50)
+
             
-        hires_kernel     = Gaussian1DKernel(stddev=3.0/2.355)
-        specobj_hires    = vm.Spectrum(self.spec['HIRES']['wave'],self.spec['HIRES']['flux']/self.spec['HIRES']['cont'], \
-                                       1/np.sqrt(self.spec['HIRES']['ivar'])/self.spec['HIRES']['cont'],hires_kernel,\
-                                       lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,2374,2344,1670,5891,5897,2852,1854,1862,1304,1302,1260])
-
-        xsh_nir_kernel  = Gaussian1DKernel(stddev=4.2/2.355)
-        xsh_nir_kernel  = Gaussian1DKernel(stddev=2.2/2.355)
-        specobj_xsh_nir = vm.Spectrum(self.spec['XSH_NIR']['wave'],self.spec['XSH_NIR']['flux']/self.spec['XSH_NIR']['cont'], \
-                                      1/np.sqrt(self.spec['XSH_NIR']['ivar'])/self.spec['XSH_NIR']['cont'],xsh_nir_kernel,\
-                                      lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,2374,2344,1670,5891,5897,2852,1854,1862,1304,1302,1260])
+        if ('HIRES' in self.spec.keys()):
+            hires_kernel     = Gaussian1DKernel(stddev=3.0/2.355)
+            specobj_hires    = vm.Spectrum(self.spec['HIRES']['wave'],self.spec['HIRES']['flux']/self.spec['HIRES']['cont'], \
+                                           1/np.sqrt(self.spec['HIRES']['ivar'])/self.spec['HIRES']['cont'],hires_kernel,\
+                                           lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,2374,2344,\
+                                                  1670,5891,5897,2852,1854,1862,1304,1302,1260])
+            self.profs_hires   = vf.sampleVPFits(m,specobj_hires,samples[1000:],50)
+            
+        if ('XSH_NIR' in self.spec.keys()):
+            xsh_nir_kernel  = Gaussian1DKernel(stddev=4.2/2.355)
+            xsh_nir_kernel  = Gaussian1DKernel(stddev=2.2/2.355)
+            specobj_xsh_nir = vm.Spectrum(self.spec['XSH_NIR']['wave'],self.spec['XSH_NIR']['flux']/self.spec['XSH_NIR']['cont'], \
+                                          1/np.sqrt(self.spec['XSH_NIR']['ivar'])/self.spec['XSH_NIR']['cont'],xsh_nir_kernel,\
+                                          lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,2374,\
+                                                 2344,1670,5891,5897,2852,1854,1862,1304,1302,1260])
+            self.profs_xsh_nir = vf.sampleVPFits(m,specobj_xsh_nir,samples[1000:],50)
+            
+        if ('XSH_VIS' in self.spec.keys()):            
+            xsh_vis_kernel  = Gaussian1DKernel(stddev=4.8/2.355)
+            specobj_xsh_vis = vm.Spectrum(self.spec['XSH_VIS']['wave'],self.spec['XSH_VIS']['flux']/self.spec['XSH_VIS']['cont'], \
+                                          1/np.sqrt(self.spec['XSH_VIS']['ivar'])/self.spec['XSH_VIS']['cont'],xsh_vis_kernel,\
+                                          lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,2374,\
+                                                 2344,1670,5891,5897,2852,1854,1862,1304,1302,1260])
+            self.profs_xsh_vis = vf.sampleVPFits(m,specobj_xsh_vis,samples[1000:],50)
         
-        xsh_vis_kernel  = Gaussian1DKernel(stddev=4.8/2.355)
-        specobj_xsh_vis = vm.Spectrum(self.spec['XSH_VIS']['wave'],self.spec['XSH_VIS']['flux']/self.spec['XSH_VIS']['cont'], \
-                                      1/np.sqrt(self.spec['XSH_VIS']['ivar'])/self.spec['XSH_VIS']['cont'],xsh_vis_kernel,\
-                                      lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,2374,2344,1670,5891,5897,2852,1854,1862,1304,1302,1260])
+        # MOSFIRE (0.7" Slit) spectral R per webpage:
+        # and our slits were 0.7" on the mask so these are appropriate
+        # Measured dispersion from the pypeit-reduced MOSFIRE spectra
+        # MOSFIRE is binned in constant wavelength pix, not constant velocity, so the R varies in pixels across orders
+        # Approximating costant R in pixels here, it may vary by 2-4% across an order, ignore for now.
         
-        self.profs_fire    = vf.sampleVPFits(m,specobj_fire,samples[1000:],50)
-        self.profs_hires   = vf.sampleVPFits(m,specobj_hires,samples[1000:],50)
-        self.profs_xsh_nir = vf.sampleVPFits(m,specobj_xsh_nir,samples[1000:],50)
-        self.profs_xsh_vis = vf.sampleVPFits(m,specobj_xsh_vis,samples[1000:],50)
+        # Y = 3380
+        # J = 3310
+        # H = 3660
+        # K = 3620
 
+        if ('MOSFIRE_Y' in self.spec.keys()):
+            mosfire_y_kernel  = Gaussian1DKernel(stddev=2.809/2.355)
+            specobj_mosfire_y = vm.Spectrum(self.spec['MOSFIRE_Y']['wave'],\
+                                            self.spec['MOSFIRE_Y']['flux']/self.spec['MOSFIRE_Y']['cont'], \
+                                            1/np.sqrt(self.spec['MOSFIRE_Y']['ivar'])/self.spec['MOSFIRE_Y']['cont'],\
+                                            mosfire_y_kernel,\
+                                            lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,\
+                                                   2374,2344,1670,5891,5897,2852,1854,1862,1304,1302,1260])
+            self.profs_mosfire_y   = vf.sampleVPFits(m,specobj_mosfire_y,samples[1000:],50)
+            
+        if ('MOSFIRE_J' in self.spec.keys()):            
+            mosfire_j_kernel  = Gaussian1DKernel(stddev=2.907/2.355)
+            specobj_mosfire_j = vm.Spectrum(self.spec['MOSFIRE_J']['wave'],\
+                                            self.spec['MOSFIRE_J']['flux']/self.spec['MOSFIRE_J']['cont'], \
+                                            1/np.sqrt(self.spec['MOSFIRE_J']['ivar'])/self.spec['MOSFIRE_J']['cont'],\
+                                            mosfire_j_kernel,\
+                                            lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,\
+                                                   2374,2344,1670,5891,5897,2852,1854,1862,1304,1302,1260])
+            self.profs_mosfire_j   = vf.sampleVPFits(m,specobj_mosfire_j,samples[1000:],50)
+            
+        if ('MOSFIRE_H' in self.spec.keys()):
+            mosfire_h_kernel  = Gaussian1DKernel(stddev=2.754/2.355)
+            specobj_mosfire_h = vm.Spectrum(self.spec['MOSFIRE_H']['wave'],\
+                                            self.spec['MOSFIRE_H']['flux']/self.spec['MOSFIRE_H']['cont'], \
+                                            1/np.sqrt(self.spec['MOSFIRE_H']['ivar'])/self.spec['MOSFIRE_H']['cont'],\
+                                            mosfire_h_kernel,\
+                                            lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,\
+                                                   2374,2344,1670,5891,5897,2852,1854,1862,1304,1302,1260])
+            self.profs_mosfire_h   = vf.sampleVPFits(m,specobj_mosfire_h,samples[1000:],50)
+        
+        if ('MOSFIRE_K' in self.spec.keys()):
+            mosfire_k_kernel  = Gaussian1DKernel(stddev=2.772/2.355)
+            specobj_mosfire_k = vm.Spectrum(self.spec['MOSFIRE_K']['wave'],\
+                                            self.spec['MOSFIRE_K']['flux']/self.spec['MOSFIRE_K']['cont'], \
+                                            1/np.sqrt(self.spec['MOSFIRE_K']['ivar'])/self.spec['MOSFIRE_K']['cont'],\
+                                            mosfire_k_kernel,\
+                                            lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,\
+                                                   2382,2374,2344,1670,5891,5897,2852,1854,1862,1304,1302,1260])
+            self.profs_mosfire_k   = vf.sampleVPFits(m,specobj_mosfire_k,samples[1000:],50)
+        
         if (False):
             voigt_profiles = {'FIRE':self.profs_fire, \
                               'HIRES': self.profs_hires, \
@@ -574,7 +639,7 @@ class GuiProgram(Ui_Dialog):
 
     def plotVPGuess(self):
 
-        linelist = [1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,2374,2344,1670,5891,5897,2852,1854,1862,1304,1302,1260]
+        linelist = [1216,1025,972,949,937,1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,2374,2344,1670,5891,5897,2852,1854,1862,1304,1302,1260]
 
         if ('FIRE' in self.instruments):
             fire_kernel     = Gaussian1DKernel(stddev=4.0/2.355)
@@ -599,7 +664,31 @@ class GuiProgram(Ui_Dialog):
             specobj_xsh_vis = vm.Spectrum(self.spec['XSH_VIS']['wave'],self.spec['XSH_VIS']['flux']/self.spec['XSH_VIS']['cont'], \
                                           1/np.sqrt(self.spec['XSH_VIS']['ivar'])/self.spec['XSH_VIS']['cont'],xsh_vis_kernel,\
                                           lines=linelist)
-        
+
+        if ('MOSFIRE_Y' in self.instruments):
+            mosfire_y_kernel  = Gaussian1DKernel(stddev=2.809/2.355)
+            specobj_mosfire_y = vm.Spectrum(self.spec['MOSFIRE_Y']['wave'],self.spec['MOSFIRE_Y']['flux']/self.spec['MOSFIRE_Y']['cont'], \
+                                          1/np.sqrt(self.spec['MOSFIRE_Y']['ivar'])/self.spec['MOSFIRE_Y']['cont'],mosfire_y_kernel,\
+                                          lines=linelist)
+
+        if ('MOSFIRE_J' in self.instruments):
+            mosfire_j_kernel  = Gaussian1DKernel(stddev=2.809/2.355)
+            specobj_mosfire_j = vm.Spectrum(self.spec['MOSFIRE_J']['wave'],self.spec['MOSFIRE_J']['flux']/self.spec['MOSFIRE_J']['cont'], \
+                                          1/np.sqrt(self.spec['MOSFIRE_J']['ivar'])/self.spec['MOSFIRE_J']['cont'],mosfire_j_kernel,\
+                                          lines=linelist)
+
+        if ('MOSFIRE_H' in self.instruments):
+            mosfire_h_kernel  = Gaussian1DKernel(stddev=2.809/2.355)
+            specobj_mosfire_h = vm.Spectrum(self.spec['MOSFIRE_H']['wave'],self.spec['MOSFIRE_H']['flux']/self.spec['MOSFIRE_H']['cont'], \
+                                          1/np.sqrt(self.spec['MOSFIRE_H']['ivar'])/self.spec['MOSFIRE_H']['cont'],mosfire_h_kernel,\
+                                          lines=linelist)
+
+        if ('MOSFIRE_K' in self.instruments):
+            mosfire_k_kernel  = Gaussian1DKernel(stddev=2.809/2.355)
+            specobj_mosfire_k = vm.Spectrum(self.spec['MOSFIRE_K']['wave'],self.spec['MOSFIRE_K']['flux']/self.spec['MOSFIRE_K']['cont'], \
+                                          1/np.sqrt(self.spec['MOSFIRE_K']['ivar'])/self.spec['MOSFIRE_K']['cont'],mosfire_k_kernel,\
+                                          lines=linelist)
+
         
         if (self.vpTree != None):
 
@@ -616,12 +705,25 @@ class GuiProgram(Ui_Dialog):
                 elif(self.plotinstruments[i] == 'HIRES'):
                     thisprof = vf.vpTau2Flux(vf.vpFromModel(self.vpTree.vp_model, specobj_hires),hires_kernel)
                     thiswave = self.spec['HIRES']['wave']
+                elif(self.plotinstruments[i] == 'MOSFIRE_Y'):
+                    thisprof = vf.vpTau2Flux(vf.vpFromModel(self.vpTree.vp_model, specobj_mosfire_y),mosfire_y_kernel)
+                    thiswave = self.spec['MOSFIRE_Y']['wave']
+                elif(self.plotinstruments[i] == 'MOSFIRE_J'):
+                    thisprof = vf.vpTau2Flux(vf.vpFromModel(self.vpTree.vp_model, specobj_mosfire_j),mosfire_j_kernel)
+                    thiswave = self.spec['MOSFIRE_J']['wave']
+                elif(self.plotinstruments[i] == 'MOSFIRE_H'):
+                    thisprof = vf.vpTau2Flux(vf.vpFromModel(self.vpTree.vp_model, specobj_mosfire_h),mosfire_h_kernel)
+                    thiswave = self.spec['MOSFIRE_H']['wave']
+                elif(self.plotinstruments[i] == 'MOSFIRE_K'):
+                    thisprof = vf.vpTau2Flux(vf.vpFromModel(self.vpTree.vp_model, specobj_mosfire_k),mosfire_k_kernel)
+                    thiswave = self.spec['MOSFIRE_K']['wave']
+
                 self.ax[i].plot(thiswave,thisprof,color='c',alpha=1.0)
 
     def plotVPfits(self):
 
-        if (self.profs_fire == None):
-            return()
+        #if (self.profs_fire == None):
+        #    return()
         
         if (self.plotinstruments[0] == 'FIRE'):
             profs0 = self.profs_fire
@@ -631,6 +733,14 @@ class GuiProgram(Ui_Dialog):
             profs0 = self.profs_xsh_vis
         elif (self.plotinstruments[0] == 'XSH_NIR'):
             profs0 = self.profs_xsh_nir
+        elif (self.plotinstruments[0] == 'MOSFIRE_Y'):
+            profs0 = self.profs_mosfire_y
+        elif (self.plotinstruments[0] == 'MOSFIRE_J'):
+            profs0 = self.profs_mosfire_j
+        elif (self.plotinstruments[0] == 'MOSFIRE_H'):
+            profs0 = self.profs_mosfire_h
+        elif (self.plotinstruments[0] == 'MOSFIRE_K'):
+            profs0 = self.profs_mosfire_k
 
         for thisprof in profs0:
             self.ax[0].plot(self.spec[self.plotinstruments[0]]['wave'],thisprof,color='r',alpha=0.2)
@@ -643,7 +753,15 @@ class GuiProgram(Ui_Dialog):
             profs1 = self.profs_xsh_vis
         elif (self.plotinstruments[1] == 'XSH_NIR'):
             profs1 = self.profs_xsh_nir
-
+        elif (self.plotinstruments[1] == 'MOSFIRE_Y'):
+            profs1 = self.profs_mosfire_y
+        elif (self.plotinstruments[1] == 'MOSFIRE_J'):
+            profs1 = self.profs_mosfire_j
+        elif (self.plotinstruments[1] == 'MOSFIRE_H'):
+            profs1 = self.profs_mosfire_h
+        elif (self.plotinstruments[1] == 'MOSFIRE_K'):
+            profs1 = self.profs_mosfire_k
+            
         for thisprof in profs1:
             self.ax[1].plot(self.spec[self.plotinstruments[1]]['wave'],thisprof,color='r',alpha=0.2)
 
@@ -656,6 +774,14 @@ class GuiProgram(Ui_Dialog):
             profs2 = self.profs_xsh_vis
         elif (self.plotinstruments[2] == 'XSH_NIR'):
             profs2 = self.profs_xsh_nir
+        elif (self.plotinstruments[2] == 'MOSFIRE_Y'):
+            profs2 = self.profs_mosfire_y
+        elif (self.plotinstruments[2] == 'MOSFIRE_J'):
+            profs2 = self.profs_mosfire_j
+        elif (self.plotinstruments[2] == 'MOSFIRE_H'):
+            profs2 = self.profs_mosfire_h
+        elif (self.plotinstruments[2] == 'MOSFIRE_K'):
+            profs2 = self.profs_mosfire_k
 
         for thisprof in profs2:
             self.ax[2].plot(self.spec[self.plotinstruments[2]]['wave'],thisprof,color='r',alpha=0.2)
