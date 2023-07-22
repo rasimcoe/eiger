@@ -227,11 +227,18 @@ class GuiProgram(Ui_Dialog):
             self.ymax=event.ydata
         elif (event.key == 'b'):
             self.ymin=event.ydata
-        elif (event.key == 'w'):
-            self.xmin = min(self.spec['FIRE']['wave'])
-            self.xmax = max(self.spec['FIRE']['wave'])
-            self.ymin = -5
-            self.ymax = 5
+        elif (np.logical_or(event.key == 'w',event.key == 'W')):
+            wv_max = 0
+            wv_min = 1e6
+            for inst in self.plotinstruments:
+                if (min(self.spec[inst]['wave']) < wv_min):
+                    wv_min = min(self.spec[inst]['wave'])
+                if (max(self.spec[inst]['wave']) > wv_max):
+                    wv_max = max(self.spec[inst]['wave'])
+            self.xmin = wv_min
+            self.xmax = wv_max
+            self.ymin = -1
+            self.ymax = 3
         elif (event.key == '}' or event.key == ']'):
             dx = self.xmax-self.xmin
             self.xmin = self.xmax
