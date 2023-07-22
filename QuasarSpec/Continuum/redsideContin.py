@@ -28,14 +28,14 @@ def redsideContin(specdict, instrument, writefile=False, bspline=True):
     #
     fitmask[restwave < 1210] = False
     fitmask[np.logical_and(wave > 13490, wave < 14300)] = False
-    fitmask[np.logical_and(wave > 17900, wave < 19500)] = False
+    fitmask[np.logical_and(wave > 17940, wave < 19500)] = False
 
     if (instrument=='MOSFIRE_Y'):
-        fitmask[np.logical_or(wave < 9700, wave > 10800)] = False
+        fitmask[np.logical_or(wave < 9580, wave > 11400)] = False
     if (instrument=='MOSFIRE_J'):
-        fitmask[np.logical_or(wave < 11500, wave > 13550)] = False
+        fitmask[np.logical_or(wave < 11350, wave > 13750)] = False
     if (instrument=='MOSFIRE_H'):
-        fitmask[np.logical_or(wave < 14700, wave > 17900)] = False
+        fitmask[np.logical_or(wave < 14750, wave > 17950)] = False
     if (instrument=='MOSFIRE_K'):
         fitmask[wave < 19520] = False
 
@@ -65,7 +65,10 @@ def redsideContin(specdict, instrument, writefile=False, bspline=True):
     # 75th %-ile) because that screens out broad absorption lines a bit better.
     # We will fix that systematic difference further below in iterative fit.
 
-    binwidth  = 250
+    if ('MOSFIRE' in instrument):
+        binwidth  = 75
+    else:
+        binwidth  = 250
     halfwidth = binwidth // 2
     nbins     = (naxis1 // binwidth) - 1
     indx = halfwidth + np.arange(nbins) * binwidth
@@ -74,10 +77,10 @@ def redsideContin(specdict, instrument, writefile=False, bspline=True):
 
     # Note this intentionally fits high (75 %-ile)
     # to eliminate dipping into absorption lines
-    ybin = np.array([np.quantile(flux[ii-halfwidth:ii+halfwidth],0.75) for ii in indx[gd]])
+    ybin = np.array([np.quantile(flux[ii-halfwidth:ii+halfwidth],0.5) for ii in indx[gd]])
 
     # Tidy up some areas we won't use, and save points for later
-    ybin[xbin < 1216] = ybin[xbin > 1216][0]
+    # ybin[xbin < 1216] = ybin[xbin > 1216][0]
     ybin[ybin < 1e-20] = np.median(ybin)
     xbin1 = xbin
     ybin1 = ybin
@@ -85,6 +88,12 @@ def redsideContin(specdict, instrument, writefile=False, bspline=True):
     # Fit the knots with a bspline and normalize it out
     t, c, k = interpolate.splrep(xbin, ybin, k=3, s=0)
     flux_filt = interpolate.BSpline(t,c,k)
+
+    if (False):
+        plt.plot(wave,flux)
+        plt.plot(xbin*(1+redshift),ybin,'*',color='c')
+        plt.plot(wave,flux_filt(restwave))
+        plt.show()
 
     flux = flux / flux_filt(restwave)
     ivar = ivar * (flux_filt(restwave))**2
@@ -102,6 +111,8 @@ def redsideContin(specdict, instrument, writefile=False, bspline=True):
         binwidth=250
     elif (instrument == 'FIRE_XSH'):
         binwidth = 15
+    elif ('MOSFIRE' in instrument):
+        binwidth = 50
     else:
         binwidth  = 60
 
@@ -127,9 +138,9 @@ def redsideContin(specdict, instrument, writefile=False, bspline=True):
     # Set the number of iterations and rejection criteria, which
     # vary according to which spectrograph is used.
     
-    if (instrument == 'MOSFIRE'):
-        niter=3
-        discard = [4,3,2]
+    if ('MOSFIRE' in instrument):
+        niter=1
+        discard = [4,3]
     elif (instrument == 'FIRE' or instrument == 'XSH_NIR'):
         niter=3
         discard = [4,3,2]
@@ -190,7 +201,7 @@ def redsideContin(specdict, instrument, writefile=False, bspline=True):
             medpoints = flux[ii-halfwidth:ii+halfwidth]
             medmask   = inlier_mask[ii-halfwidth:ii+halfwidth]
             ybin[i] = np.median(medpoints[medmask])
-
+        # print(xbin,ybin)
             
         use = ~np.isnan(ybin)
         if (bspline):
@@ -224,10 +235,11 @@ def redsideContin(specdict, instrument, writefile=False, bspline=True):
     # Write the output to disk as a fits binary table
     # in the same directory as the data file
     if (writefile):
-        infile   = loadQsoSpec(specdict['objid'],revision=specdict['revision'],files=True)
-        path     = os.path.dirname(infile[instrument])
-        contname = os.path.basename(infile[instrument])[:-5]+'_contin.fits'
-        outfile  = path+'/'+contname
+        #infile   = loadQsoSpec(specdict['objid'],revision=specdict['revision'],files=True)
+        #path     = os.path.dirname(infile[instrument])
+        #contname = os.path.basename(infile[instrument])[:-5]+'_contin.fits'
+        # outfile  = path+'/'+contname
+        outfile  = writefile
         t = Table([all_wave,fullcontin],names=('wave','cont'))
         t.write(outfile, format='fits', overwrite=True)
         print(f"Writing: {outfile}")
@@ -304,3 +316,17 @@ def allContin(writefile=False):
     xsh_nir_contin  = redsideContin(qso,'XSH_NIR',writefile=writefile)
     xsh_vis_contin  = redsideContin(qso,'XSH_VIS',writefile=writefile)
 
+def j1148():
+
+    qso = loadQsoSpec(5)
+
+    path='/Users/simcoe/Science/eiger/Cache/Keck/MOSFIRE/'
+
+    output = path+'J1148_coadd_Y_1013_tellcorr_contin.fits'
+    mosfire_y  = redsideContin(qso,'MOSFIRE_Y',writefile=output)
+    output = path+'J1148_coadd_J_1013_tellcorr_contin.fits'
+    mosfire_j  = redsideContin(qso,'MOSFIRE_J',writefile=output)
+    output = path+'J1148_coadd_H_1011_tellcorr_contin.fits'
+    mosfire_h  = redsideContin(qso,'MOSFIRE_H',writefile=output)
+    output = path+'J1148_coadd_K_1011_tellcorr_contin.fits'
+    mosfire_k  = redsideContin(qso,'MOSFIRE_K',writefile=output)
