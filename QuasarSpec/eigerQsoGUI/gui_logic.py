@@ -124,7 +124,7 @@ class GuiProgram(Ui_Dialog):
         if (self.zabs != None or len(self.idtable)>0):
             self.label_abslines()
 
-        if (self.profs_hires != None):
+        if (self.profs_xsh_nir != None):
             self.plotVPfits()
 
         self.plotVPGuess()
@@ -315,7 +315,11 @@ class GuiProgram(Ui_Dialog):
             obswaves    = (1+self.idtable['redshift']) * self.idtable['restwv']
             diffs = abs(wave_marked - obswaves)
             line = self.idtable[diffs == min(diffs)]
-            zz = float(wave_marked / line['restwv'] - 1.0)
+            print(f"{wave_marked}; {line['restwv']}")
+            if (len(line['restwv']) == 1):
+                zz = float(wave_marked / line['restwv'] - 1.0)
+            else:
+                zz = float(wave_marked / line['restwv'][0] - 1.0)
             # Mark an absorption "component"
             cmd = f"m.addcomponent({zz:6.4f},bpriors=[2,30])"
             self.vpTree.add_component(round(zz,4))
@@ -509,146 +513,236 @@ class GuiProgram(Ui_Dialog):
 
         if (picklefile == None or picklefile == ''):
             return()
-        
-        with open(picklefile, "rb") as fp:
-            vpfit = pickle.load(fp)
 
-        m       = vpfit['model']
-        samples = vpfit['samples']
+        if ('fits' in picklefile):
 
-        if ('FIRE' in self.spec.keys()):
-            fire_kernel     = Gaussian1DKernel(stddev=4.0/2.355)
-            specobj_fire    = vm.Spectrum(self.spec['FIRE']['wave'],self.spec['FIRE']['flux']/self.spec['FIRE']['cont'], \
-                                          1/np.sqrt(self.spec['FIRE']['ivar'])/self.spec['FIRE']['cont'],fire_kernel,\
-                                          lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,2374,2344,\
-                                                 1670,5891,5897,2852,1854,1862,1304,1302,1260])
-            self.profs_fire    = vf.sampleVPFits(m,specobj_fire,samples[1000:],50)
+            allprofs = Table.read(picklefile)
 
+            if ('xsh_vis' in picklefile):
+                self.profs_xsh_vis = None
+                for i in range(50):
+                    colname = f'modelprof{i}'
+                    if (i == 0):
+                        self.profs_xsh_vis = [list(allprofs[colname])]
+                    else:
+                        self.profs_xsh_vis.append(list(allprofs[colname]))
+                if (self.profs_xsh_nir == None):
+                    self.profs_xsh_nir = [list(np.ones(len(self.spec['XSH_NIR']['wave'])))]
+                    for i in range(49):
+                        self.profs_xsh_nir.append(list(np.ones(len(self.spec['XSH_NIR']['wave']))))
+                    
+            elif ('xsh_nir' in picklefile):
+                self.profs_xsh_nir = None
+                for i in range(50):
+                    colname = f'modelprof{i}'
+                    if (i == 0):
+                        self.profs_xsh_nir = [list(allprofs[colname])]
+                    else:
+                        self.profs_xsh_nir.append(list(allprofs[colname]))
+                if (self.profs_xsh_vis == None):
+                    self.profs_xsh_vis = [list(np.ones(len(self.spec['XSH_VIS']['wave'])))]
+                    for i in range(49):
+                        self.profs_xsh_vis.append(list(np.ones(len(self.spec['XSH_VIS']['wave']))))
+
+            elif ('hires' in picklefile):
+                self.profs_hires = None
+                for i in range(50):
+                    colname = f'modelprof{i}'
+                    if (i == 0):
+                        self.profs_hires = [list(allprofs[colname])]
+                    else:
+                        self.profs_hires.append(list(allprofs[colname]))
+
+            elif ('mosfire_y' in picklefile):
+                self.profs_mosfire_y = None
+                for i in range(50):
+                    colname = f'modelprof{i}'
+                    if (i == 0):
+                        self.profs_mosfire_y = [list(allprofs[colname])]
+                    else:
+                        self.profs_mosfire_y.append(list(allprofs[colname]))
+
+
+            elif ('mosfire_j' in picklefile):
+                self.profs_mosfire_j = None
+                for i in range(50):
+                    colname = f'modelprof{i}'
+                    if (i == 0):
+                        self.profs_mosfire_j = [list(allprofs[colname])]
+                    else:
+                        self.profs_mosfire_j.append(list(allprofs[colname]))
+            elif ('mosfire_h' in picklefile):
+                self.profs_mosfire_h = None
+                for i in range(50):
+                    colname = f'modelprof{i}'
+                    if (i == 0):
+                        self.profs_mosfire_h = [list(allprofs[colname])]
+                    else:
+                        self.profs_mosfire_h.append(list(allprofs[colname]))
+            elif ('mosfire_k' in picklefile):
+                self.profs_mosfire_k = None
+                for i in range(50):
+                    colname = f'modelprof{i}'
+                    if (i == 0):
+                        self.profs_mosfire_k = [list(allprofs[colname])]
+                    else:
+                        self.profs_mosfire_k.append(list(allprofs[colname]))
+
+            elif ('fire' in picklefile):
+                self.profs_fire = None
+                for i in range(50):
+                    colname = f'modelprof{i}'
+                    if (i == 0):
+                        self.profs_fire = [list(allprofs[colname])]
+                    else:
+                        self.profs_fire.append(list(allprofs[colname]))
+                if (self.profs_xsh_vis == None):
+                    self.profs_xsh_vis = [list(np.ones(len(self.spec['XSH_VIS']['wave'])))]
+                    for i in range(49):
+                        self.profs_xsh_vis.append(list(np.ones(len(self.spec['XSH_VIS']['wave']))))
+
+                        
+        else:
             
-        if ('HIRES' in self.spec.keys()):
-            hires_kernel     = Gaussian1DKernel(stddev=3.0/2.355)
-            specobj_hires    = vm.Spectrum(self.spec['HIRES']['wave'],self.spec['HIRES']['flux']/self.spec['HIRES']['cont'], \
-                                           1/np.sqrt(self.spec['HIRES']['ivar'])/self.spec['HIRES']['cont'],hires_kernel,\
-                                           lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,2374,2344,\
-                                                  1670,5891,5897,2852,1854,1862,1304,1302,1260])
-            self.profs_hires   = vf.sampleVPFits(m,specobj_hires,samples[1000:],50)
-            
-        if ('XSH_NIR' in self.spec.keys()):
-            xsh_nir_kernel  = Gaussian1DKernel(stddev=4.2/2.355)
-            xsh_nir_kernel  = Gaussian1DKernel(stddev=2.2/2.355)
-            specobj_xsh_nir = vm.Spectrum(self.spec['XSH_NIR']['wave'],self.spec['XSH_NIR']['flux']/self.spec['XSH_NIR']['cont'], \
-                                          1/np.sqrt(self.spec['XSH_NIR']['ivar'])/self.spec['XSH_NIR']['cont'],xsh_nir_kernel,\
-                                          lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,2374,\
-                                                 2344,1670,5891,5897,2852,1854,1862,1304,1302,1260])
-            self.profs_xsh_nir = vf.sampleVPFits(m,specobj_xsh_nir,samples[1000:],50)
-            
-        if ('XSH_VIS' in self.spec.keys()):            
-            xsh_vis_kernel  = Gaussian1DKernel(stddev=4.8/2.355)
-            specobj_xsh_vis = vm.Spectrum(self.spec['XSH_VIS']['wave'],self.spec['XSH_VIS']['flux']/self.spec['XSH_VIS']['cont'], \
-                                          1/np.sqrt(self.spec['XSH_VIS']['ivar'])/self.spec['XSH_VIS']['cont'],xsh_vis_kernel,\
-                                          lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,2374,\
-                                                 2344,1670,5891,5897,2852,1854,1862,1304,1302,1260])
-            self.profs_xsh_vis = vf.sampleVPFits(m,specobj_xsh_vis,samples[1000:],50)
-        
-        # MOSFIRE (0.7" Slit) spectral R per webpage:
-        # and our slits were 0.7" on the mask so these are appropriate
-        # Measured dispersion from the pypeit-reduced MOSFIRE spectra
-        # MOSFIRE is binned in constant wavelength pix, not constant velocity, so the R varies in pixels across orders
-        # Approximating costant R in pixels here, it may vary by 2-4% across an order, ignore for now.
-        
-        # Y = 3380
-        # J = 3310
-        # H = 3660
-        # K = 3620
+            with open(picklefile, "rb") as fp:
+                vpfit = pickle.load(fp)
 
-        if ('MOSFIRE_Y' in self.spec.keys()):
-            mosfire_y_kernel  = Gaussian1DKernel(stddev=2.809/2.355)
-            specobj_mosfire_y = vm.Spectrum(self.spec['MOSFIRE_Y']['wave'],\
-                                            self.spec['MOSFIRE_Y']['flux']/self.spec['MOSFIRE_Y']['cont'], \
-                                            1/np.sqrt(self.spec['MOSFIRE_Y']['ivar'])/self.spec['MOSFIRE_Y']['cont'],\
-                                            mosfire_y_kernel,\
-                                            lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,\
-                                                   2374,2344,1670,5891,5897,2852,1854,1862,1304,1302,1260])
-            self.profs_mosfire_y   = vf.sampleVPFits(m,specobj_mosfire_y,samples[1000:],50)
-            
-        if ('MOSFIRE_J' in self.spec.keys()):            
-            mosfire_j_kernel  = Gaussian1DKernel(stddev=2.907/2.355)
-            specobj_mosfire_j = vm.Spectrum(self.spec['MOSFIRE_J']['wave'],\
-                                            self.spec['MOSFIRE_J']['flux']/self.spec['MOSFIRE_J']['cont'], \
-                                            1/np.sqrt(self.spec['MOSFIRE_J']['ivar'])/self.spec['MOSFIRE_J']['cont'],\
-                                            mosfire_j_kernel,\
-                                            lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,\
-                                                   2374,2344,1670,5891,5897,2852,1854,1862,1304,1302,1260])
-            self.profs_mosfire_j   = vf.sampleVPFits(m,specobj_mosfire_j,samples[1000:],50)
-            
-        if ('MOSFIRE_H' in self.spec.keys()):
-            mosfire_h_kernel  = Gaussian1DKernel(stddev=2.754/2.355)
-            specobj_mosfire_h = vm.Spectrum(self.spec['MOSFIRE_H']['wave'],\
-                                            self.spec['MOSFIRE_H']['flux']/self.spec['MOSFIRE_H']['cont'], \
-                                            1/np.sqrt(self.spec['MOSFIRE_H']['ivar'])/self.spec['MOSFIRE_H']['cont'],\
-                                            mosfire_h_kernel,\
-                                            lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,\
-                                                   2374,2344,1670,5891,5897,2852,1854,1862,1304,1302,1260])
-            self.profs_mosfire_h   = vf.sampleVPFits(m,specobj_mosfire_h,samples[1000:],50)
-        
-        if ('MOSFIRE_K' in self.spec.keys()):
-            mosfire_k_kernel  = Gaussian1DKernel(stddev=2.772/2.355)
-            specobj_mosfire_k = vm.Spectrum(self.spec['MOSFIRE_K']['wave'],\
-                                            self.spec['MOSFIRE_K']['flux']/self.spec['MOSFIRE_K']['cont'], \
-                                            1/np.sqrt(self.spec['MOSFIRE_K']['ivar'])/self.spec['MOSFIRE_K']['cont'],\
-                                            mosfire_k_kernel,\
-                                            lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,\
-                                                   2382,2374,2344,1670,5891,5897,2852,1854,1862,1304,1302,1260])
-            self.profs_mosfire_k   = vf.sampleVPFits(m,specobj_mosfire_k,samples[1000:],50)
-        
-        if (False):
-            voigt_profiles = {'FIRE':self.profs_fire, \
-                              'HIRES': self.profs_hires, \
-                              'XSH_VIS': self.profs_xsh_vis, \
-                              'XSH_NIR': self.profs_xsh_nir}
-            with open("SDSS1030_z5.7_highions.pickle", "wb") as fp:
-                pickle.dump(voigt_profiles,fp, pickle.HIGHEST_PROTOCOL)
-        
-        # Now get the statistics
-        with open(picklefile,'rb') as fp:
-            thefit = pickle.load(fp)
-            mm      = thefit['model']
-            samples = thefit['samples'][1000:]
+            m       = vpfit['model']
+            samples = vpfit['samples']
 
-        thetable = []
-
-        linetable = Table(names=['ion','z_median','z_16pct','z_84pct','b_median','b_16pct','b_84pct','N_median','N_16pct','N_84pct'],\
-                          dtype=('U1','f8','f8','f8','f8','f8','f8','f8','f8','f8'))
-        linetable['z_median'].format = '7.5f'
-        linetable['z_16pct'].format = '7.5f'
-        linetable['z_84pct'].format = '7.5f'
-        linetable['b_median'].format = '3.1f'
-        linetable['b_16pct'].format = '3.1f'
-        linetable['b_84pct'].format = '3.1f'
-        linetable['N_median'].format = '5.2f'
-        linetable['N_16pct'].format = '5.2f'
-        linetable['N_84pct'].format = '5.2f'
-        
-        indx = 0
-        for c in mm.components:
-            comp = mm.components[c]
-            redshift = comp.z
-            z_low,z_med,z_high = np.quantile(samples[:,indx],[0.16,0.5,0.84])
-            indx += 1
-            b_turb   = comp.b_turb
-            b_low,b_med,b_high = np.quantile(samples[:,indx],[0.16,0.5,0.84])
-            indx += 1
-            for ion in comp.ions:
-                thision  = comp.ions[ion]
-                ionname = thision.name
-                Nlow,Nmed,Nhigh = np.quantile(samples[:,indx],[0.16,0.5,0.84])
-                indx += 1
-                #print(f"{z_med:7.5f} [{z_low:7.5f},{z_high:7.5f}]\t{b_med:3.1f} [{b_low:3.1f},{b_high:3.1f}]\t{ionname}\t\t{Nmed:5.2f} [{Nlow:5.2f},{Nhigh:5.2f}]")
-                linetable.add_row([ion,z_med,z_low,z_high,b_med,b_low,b_high,Nmed,Nlow,Nhigh])
+            if ('FIRE' in self.spec.keys()):
+                fire_kernel     = Gaussian1DKernel(stddev=4.0/2.355)
+                specobj_fire    = vm.Spectrum(self.spec['FIRE']['wave'],self.spec['FIRE']['flux']/self.spec['FIRE']['cont'], \
+                                              1/np.sqrt(self.spec['FIRE']['ivar'])/self.spec['FIRE']['cont'],fire_kernel,\
+                                              lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,2374,2344,\
+                                                     1608,1670,5891,5897,2852,1854,1862,1304,1302,1260])
+                self.profs_fire    = vf.sampleVPFits(m,specobj_fire,samples[1000:],50)
+            
+            
+            if ('HIRES' in self.spec.keys()):
+                hires_kernel     = Gaussian1DKernel(stddev=3.0/2.355)
+                specobj_hires    = vm.Spectrum(self.spec['HIRES']['wave'],self.spec['HIRES']['flux']/self.spec['HIRES']['cont'], \
+                                               1/np.sqrt(self.spec['HIRES']['ivar'])/self.spec['HIRES']['cont'],hires_kernel,\
+                                               lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,2374,2344,\
+                                                      1608,1670,5891,5897,2852,1854,1862,1304,1302,1260])
+                self.profs_hires   = vf.sampleVPFits(m,specobj_hires,samples[1000:],50)
+            
+            if ('XSH_NIR' in self.spec.keys()):
+                xsh_nir_kernel  = Gaussian1DKernel(stddev=4.2/2.355)
+                xsh_nir_kernel  = Gaussian1DKernel(stddev=2.2/2.355)
+                specobj_xsh_nir = vm.Spectrum(self.spec['XSH_NIR']['wave'],self.spec['XSH_NIR']['flux']/self.spec['XSH_NIR']['cont'], \
+                                              1/np.sqrt(self.spec['XSH_NIR']['ivar'])/self.spec['XSH_NIR']['cont'],xsh_nir_kernel,\
+                                              lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,2374,\
+                                                     1608,2344,1670,5891,5897,2852,1854,1862,1304,1302,1260])
+                self.profs_xsh_nir = vf.sampleVPFits(m,specobj_xsh_nir,samples[1000:],50)
                 
-        linetable.sort('z_median')
-        linetable.reverse()
-        print(linetable)
+            if ('XSH_VIS' in self.spec.keys()):            
+                xsh_vis_kernel  = Gaussian1DKernel(stddev=4.8/2.355)
+                specobj_xsh_vis = vm.Spectrum(self.spec['XSH_VIS']['wave'],self.spec['XSH_VIS']['flux']/self.spec['XSH_VIS']['cont'], \
+                                              1/np.sqrt(self.spec['XSH_VIS']['ivar'])/self.spec['XSH_VIS']['cont'],xsh_vis_kernel,\
+                                              lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,2374,\
+                                                     2344,1670,1608,5891,5897,2852,1854,1862,1304,1302,1260])
+                self.profs_xsh_vis = vf.sampleVPFits(m,specobj_xsh_vis,samples[1000:],50)
+                
+            # MOSFIRE (0.7" Slit) spectral R per webpage:
+            # and our slits were 0.7" on the mask so these are appropriate
+            # Measured dispersion from the pypeit-reduced MOSFIRE spectra
+            # MOSFIRE is binned in constant wavelength pix, not constant velocity, so the R varies in pixels across orders
+            # Approximating costant R in pixels here, it may vary by 2-4% across an order, ignore for now.
+            
+            # Y = 3380
+            # J = 3310
+            # H = 3660
+            # K = 3620
+            
+            if ('MOSFIRE_Y' in self.spec.keys()):
+                mosfire_y_kernel  = Gaussian1DKernel(stddev=2.809/2.355)
+                specobj_mosfire_y = vm.Spectrum(self.spec['MOSFIRE_Y']['wave'],\
+                                                self.spec['MOSFIRE_Y']['flux']/self.spec['MOSFIRE_Y']['cont'], \
+                                                1/np.sqrt(self.spec['MOSFIRE_Y']['ivar'])/self.spec['MOSFIRE_Y']['cont'],\
+                                                mosfire_y_kernel,\
+                                                lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,\
+                                                       2374,2344,1670,1608,5891,5897,2852,1854,1862,1304,1302,1260])
+                self.profs_mosfire_y   = vf.sampleVPFits(m,specobj_mosfire_y,samples[1000:],50)
+                
+            if ('MOSFIRE_J' in self.spec.keys()):            
+                mosfire_j_kernel  = Gaussian1DKernel(stddev=2.907/2.355)
+                specobj_mosfire_j = vm.Spectrum(self.spec['MOSFIRE_J']['wave'],\
+                                                self.spec['MOSFIRE_J']['flux']/self.spec['MOSFIRE_J']['cont'], \
+                                                1/np.sqrt(self.spec['MOSFIRE_J']['ivar'])/self.spec['MOSFIRE_J']['cont'],\
+                                                mosfire_j_kernel,\
+                                                lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,\
+                                                       2374,2344,1670,1608,5891,5897,2852,1854,1862,1304,1302,1260])
+                self.profs_mosfire_j   = vf.sampleVPFits(m,specobj_mosfire_j,samples[1000:],50)
+                
+            if ('MOSFIRE_H' in self.spec.keys()):
+                mosfire_h_kernel  = Gaussian1DKernel(stddev=2.754/2.355)
+                specobj_mosfire_h = vm.Spectrum(self.spec['MOSFIRE_H']['wave'],\
+                                                self.spec['MOSFIRE_H']['flux']/self.spec['MOSFIRE_H']['cont'], \
+                                                1/np.sqrt(self.spec['MOSFIRE_H']['ivar'])/self.spec['MOSFIRE_H']['cont'],\
+                                                mosfire_h_kernel,\
+                                                lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,2382,\
+                                                       2374,2344,1670,1608,5891,5897,2852,1854,1862,1304,1302,1260])
+                self.profs_mosfire_h   = vf.sampleVPFits(m,specobj_mosfire_h,samples[1000:],50)
+                
+            if ('MOSFIRE_K' in self.spec.keys()):
+                mosfire_k_kernel  = Gaussian1DKernel(stddev=2.772/2.355)
+                specobj_mosfire_k = vm.Spectrum(self.spec['MOSFIRE_K']['wave'],\
+                                                self.spec['MOSFIRE_K']['flux']/self.spec['MOSFIRE_K']['cont'], \
+                                                1/np.sqrt(self.spec['MOSFIRE_K']['ivar'])/self.spec['MOSFIRE_K']['cont'],\
+                                                mosfire_k_kernel,\
+                                                lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,\
+                                                       2382,2374,2344,1670,1608,5891,5897,2852,1854,1862,1304,1302,1260])
+                self.profs_mosfire_k   = vf.sampleVPFits(m,specobj_mosfire_k,samples[1000:],50)
+                
+            if (False):
+                voigt_profiles = {'FIRE':self.profs_fire, \
+                                  'HIRES': self.profs_hires, \
+                                  'XSH_VIS': self.profs_xsh_vis, \
+                                  'XSH_NIR': self.profs_xsh_nir}
+                with open("SDSS1030_z5.7_highions.pickle", "wb") as fp:
+                    pickle.dump(voigt_profiles,fp, pickle.HIGHEST_PROTOCOL)
+        
+            # Now get the statistics
+            with open(picklefile,'rb') as fp:
+                thefit = pickle.load(fp)
+                mm      = thefit['model']
+                samples = thefit['samples'][1000:]
+
+            thetable = []
+            
+            linetable = Table(names=['ion','z_median','z_16pct','z_84pct','b_median','b_16pct','b_84pct','N_median','N_16pct','N_84pct'],\
+                              dtype=('U1','f8','f8','f8','f8','f8','f8','f8','f8','f8'))
+            linetable['z_median'].format = '7.5f'
+            linetable['z_16pct'].format = '7.5f'
+            linetable['z_84pct'].format = '7.5f'
+            linetable['b_median'].format = '3.1f'
+            linetable['b_16pct'].format = '3.1f'
+            linetable['b_84pct'].format = '3.1f'
+            linetable['N_median'].format = '5.2f'
+            linetable['N_16pct'].format = '5.2f'
+            linetable['N_84pct'].format = '5.2f'
+            
+            indx = 0
+            for c in mm.components:
+                comp = mm.components[c]
+                redshift = comp.z
+                z_low,z_med,z_high = np.quantile(samples[:,indx],[0.16,0.5,0.84])
+                indx += 1
+                b_turb   = comp.b_turb
+                b_low,b_med,b_high = np.quantile(samples[:,indx],[0.16,0.5,0.84])
+                indx += 1
+                for ion in comp.ions:
+                    thision  = comp.ions[ion]
+                    ionname = thision.name
+                    Nlow,Nmed,Nhigh = np.quantile(samples[:,indx],[0.16,0.5,0.84])
+                    indx += 1
+                    #print(f"{z_med:7.5f} [{z_low:7.5f},{z_high:7.5f}]\t{b_med:3.1f} [{b_low:3.1f},{b_high:3.1f}]\t{ionname}\t\t{Nmed:5.2f} [{Nlow:5.2f},{Nhigh:5.2f}]")
+                    linetable.add_row([ion,z_med,z_low,z_high,b_med,b_low,b_high,Nmed,Nlow,Nhigh])
+                    
+            linetable.sort('z_median')
+            linetable.reverse()
+            print(linetable)
 
     def plotVPGuess(self):
 
@@ -755,8 +849,9 @@ class GuiProgram(Ui_Dialog):
         elif (self.plotinstruments[0] == 'MOSFIRE_K'):
             profs0 = self.profs_mosfire_k
 
-        for thisprof in profs0:
-            self.ax[0].plot(self.spec[self.plotinstruments[0]]['wave'],thisprof,color='r',alpha=0.2)
+        if (profs0 != None):
+            for thisprof in profs0:
+                self.ax[0].plot(self.spec[self.plotinstruments[0]]['wave'],thisprof,color='r',alpha=0.2)
 
         if (self.plotinstruments[1] == 'FIRE'):
             profs1 = self.profs_fire
@@ -774,9 +869,10 @@ class GuiProgram(Ui_Dialog):
             profs1 = self.profs_mosfire_h
         elif (self.plotinstruments[1] == 'MOSFIRE_K'):
             profs1 = self.profs_mosfire_k
-            
-        for thisprof in profs1:
-            self.ax[1].plot(self.spec[self.plotinstruments[1]]['wave'],thisprof,color='r',alpha=0.2)
+
+        if (profs1 != None):
+            for thisprof in profs1:
+                self.ax[1].plot(self.spec[self.plotinstruments[1]]['wave'],thisprof,color='r',alpha=0.2)
 
 
         if (self.plotinstruments[2] == 'FIRE'):
@@ -796,9 +892,13 @@ class GuiProgram(Ui_Dialog):
         elif (self.plotinstruments[2] == 'MOSFIRE_K'):
             profs2 = self.profs_mosfire_k
 
-        for thisprof in profs2:
-            self.ax[2].plot(self.spec[self.plotinstruments[2]]['wave'],thisprof,color='r',alpha=0.2)
-
+        try:
+            if (profs2 != None):
+                for thisprof in profs2:
+                    self.ax[2].plot(self.spec[self.plotinstruments[2]]['wave'],thisprof,color='r',alpha=0.2)
+        except:
+            print("No profiles for this instrument")
+                
 ############################################################################            
                
 class SpecSelect(Ui_SpectrumSelector):
