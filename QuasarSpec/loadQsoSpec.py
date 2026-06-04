@@ -164,6 +164,11 @@ def loadQsoSpec(obj_id, spectrographs=['XShooter', 'FIRE', 'MOSFIRE', 'HIRES','F
             spectra['objname'] = 'J0100'
             spectra['z_em'] = 6.3258
             spectra['revision'] = 'current'
+        elif (obj_id == 1):
+            spectra['objid']   = obj_id
+            spectra['objname'] = 'J1030+0524'
+            spectra['z_em'] = 6.28
+            spectra['revision'] = 'current'
         else:
             print(f"loadQsoSpec not configured for objid == {obj_id}")
             return()
