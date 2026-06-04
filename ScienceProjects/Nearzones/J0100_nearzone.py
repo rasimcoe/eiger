@@ -153,7 +153,7 @@ class Nearzone:
     
     def physical_distance(self,zreference, zgal, ra, dec):
 
-        # This could be improved by calculating the full line element,
+        # This could be improved by calculating the full FLRW line element,
         # this is a linear approximation, assuming pythagorean theorem
 
         # This weird line is so that we can pass vectors or scalars
