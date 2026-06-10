@@ -1,0 +1,72 @@
+# local_objects.yaml — place this file at $EIGER_CACHE/local_objects.yaml
+#
+# Register quasar objects whose spectra live on local disk rather than in the
+# EIGER AWS cloud.  Each registered object appears in the GUI dropdown after
+# the six standard EIGER objects and can be used with loadLocalSpec() and the
+# Voigt profile fitting scripts.
+#
+# All paths are relative to $EIGER_CACHE and should follow the existing
+# directory convention:  Observatory/Instrument/filename.fits
+#
+# Continuum modes (required for each spectrum file):
+#
+#   normalized  — the file already contains flux/continuum (no cont needed)
+#
+#   companion   — continuum is in a separate FITS file.  By default the loader
+#                 looks for  <spectrum_name>_contin.fits  next to the spectrum.
+#                 Override with an explicit continuum_path.
+#
+#   extension   — continuum is stored in a different HDU of the same FITS file.
+#                 Specify continuum_hdu (integer, default 2) and
+#                 continuum_column (column name, default "cont").
+
+objects:
+
+  # ---- Example 1: object with FIRE + XShooter, mixed continuum modes -------
+  - name: "J0000+0000"
+    z_em: 6.10
+
+    spectra:
+
+      FIRE:
+        - path: "Magellan/FIRE/J0000+0000_FIRE_firehose.fits"
+          continuum: companion
+          # continuum_path omitted → looks for J0000+0000_FIRE_firehose_contin.fits
+
+      XShooter:
+        - path: "VLT/XShooter/J0000+0000_VIS_XSHOOTER.fits"
+          continuum: companion
+          continuum_path: "VLT/XShooter/J0000+0000_VIS_contin.fits"
+        - path: "VLT/XShooter/J0000+0000_NIR_XSHOOTER.fits"
+          continuum: companion
+          continuum_path: "VLT/XShooter/J0000+0000_NIR_contin.fits"
+
+  # ---- Example 2: pre-normalized spectrum ----------------------------------
+  - name: "J9999-9999"
+    z_em: 5.85
+
+    spectra:
+
+      FIRE:
+        - path: "Magellan/FIRE/J9999-9999_FIRE_firehose.fits"
+          continuum: normalized
+
+      HIRES:
+        - path: "Keck/HIRES/J9999-9999_HIRES.fits"
+          continuum: normalized
+
+  # ---- Example 3: continuum in a second FITS extension --------------------
+  - name: "J1234+5678"
+    z_em: 6.42
+
+    spectra:
+
+      XShooter:
+        - path: "VLT/XShooter/J1234+5678_VIS_XSHOOTER.fits"
+          continuum: extension
+          continuum_hdu: 2
+          continuum_column: "cont"
+        - path: "VLT/XShooter/J1234+5678_NIR_XSHOOTER.fits"
+          continuum: extension
+          continuum_hdu: 2
+          continuum_column: "cont"
