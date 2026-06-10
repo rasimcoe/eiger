@@ -4,6 +4,7 @@ import boto3
 from astropy.io import fits
 import os
 import numpy as np
+import yaml
 
 #############################################################################
 #
@@ -55,7 +56,7 @@ def getSpec(specfile, offline=False, filenames=False):
 
 #############################################################################
 
-def parseSpec(fitsfile, instrument):
+def parseSpec(fitsfile, instrument, skip_continuum=False):
 
     outspec = {}
 
@@ -104,29 +105,37 @@ def parseSpec(fitsfile, instrument):
         outspec['wave'] = tmp['wave'][mask]
         outspec['flux'] = tmp['flux'][mask]
         outspec['ivar'] = tmp['ivar'][mask]
+
+    elif (instrument == 'NIRSpec'):
+        tmp = fits.open(fitsfile)[1].data
+        mask = np.array(tmp['mask'],dtype=bool)
+        outspec['wave'] = tmp['wave'][mask]
+        outspec['flux'] = tmp['flux'][mask]
+        outspec['ivar'] = tmp['ivar'][mask]
         
-    contname = fitsfile[:-5]+'_contin.fits'
-    if(os.path.exists(contname)):
-        tmp = fits.open(contname)[1].data
-        try:
-            outspec['cont'] = tmp['cont'][mask]
-        except:
-            outspec['cont'] = tmp['cont']
-    else:
-        # Go and get it from S3
-        try:
-            cc = contname.split('//')[1]
-            print(f"Fetching continuum file from S3 cloud ({cc})")
-            getSpec(['gto1243',cc])
+    if not skip_continuum:
+        contname = fitsfile[:-5]+'_contin.fits'
+        if(os.path.exists(contname)):
             tmp = fits.open(contname)[1].data
             try:
                 outspec['cont'] = tmp['cont'][mask]
             except:
                 outspec['cont'] = tmp['cont']
-            # outspec['inlier_mask'] = tmp['mask']
-        except:
-            print("WARNING: No valid continuum spectrum exists for this object, either locally or on the cloud.")
-            
+        else:
+            # Go and get it from S3
+            try:
+                cc = contname.split('//')[1]
+                print(f"Fetching continuum file from S3 cloud ({cc})")
+                getSpec(['gto1243',cc])
+                tmp = fits.open(contname)[1].data
+                try:
+                    outspec['cont'] = tmp['cont'][mask]
+                except:
+                    outspec['cont'] = tmp['cont']
+                # outspec['inlier_mask'] = tmp['mask']
+            except:
+                print("WARNING: No valid continuum spectrum exists for this object, either locally or on the cloud.")
+
     np.seterr(divide='warn', invalid='warn')
 
     return(outspec)
@@ -245,4 +254,127 @@ def loadQsoSpec(obj_id, spectrographs=['XShooter', 'FIRE', 'MOSFIRE', 'HIRES','F
         return(local_file)
     else:
         return(spectra)
+
+
+#############################################################################
+#
+# Local object support: load spectra from EIGER_CACHE without AWS access.
+# Objects are described by $EIGER_CACHE/local_objects.yaml.
+#
+
+def _local_yaml_path():
+    return os.path.join(os.getenv('EIGER_CACHE'), 'local_objects.yaml')
+
+
+def list_local_objects():
+    """Return [(name, z_em), ...] for all objects in local_objects.yaml.
+    Returns an empty list if the file does not exist."""
+    yaml_path = _local_yaml_path()
+    if not os.path.exists(yaml_path):
+        return []
+    with open(yaml_path, 'r') as f:
+        config = yaml.safe_load(f)
+    return [(obj['name'], obj['z_em']) for obj in config.get('objects', [])]
+
+
+def _apply_local_continuum(outspec, entry, fitsfile):
+    """Populate outspec['cont'] according to the continuum mode in a YAML entry."""
+    mode = entry.get('continuum', 'companion')
+    cache = os.getenv('EIGER_CACHE')
+
+    if mode == 'normalized':
+        outspec['cont'] = np.ones(len(outspec['wave']))
+
+    elif mode == 'extension':
+        hdu_idx = entry.get('continuum_hdu', 2)
+        col     = entry.get('continuum_column', 'cont')
+        try:
+            outspec['cont'] = fits.open(fitsfile)[hdu_idx].data[col]
+        except Exception as e:
+            print(f"  WARNING: could not load continuum from HDU {hdu_idx}: {e}")
+
+    else:  # 'companion' (default)
+        if 'continuum_path' in entry:
+            contfile = os.path.join(cache, entry['continuum_path'])
+        else:
+            contfile = fitsfile[:-5] + '_contin.fits'
+
+        if os.path.exists(contfile):
+            try:
+                outspec['cont'] = fits.open(contfile)[1].data['cont']
+            except Exception as e:
+                print(f"  WARNING: could not read continuum from {contfile}: {e}")
+        else:
+            print(f"  WARNING: no continuum file found at {contfile}")
+
+    return outspec
+
+
+def loadLocalSpec(obj_name, spectrographs=['XShooter', 'FIRE', 'MOSFIRE', 'HIRES', 'FIRE_XSH', 'NIRSpec']):
+    """Load spectra for a locally-registered object from EIGER_CACHE.
+    No AWS access is performed. Returns the same dict structure as loadQsoSpec()."""
+    yaml_path = _local_yaml_path()
+    if not os.path.exists(yaml_path):
+        print(f"ERROR: {yaml_path} not found — create it to use local objects")
+        return None
+
+    with open(yaml_path, 'r') as f:
+        config = yaml.safe_load(f)
+
+    obj_config = next((o for o in config.get('objects', []) if o['name'] == obj_name), None)
+    if obj_config is None:
+        print(f"ERROR: object '{obj_name}' not found in local_objects.yaml")
+        return None
+
+    cache = os.getenv('EIGER_CACHE')
+    spectra = {
+        'objid':    None,
+        'objname':  obj_config['name'],
+        'z_em':     obj_config['z_em'],
+        'revision': 'local',
+    }
+
+    for spectrograph in spectrographs:
+        entries = obj_config.get('spectra', {}).get(spectrograph)
+        if not entries:
+            continue
+
+        print(f"{spectrograph}:")
+
+        if spectrograph == 'XShooter':
+            for entry in entries:
+                local_file = os.path.join(cache, entry['path'])
+                if not os.path.exists(local_file):
+                    print(f"  WARNING: file not found: {local_file}")
+                    continue
+                spectrum = parseSpec(local_file, spectrograph, skip_continuum=True)
+                _apply_local_continuum(spectrum, entry, local_file)
+                arm = 'XSH_VIS' if 'VIS' in local_file else 'XSH_NIR'
+                spectra[arm] = spectrum
+
+        elif spectrograph == 'MOSFIRE':
+            for entry in entries:
+                local_file = os.path.join(cache, entry['path'])
+                if not os.path.exists(local_file):
+                    print(f"  WARNING: file not found: {local_file}")
+                    continue
+                spectrum = parseSpec(local_file, spectrograph, skip_continuum=True)
+                _apply_local_continuum(spectrum, entry, local_file)
+                if   '_Y_' in local_file: arm = 'MOSFIRE_Y'
+                elif '_J_' in local_file: arm = 'MOSFIRE_J'
+                elif '_H_' in local_file: arm = 'MOSFIRE_H'
+                elif '_K_' in local_file: arm = 'MOSFIRE_K'
+                spectra[arm] = spectrum
+
+        else:
+            entry      = entries[0]
+            local_file = os.path.join(cache, entry['path'])
+            if not os.path.exists(local_file):
+                print(f"  WARNING: file not found: {local_file}")
+                continue
+            spectrum = parseSpec(local_file, spectrograph, skip_continuum=True)
+            _apply_local_continuum(spectrum, entry, local_file)
+            spectra[spectrograph] = spectrum
+
+    return spectra
 
