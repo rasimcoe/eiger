@@ -5,7 +5,7 @@ from gui import Ui_Dialog
 from SpecGui import Ui_SpectrumSelector
 from LineGui import Ui_LineSelector
 from vpModelGui import Ui_VoigtProfileModel
-from eiger.QuasarSpec.loadQsoSpec import loadQsoSpec
+from eiger.QuasarSpec.loadQsoSpec import loadQsoSpec, loadLocalSpec, list_local_objects
 from astropy.table import Table, unique
 import matplotlib.pyplot as plt
 from pypeit.core.wave import airtovac
@@ -56,6 +56,7 @@ class GuiProgram(Ui_Dialog):
         self.profs_mosfire_j = None
         self.profs_mosfire_h = None
         self.profs_mosfire_k = None
+        self.profs_nirspec = None
         self.vp_model = None
         self.vpTree = None
         
@@ -74,6 +75,8 @@ class GuiProgram(Ui_Dialog):
         self.eigerObjectSelect.addItem("4: J0100+2802")
         self.eigerObjectSelect.addItem("5: J1148+5251")
         self.eigerObjectSelect.addItem("6: J0148+0600")
+        for i, (name, _) in enumerate(list_local_objects(), start=7):
+            self.eigerObjectSelect.addItem(f"{i}: {name}")
         
         # Connect our button with plotting function
         self.reloadPushButton.clicked.connect(self.load_newplot)
@@ -98,7 +101,7 @@ class GuiProgram(Ui_Dialog):
         # Set up the new plot
 
         nplots = sum(self.doplot)
-        self.ax = self.fig.subplots(nplots,sharex=True,squeeze=True,gridspec_kw={'hspace':0})
+        self.ax = np.atleast_1d(self.fig.subplots(nplots,sharex=True,squeeze=True,gridspec_kw={'hspace':0}))
             
         for i in range(len(self.doplot)):
 
@@ -159,10 +162,16 @@ class GuiProgram(Ui_Dialog):
 
         indx = int(selected_object.split(':')[0])
 
-        self.spec = loadQsoSpec(indx,revision='current')
+        if indx <= 6:
+            self.spec = loadQsoSpec(indx, revision='current')
+        else:
+            obj_name = selected_object.split(': ', 1)[1]
+            self.spec = loadLocalSpec(obj_name)
+
         self.instruments = list(self.spec.keys())[4:]
 
         self.plotinstruments = self.instruments[0:3]
+        self.doplot = [True] * len(self.plotinstruments)
 
         # The J1030 HIRES reduction is in air wavelengths
         if (indx == 1):
@@ -601,6 +610,15 @@ class GuiProgram(Ui_Dialog):
                     for i in range(49):
                         self.profs_xsh_vis.append(list(np.ones(len(self.spec['XSH_VIS']['wave']))))
 
+            elif ('nirspec' in picklefile):
+                self.profs_nirspec = None
+                for i in range(50):
+                    colname = f'modelprof{i}'
+                    if (i == 0):
+                        self.profs_nirspec = [list(allprofs[colname])]
+                    else:
+                        self.profs_nirspec.append(list(allprofs[colname]))
+
                         
         else:
             
@@ -694,7 +712,18 @@ class GuiProgram(Ui_Dialog):
                                                 lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,\
                                                        2382,2374,2344,1670,1608,5891,5897,2852,1854,1862,1304,1302,1260])
                 self.profs_mosfire_k   = vf.sampleVPFits(m,specobj_mosfire_k,samples[1000:],50)
-                
+
+            # NIRSpec G140H/G235H: 2.2 pixels/resolution element; refine kernel once fitted.
+            if ('NIRSpec' in self.spec.keys()):
+                nirspec_kernel    = Gaussian1DKernel(stddev=2.2/2.355)
+                specobj_nirspec   = vm.Spectrum(self.spec['NIRSpec']['wave'],\
+                                                self.spec['NIRSpec']['flux']/self.spec['NIRSpec']['cont'], \
+                                                1/np.sqrt(self.spec['NIRSpec']['ivar'])/self.spec['NIRSpec']['cont'],\
+                                                nirspec_kernel,\
+                                                lines=[1548,1550,2796,2803,1526,1393,1402,1334,1335,2600,2586,\
+                                                       2382,2374,2344,1670,1608,5891,5897,2852,1854,1862,1304,1302,1260])
+                self.profs_nirspec = vf.sampleVPFits(m,specobj_nirspec,samples[1000:],50)
+
             if (False):
                 voigt_profiles = {'FIRE':self.profs_fire, \
                                   'HIRES': self.profs_hires, \
@@ -796,7 +825,14 @@ class GuiProgram(Ui_Dialog):
                                           1/np.sqrt(self.spec['MOSFIRE_K']['ivar'])/self.spec['MOSFIRE_K']['cont'],mosfire_k_kernel,\
                                           lines=linelist)
 
-        
+        # NIRSpec G140H/G235H: 2.2 pixels per resolution element (Jakobsen+2022),
+        # in-flight sigma_LSF ~ 41 km/s (Vander Meulen+2025); refine kernel once fitted.
+        if ('NIRSpec' in self.instruments):
+            nirspec_kernel    = Gaussian1DKernel(stddev=2.2/2.355)
+            specobj_nirspec   = vm.Spectrum(self.spec['NIRSpec']['wave'],self.spec['NIRSpec']['flux']/self.spec['NIRSpec']['cont'], \
+                                          1/np.sqrt(self.spec['NIRSpec']['ivar'])/self.spec['NIRSpec']['cont'],nirspec_kernel,\
+                                          lines=linelist)
+
         if (self.vpTree != None):
 
             for i in range(3):
@@ -824,6 +860,11 @@ class GuiProgram(Ui_Dialog):
                 elif(self.plotinstruments[i] == 'MOSFIRE_K'):
                     thisprof = vf.vpTau2Flux(vf.vpFromModel(self.vpTree.vp_model, specobj_mosfire_k),mosfire_k_kernel)
                     thiswave = self.spec['MOSFIRE_K']['wave']
+                elif(self.plotinstruments[i] == 'NIRSpec'):
+                    thisprof = vf.vpTau2Flux(vf.vpFromModel(self.vpTree.vp_model, specobj_nirspec),nirspec_kernel)
+                    thiswave = self.spec['NIRSpec']['wave']
+                else:
+                    continue
 
                 self.ax[i].plot(thiswave,thisprof,color='c',alpha=1.0)
 
@@ -848,6 +889,10 @@ class GuiProgram(Ui_Dialog):
             profs0 = self.profs_mosfire_h
         elif (self.plotinstruments[0] == 'MOSFIRE_K'):
             profs0 = self.profs_mosfire_k
+        elif (self.plotinstruments[0] == 'NIRSpec'):
+            profs0 = self.profs_nirspec
+        else:
+            profs0 = None
 
         if (profs0 != None):
             for thisprof in profs0:
@@ -869,6 +914,10 @@ class GuiProgram(Ui_Dialog):
             profs1 = self.profs_mosfire_h
         elif (self.plotinstruments[1] == 'MOSFIRE_K'):
             profs1 = self.profs_mosfire_k
+        elif (self.plotinstruments[1] == 'NIRSpec'):
+            profs1 = self.profs_nirspec
+        else:
+            profs1 = None
 
         if (profs1 != None):
             for thisprof in profs1:
@@ -891,6 +940,10 @@ class GuiProgram(Ui_Dialog):
             profs2 = self.profs_mosfire_h
         elif (self.plotinstruments[2] == 'MOSFIRE_K'):
             profs2 = self.profs_mosfire_k
+        elif (self.plotinstruments[2] == 'NIRSpec'):
+            profs2 = self.profs_nirspec
+        else:
+            profs2 = None
 
         try:
             if (profs2 != None):
