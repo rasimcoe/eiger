@@ -84,10 +84,7 @@ The main window opens with an empty plot panel, a toolbar, and a set of
 controls on the right-hand side.  The spectrum display area will be
 blank until an object is loaded.
 
-> **[FIGURE 1: Main window on startup — empty plot area with controls
-> visible on the right: object dropdown, Reload button, Select Spectra
-> button, VP Tree button, Load VPfit button, and the redshift entry
-> field.]**
+![Figure 1: Main window on startup — empty plot area with controls visible on the right: object dropdown, Reload button, Select Spectra button, VP Tree button, Load VPfit button, and the redshift entry field.](figures/fig1.png)
 
 \newpage
 
@@ -117,10 +114,7 @@ displays the first three available instrument arms as separate sub-panels
 stacked vertically with a shared wavelength axis.  The initial wavelength
 range is 8000–23000 Å.
 
-> **[FIGURE 2: Main window after loading a quasar, showing three
-> instrument panels (e.g. XSH\_NIR, HIRES, XSH\_VIS) with flux/continuum
-> on the y-axis, wavelength in Å on the x-axis, and the red $1\sigma$ error
-> spectrum plotted at low opacity.]**
+![Figure 2: Main window after loading a quasar, showing three instrument panels (XSH\_NIR, HIRES, XSH\_VIS) with flux/continuum on the y-axis, wavelength in Å on the x-axis, and the red $1\sigma$ error spectrum plotted at low opacity.](figures/fig2.png)
 
 ## Choosing Which Instruments to Display
 
@@ -173,9 +167,7 @@ in small text at the top of each marker.
 Changing the viewport and pressing any navigation key will refresh the
 labels for the new wavelength window.
 
-> **[FIGURE 3: Spectrum with trial redshift set, showing vertical line
-> markers with ion labels (e.g. CIV 1548, CIV 1550, MgII 2796) overlaid
-> on the absorber region.]**
+![Figure 3: Spectrum with trial redshift z = 4.875 set, showing vertical line markers with ion labels (e.g. CIV 1548, CIV 1550) overlaid on the absorber region near 9090 Å.](figures/fig3.png)
 
 ## Setting Redshift by Line Identification
 
@@ -293,10 +285,7 @@ Press **VP Tree** in the main window.  A separate dialog opens containing
 a hierarchical tree widget and three buttons: **Write**, **Read**, and
 **Clear**.
 
-> **[FIGURE 4: VP Model Tree window, showing the four-level hierarchy
-> (Component at level 0, Ion at level 1, Transition at level 2, Fit
-> Region at level 3) with one or two example entries populated.
-> The column headers "Component", "b (km/s)", and "N (cm-2)" are visible.]**
+![Figure 4: VP Model Tree window showing the four-level hierarchy (Component at level 0, Ion at level 1, Transition at level 2, Fit Region at level 3) populated from the tutorial example. Column headers "Component", "b (km/s)", and "N (cm-2)" are visible.](figures/fig4.png)
 
 The tree has three columns:
 
@@ -387,9 +376,7 @@ parent component's redshift, and appends a new Fit Region child to
 the selected transition.  The instrument arm is determined automatically
 from which panel the drag occurred in.
 
-> **[FIGURE 5: Main spectrum window with a shaded or bracketed fit region
-> visible on one of the instrument panels, and the corresponding Fit
-> Region entry highlighted in the tree widget.]**
+![Figure 5: Main spectrum window zoomed to the C IV absorber at z = 4.875, with fit-region velocity windows shaded in blue on each instrument panel. The shaded bands correspond to the \texttt{addfitregion} entries in the model file.](figures/fig5.png)
 
 ## The Live Model Preview
 
@@ -400,9 +387,7 @@ convolved with the appropriate instrumental resolution kernel.  The
 preview lets you judge whether your initial guesses are reasonable
 before committing to a multi-hour MCMC run.
 
-> **[FIGURE 6: Spectrum with the cyan initial-guess Voigt profile
-> overlaid on an absorber, showing reasonable alignment with the observed
-> trough depths.]**
+![Figure 6: Spectrum with the cyan initial-guess Voigt profile overlaid on the C IV doublet at z = 4.875, showing reasonable alignment with the observed absorption troughs before the MCMC fit is run.](figures/fig6.png)
 
 ## Saving and Loading Model Files
 
@@ -424,8 +409,13 @@ model object.
 ## The Model (`.in`) File Format
 
 The `.in` file is a plain-text list of Python method calls that
-construct the model object `m`.  A minimal example for a two-component
-C IV absorber looks like:
+construct the model object `m`.  Lines beginning with `#` are treated
+as comments and ignored by the loader.  A fully annotated tutorial
+example (`Docs/tutorial_example.in`) is included in the repository; it
+models the two-component C IV absorber at $z \approx 4.875$ toward
+J0100+2802 and is the basis for the figures in this guide.
+
+A minimal example for a two-component C IV absorber looks like:
 
 ```python
 m.addcomponent(5.1075, bpriors=[3,50], b_turb=10.0)
@@ -573,10 +563,7 @@ to and select the output pickle file.  The GUI will:
 The resulting ensemble of red profiles gives a direct visual impression
 of both the best-fit model shape and its posterior uncertainty.
 
-> **[FIGURE 7: Spectrum showing the red posterior profile ensemble (50
-> semi-transparent draws) overlaid on the data, with the data plotted in
-> the default stepped histogram style and the $1\sigma$ error array in light
-> red.  The profiles bracket the absorption feature.]**
+![Figure 7: Spectrum of J0100+2802 near the C IV doublet at z = 4.875 after loading the DR1 HIRES posterior profiles. Fifty semi-transparent red draws bracket the absorption troughs, giving a direct visual impression of the posterior uncertainty.](figures/fig7.png)
 
 ## Printed Parameter Table
 
@@ -633,9 +620,7 @@ You can load profiles for multiple arms sequentially by pressing **Load
 VPfit** multiple times — each call adds profiles for one arm without
 clearing the others.
 
-> **[FIGURE 8: Same spectrum as Figure 7, but with profiles loaded for
-> two arms (e.g. HIRES and XSH\_NIR) simultaneously, showing the red
-> ensemble on both panels.]**
+![Figure 8: Same field as Figure 7 after additionally loading the DR1 XSH\_VIS posterior profiles. The red ensemble now appears on both the HIRES and XSH\_VIS panels simultaneously, providing a joint view of the constraint from two instruments.](figures/fig8.png)
 
 \newpage
 
