@@ -1232,85 +1232,77 @@ class VPModelTree(Ui_VoigtProfileModel):
         self.vp_model = vm.Model()
         self.components = []
         
-    def loadVPTree(self):                
-        # Clear any existing tree
+    def _populate_from_file(self, fileName):
+        """Populate the VP tree from a .in file path without opening a dialog."""
         try:
-            self.treeModel.removeRows(0,self.treeModel.rowCount())
+            self.treeModel.removeRows(0, self.treeModel.rowCount())
         except:
-            print("Reloading model")
-            
-        # Get the file name from the user
-        options = QFileDialog.Options()
-        fileName, _ = QFileDialog.getOpenFileName(self.vpModelTree, \
-                                                  "Open","","All Files (*);;Text Files (*.txt)", options=options)
+            pass
+        self.vp_model = vm.Model()
+        self.components = []
 
-        # Read in the requested filename and populate the tree
-        if (fileName):
-            with open(fileName, "r") as fp:
-                entries = fp.readlines()
+        with open(fileName, "r") as fp:
+            entries = [l for l in fp.readlines() if not l.lstrip().startswith('#')]
 
-            # First loop through and populate all the components (level 1)
-            for l in entries:
-                if('addcomponent' in l):
-                    redshift = float(l.split(',')[0].split('(')[1])
-                    bparam = float(l.split('b_turb=')[1].split(')')[0])
-                    self.add_component(redshift, b=bparam)
-                    
-            # Second, loop through and populate all of the ions
-            for l in entries:
-                if('addion' in l):
-                    ion = l.split('\'')[1]
-                    redshift = float(l.split(",")[1])
-                    column = float(l.split("N=")[1].split(',')[0])
-                    self.add_ion(redshift,ion,column=column)
-                    
-            # Third, loop through and populate all of the transitions
-            for l in entries:
-                if('addtransition' in l):
-                    restwv = float(l.split(',')[0].split('(')[1])
-                    ion = l.split("\'")[1]
-                    redshift = float(l.split(',')[-1][:-2])
-                    for i in range(self.treeModel.rowCount()):
-                        indx = self.treeModel.index(i,0)
-                        component_z = float(self.treeModel.data(indx))
-                        # print(f"component_z: {component_z}, {redshift}")
-                        if (redshift == component_z):
-                            component = self.treeModel.itemFromIndex(indx)
-                            break
+        # First loop through and populate all the components (level 1)
+        for l in entries:
+            if('addcomponent' in l):
+                redshift = float(l.split(',')[0].split('(')[1])
+                bparam = float(l.split('b_turb=')[1].split(')')[0])
+                self.add_component(redshift, b=bparam)
 
-                    if component.hasChildren():
-                        # print(f"Adding transition: {restwv}, {component_z}")
-                        for i in range(component.rowCount()):
-                            if(component.child(i).data()[0] == ion):
-                                component.child(i).appendRow(vpTransition(restwv))
-                                
-            # Finally, loop through and populate all of the fitregions
-            for l in entries:
-                if('fitregion' in l):
-                    restwv = float(l.split(',')[0].split('(')[1])
-                    ion_name = l.split("\'")[1]
-                    redshift = float(l.split(',')[2])
-                    instrument = l.split("\'")[-2]
-                    lower_dv = float(l.split('[')[1].split(',')[0])
-                    upper_dv = float(l.split(']')[0].split(',')[-1])
+        # Second, loop through and populate all of the ions
+        for l in entries:
+            if('addion' in l):
+                ion = l.split('\'')[1]
+                redshift = float(l.split(",")[1])
+                column = float(l.split("N=")[1].split(',')[0])
+                self.add_ion(redshift,ion,column=column)
 
+        # Third, loop through and populate all of the transitions
+        for l in entries:
+            if('addtransition' in l):
+                restwv = float(l.split(',')[0].split('(')[1])
+                ion = l.split("\'")[1]
+                redshift = float(l.split(',')[-1][:-2])
+                for i in range(self.treeModel.rowCount()):
+                    indx = self.treeModel.index(i,0)
+                    component_z = float(self.treeModel.data(indx))
+                    if (redshift == component_z):
+                        component = self.treeModel.itemFromIndex(indx)
+                        break
 
-                    for i in range(self.treeModel.rowCount()):
-                        indx = self.treeModel.index(i,0)
-                        component_z = float(self.treeModel.data(indx))
-                        if (redshift == component_z):
-                            component = self.treeModel.itemFromIndex(indx)
-                            break
+                if component.hasChildren():
+                    for i in range(component.rowCount()):
+                        if(component.child(i).data()[0] == ion):
+                            component.child(i).appendRow(vpTransition(restwv))
 
-                    if component.hasChildren():
-                        for i in range(component.rowCount()):
-                            if(component.child(i).data(0) == ion_name):
-                                ion = component.child(i)
-                                
-                    if ion.hasChildren():
-                        for i in range(ion.rowCount()):
-                            if (ion.child(i).data() == restwv):
-                                ion.child(i).appendRow(vpFitRegion(instrument,[lower_dv,upper_dv]))
+        # Finally, loop through and populate all of the fitregions
+        for l in entries:
+            if('fitregion' in l):
+                restwv = float(l.split(',')[0].split('(')[1])
+                ion_name = l.split("\'")[1]
+                redshift = float(l.split(',')[2])
+                instrument = l.split("\'")[-2]
+                lower_dv = float(l.split('[')[1].split(',')[0])
+                upper_dv = float(l.split(']')[0].split(',')[-1])
+
+                for i in range(self.treeModel.rowCount()):
+                    indx = self.treeModel.index(i,0)
+                    component_z = float(self.treeModel.data(indx))
+                    if (redshift == component_z):
+                        component = self.treeModel.itemFromIndex(indx)
+                        break
+
+                if component.hasChildren():
+                    for i in range(component.rowCount()):
+                        if(component.child(i).data(0) == ion_name):
+                            ion = component.child(i)
+
+                if ion.hasChildren():
+                    for i in range(ion.rowCount()):
+                        if (ion.child(i).data() == restwv):
+                            ion.child(i).appendRow(vpFitRegion(instrument,[lower_dv,upper_dv]))
 
         self.makeVPModel()
         self.treeModel.itemChanged.connect(self.updateModel)
@@ -1318,6 +1310,20 @@ class VPModelTree(Ui_VoigtProfileModel):
             GuiProgram.change_plot(self.parentobj)
         except:
             print("WARNING: loading model, but no spectrum has been read in")
+
+    def loadVPTree(self):
+        # Get the file name from the user
+        options = QFileDialog.Options()
+        fileName, _ = QFileDialog.getOpenFileName(self.vpModelTree, \
+                                                  "Open","","All Files (*);;Text Files (*.txt)", options=options)
+
+        if (fileName):
+            self._populate_from_file(fileName)
+        else:
+            try:
+                self.treeModel.removeRows(0, self.treeModel.rowCount())
+            except:
+                print("Reloading model")
 
     # This is to write out a file for running fitting
     def traverseVPTree(self):
